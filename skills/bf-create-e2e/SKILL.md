@@ -12,7 +12,13 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
 ## When to Use
 
 - 에픽 구현 시작 전 자동 실행
-- 사용자가 `/create-e2e`를 직접 입력했을 때
+- 사용자가 `/bf-create-e2e`를 직접 입력했을 때
+
+## Prerequisites
+
+- Story 파일들 존재: `docs/stories/{TICKET}-story-*.md`
+- sprint-status.yaml 존재 및 해당 에픽 정의됨
+- `tests/e2e/` 디렉토리 존재 (없으면 생성)
 
 ## Instructions
 
@@ -23,13 +29,15 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
    - Happy path + 주요 실패 경로 포함
    - 사용자 플로우 기준으로 시나리오 순서 결정
 
-3. agent-browser 기반 테스트 코드를 작성한다:
-   - 접근성 트리의 @ref 기반 요소 선택 (CSS 셀렉터 사용 금지)
+3. agent-browser CLI 기반 테스트 스크립트를 작성한다:
+   - `snapshot` → `@ref` 또는 `find` semantic locator로 요소 선택
+   - CSS 셀렉터 사용 금지 (DOM 변경에 취약)
    - 각 시나리오별 독립 실행 가능한 구조
 
-4. 테스트 파일을 저장한다:
+4. 테스트 스크립트 파일을 저장한다:
    - `tests/e2e/{epic-name}/` 디렉토리에 저장
-   - 파일명: `{scenario-name}.test.ts`
+   - 파일명: `{scenario-name}.sh` (shell 스크립트)
+   - agent-browser CLI 명령어를 순차적으로 실행하는 형태
 
 5. sprint-status.yaml의 해당 에픽 e2e 상태를 `written`으로 업데이트한다.
 
@@ -40,5 +48,76 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
 
 ## Output Format
 
-- `tests/e2e/{epic-name}/*.test.ts` — E2E 테스트 파일
+- `tests/e2e/{epic-name}/*.sh` — E2E 테스트 스크립트 (agent-browser CLI)
 - sprint-status.yaml 업데이트
+
+### E2E 테스트 스크립트 예제 (agent-browser CLI)
+
+```zsh
+#!/bin/zsh
+# tests/e2e/user-authentication/login-flow.sh
+# Test: User can log in with valid credentials
+
+set -e  # 실패 시 중단
+
+# 세션 격리 (병렬 실행 대비)
+SESSION="e2e-login-$(date +%s)"
+
+# 1. 로그인 페이지 이동
+agent-browser --session $SESSION open http://localhost:3000/login
+
+# 2. 접근성 트리 확인 (디버깅용)
+agent-browser --session $SESSION snapshot
+
+# 3. semantic locator로 요소 찾아 입력
+agent-browser --session $SESSION find label "Email" fill "user@example.com"
+agent-browser --session $SESSION find label "Password" fill "password123"
+
+# 4. 로그인 버튼 클릭
+agent-browser --session $SESSION find role button --name "Log In" click
+
+# 5. 대시보드 로딩 대기
+agent-browser --session $SESSION wait --text "Dashboard"
+
+# 6. 결과 검증
+agent-browser --session $SESSION find role heading --name "Dashboard" is visible
+agent-browser --session $SESSION find text "Welcome, user@example.com" is visible
+
+# 7. 증거 수집
+agent-browser --session $SESSION screenshot tests/e2e/user-authentication/login-success.png
+
+echo "✅ PASS: login-flow"
+```
+
+```zsh
+#!/bin/zsh
+# tests/e2e/user-authentication/login-error.sh
+# Test: User sees error with invalid credentials
+
+set -e
+
+SESSION="e2e-login-error-$(date +%s)"
+
+agent-browser --session $SESSION open http://localhost:3000/login
+agent-browser --session $SESSION find label "Email" fill "wrong@example.com"
+agent-browser --session $SESSION find label "Password" fill "wrongpass"
+agent-browser --session $SESSION find role button --name "Log In" click
+
+# 에러 메시지 확인
+agent-browser --session $SESSION wait --text "Invalid credentials"
+agent-browser --session $SESSION find role alert is visible
+
+echo "✅ PASS: login-error"
+```
+
+### agent-browser 요소 선택 원칙
+
+**✅ 사용해야 하는 방법:**
+- **Semantic locator**: `find role button --name "Submit"`, `find label "Email"`, `find text "Sign In"`, `find placeholder "Username"`
+- **@ref (snapshot 기반)**: `snapshot`으로 접근성 트리 조회 후 `@e2`, `@e5` 등으로 직접 선택
+- **wait 전략**: `wait --text "Welcome"`, `wait --url "**/dashboard"`, `wait --load networkidle`
+
+**❌ 사용 금지:**
+- CSS 셀렉터: `#email-input`, `.login-form`, `input[name='email']`
+- XPath
+- DOM 구현 세부사항에 의존하는 선택자

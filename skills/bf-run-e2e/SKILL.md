@@ -12,7 +12,13 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
 ## When to Use
 
 - 에픽 내 모든 Story가 approved된 후 자동 실행
-- 사용자가 `/run-e2e`를 직접 입력했을 때
+- 사용자가 `/bf-run-e2e`를 직접 입력했을 때
+
+## Prerequisites
+
+- E2E 테스트 스크립트 존재: `tests/e2e/{epic-name}/*.sh`
+- 해당 에픽의 모든 Story `review: approved`
+- agent-browser CLI 설치됨 (`agent-browser install` 완료)
 
 ## Instructions
 
@@ -20,8 +26,10 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
    - 모든 Story의 review가 `approved`인지 검증
    - 미승인 Story가 있으면 실행 중단 및 안내
 
-2. `tests/e2e/{epic-name}/` 의 테스트를 실행한다:
-   - agent-browser를 사용하여 실제 브라우저 환경에서 실행
+2. `tests/e2e/{epic-name}/*.sh` 스크립트를 순차 실행한다:
+   - 각 `.sh` 파일을 `zsh`로 실행
+   - agent-browser CLI가 실제 브라우저를 조작
+   - `--session` 플래그로 세션 격리 (병렬 실행 시)
 
 3. 결과를 판정한다:
    - **전체 통과**:

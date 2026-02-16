@@ -11,16 +11,22 @@ description: Agent Teams 토론 방식으로 Tech Spec을 다관점 리뷰한다
 
 ## When to Use
 
-- `/create-tech-spec` 완료 직후 자동 실행
-- 사용자가 `/review-tech-spec`을 직접 입력했을 때
+- `/bf-create-tech-spec` 완료 직후 자동 실행
+- 사용자가 `/bf-review-tech-spec`을 직접 입력했을 때
+
+## Prerequisites
+
+- Tech Spec 문서 존재: `docs/tech-specs/{TICKET-NUMBER}-tech-spec.md`
+- 문서가 없으면 `/bf-create-tech-spec`을 먼저 실행해야 함
 
 ## Instructions
 
 1. 메인 세션에서 Agent Teams를 구성하여 다관점 리뷰를 수행한다 (컨텍스트 보존).
 
 2. **Agent Teams 구성:**
-   - Principal Engineer (Opus 모델): Tech Spec 읽고 3가지 리뷰 페르소나 추천
-   - 추천된 페르소나 3명을 teammate로 생성 (각각 Opus 모델):
+   - Principal Engineer 생성 시 `model: opus` 지정:
+     - Tech Spec 읽고 3가지 리뷰 페르소나 추천
+   - 추천된 페르소나 3명을 teammate로 생성 (Task tool의 `model: opus` 파라미터 사용):
      - 예: Architecture Reviewer, Security Reviewer, Performance Reviewer
      - 또는: Backend Engineer, Frontend Engineer, QA Engineer (프로젝트 특성에 따라)
 

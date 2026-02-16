@@ -11,8 +11,14 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 
 ## When to Use
 
-- 사용자가 `/archive-sprint`를 입력했을 때
+- 사용자가 `/bf-archive-sprint`를 입력했을 때
 - 스프린트 내 모든 에픽의 E2E가 통과한 후
+
+## Prerequisites
+
+- sprint-status.yaml 존재 및 모든 에픽 `e2e: passed`
+- `docs/stories/`, `docs/tech-specs/` 디렉토리 존재
+- CLAUDE.md 파일 존재 (changelog 기록용)
 
 ## Instructions
 

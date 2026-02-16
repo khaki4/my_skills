@@ -14,9 +14,16 @@ description: 승인된 Tech Spec을 기반으로 Epic, Sprint, Story를 생성�
 - 사용자가 `/bf-create-epics-and-stories`를 입력했을 때
 - Tech Spec 리뷰가 승인된 후
 
+## Prerequisites
+
+- 승인된 Tech Spec: `docs/tech-specs/{TICKET-NUMBER}-tech-spec.md`
+- Tech Spec 리뷰 통과 (사람 개입 ① 완료)
+- `docs/` 디렉토리 존재
+
 ## Instructions
 
 1. 메인 세션에서 Agent Teams Lead에게 문서 생성을 위임한다.
+   - Task tool로 Lead 생성 시 `model: opus` 지정 (복잡한 분석 작업)
    - 메인 세션은 완료 통보만 수신한다 (컨텍스트 보존).
 
 2. **Agent Teams Lead가 수행하는 작업:**
@@ -40,8 +47,15 @@ description: 승인된 Tech Spec을 기반으로 Epic, Sprint, Story를 생성�
    - **XL (Complex)**: 크로스 레이어, 보안/성능 고려, 설계 판단 포함
 
    e. 서브에이전트들에게 각 Story 문서 작성을 병렬 위임한다.
+   - Story 문서 작성은 단순 작업이므로 `model: sonnet` 사용
 
-   f. 결과를 취합하고 sprint-status.yaml을 생성한다:
+   f. Sprint 번호를 결정한다:
+   - `docs/archive/` 디렉토리가 존재하면 기존 스프린트 확인
+   - 마지막 스프린트 번호 + 1 (예: SPRINT-03 → SPRINT-04)
+   - 아카이브가 없으면 SPRINT-01로 시작
+   - 또는 사용자가 Jira 티켓 번호를 제공했으면 해당 티켓 번호 사용 (예: PROJ-123)
+
+   g. 결과를 취합하고 sprint-status.yaml을 생성한다:
 
 ```yaml
 SPRINT-XX:
@@ -54,7 +68,7 @@ SPRINT-XX:
     e2e: pending
 ```
 
-g. Story 파일을 `docs/stories/`에 저장한다.
+h. Story 파일을 `docs/stories/`에 저장한다.
 
 3. 메인 세션이 완료 통보를 수신한다.
    - 생성된 에픽/스토리 수와 난이도 분포만 표시

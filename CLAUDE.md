@@ -36,6 +36,18 @@ The BF workflow executes in this sequence:
 
 ## Key Concepts
 
+### Ralph Loop
+
+**Ralph Loop** is an iterative TDD cycle executed by a single agent without external coordination:
+1. Write test based on AC
+2. Run test → verify Red (failure)
+3. Implement code to pass test
+4. Run test → verify Green (success)
+5. Refactor if needed
+6. Commit changes
+
+Used for S and M difficulty stories where a single agent (typically Sonnet) can complete the work independently without requiring Agent Teams coordination.
+
 ### Difficulty-Based Execution Strategies
 
 Each Story is tagged with a difficulty level that determines execution approach:
@@ -84,7 +96,7 @@ docs/
 tests/
   e2e/
     {epic-name}/
-      {scenario-name}.test.ts
+      {scenario-name}.sh
 ```
 
 ### sprint-status.yaml Structure
