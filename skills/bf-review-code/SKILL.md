@@ -36,8 +36,8 @@ description: OCR과 Convention Guard를 사용하여 구현된 코드를 리뷰�
      - Task tool로 Review Lead 생성 (`model: opus`)
      - 메인 세션은 최종 결과만 수신한다
    - Review Lead가 Agent Teams discourse(토론)를 구성한다:
-     - 2~3명의 리뷰어 teammate 생성 (`model: opus`)
-     - 리뷰어 역할 예시: Convention Guard, Security Reviewer, Architecture Reviewer
+     - 2명의 리뷰어 teammate 생성 (`model: opus`)
+     - 리뷰어 역할: Convention Guard + 1명 (프로젝트 특성에 따라 Security 또는 Architecture)
      - 각 리뷰어가 독립적으로 분석 수행
      - 교차 검증 (discourse):
        - Review Lead가 각 리뷰어의 발견사항을 수집하여 공유
