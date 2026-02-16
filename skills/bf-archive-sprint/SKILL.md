@@ -40,7 +40,7 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - 메시지: `chore: archive sprint {SPRINT-XX}`
    - 아카이브된 파일 + changelog 변경 포함
 
-5. 완료 후 `/update-conventions` 실행을 안내한다.
+5. 완료 후 `/bf-update-conventions` 실행을 안내한다.
 
 ## Output Format
 

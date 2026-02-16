@@ -80,7 +80,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      - 해당 Story의 tdd 상태만 `done`으로 변경
      - 다른 Story의 상태는 보존
 
-5. 난이도 M 이상이면 자동으로 `/review-code`를 실행한다.
+5. 난이도 M 이상이면 자동으로 `/bf-review-code`를 실행한다.
 
 6. 난이도 S이면 리뷰 없이 사용자 승인(사람 개입 ②)을 요청한다.
 

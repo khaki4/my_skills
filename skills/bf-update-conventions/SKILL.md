@@ -11,8 +11,14 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
 
 ## When to Use
 
-- 사용자가 `/update-conventions`를 입력했을 때
-- `/archive-sprint` 완료 후
+- 사용자가 `/bf-update-conventions`를 입력했을 때
+- `/bf-archive-sprint` 완료 후
+
+## Prerequisites
+
+- 아카이브된 스프린트 존재: `docs/archive/{SPRINT-XX}/`
+- 아카이브 내 stories, tech-specs 디렉토리 존재
+- docs/conventions.md (없으면 신규 생성)
 
 ## Instructions
 

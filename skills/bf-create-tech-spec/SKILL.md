@@ -11,7 +11,7 @@ description: 기획자 AC와 Slack 논의 내용을 입력받아 브라운필드
 
 ## When to Use
 
-- 사용자가 `/create-tech-spec`을 입력했을 때
+- 사용자가 `/bf-create-tech-spec`을 입력했을 때
 - 새로운 기능 개발 또는 변경 요청이 있을 때
 - 기획자의 AC가 준비된 상태에서 기술 명세가 필요할 때
 
@@ -38,7 +38,7 @@ description: 기획자 AC와 Slack 논의 내용을 입력받아 브라운필드
 
 4. 문서를 `docs/tech-specs/{TICKET-NUMBER}-tech-spec.md`에 저장한다.
 
-5. 완료 후 자동으로 `/review-tech-spec`을 실행한다.
+5. 완료 후 자동으로 `/bf-review-tech-spec`을 실행한다.
 
 ## Output Format
 
