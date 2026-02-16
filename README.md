@@ -1,3 +1,19 @@
+# 전체 설치
+
+npx skills add {your-github-username}/{repo-name}
+
+# 특정 스킬만 설치
+
+npx skills add {your-github-username}/{repo-name} --skill create-tech-spec
+
+# 특정 에이전트 지정 (claude-code, cursor, codex 등)
+
+npx skills add {your-github-username}/{repo-name} -a claude-code
+
+# 글로벌 설치 (모든 프로젝트에서 사용)
+
+npx skills add {your-github-username}/{repo-name} -g
+
 | #   | 스킬                           | 실행 주체                  |
 | --- | ------------------------------ | -------------------------- |
 | 1   | `/bf-create-tech-spec`         | 사람                       |
