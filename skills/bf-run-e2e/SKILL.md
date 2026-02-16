@@ -33,14 +33,22 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
 
 3. 결과를 판정한다:
    - **전체 통과**:
-     - sprint-status.yaml의 해당 에픽 e2e를 `passed`로 업데이트
+     - sprint-status.yaml의 해당 에픽 e2e를 `passed`로 업데이트 (직전에 파일을 다시 읽어서 최신 상태 확인, read → modify → write 간격 최소화)
      - 에픽 완료 처리
      - sprint-status.yaml을 확인하여 다음 에픽 존재 여부 확인:
        - 다음 에픽이 있으면: 자동으로 다음 에픽의 `/bf-create-e2e {next-epic-id}`를 실행
        - 스프린트 내 모든 에픽 완료 시: `/bf-archive-sprint` 실행 안내 (사용자 수동 트리거)
    - **실패**:
      - 실패 원인을 분석하여 새 Story를 생성
-     - 실패 태그 추가 (spec-gap | impl-bug | test-design | convention-violation | integration)
+     - 실패 태그를 판정하여 추가:
+       - `spec-gap`: AC/Tech Spec이 이 시나리오를 예상하지 못함 (누락된 요구사항)
+       - `impl-bug`: AC는 맞으나 구현에 결함 (로직 오류, 오타)
+       - `test-design`: E2E 테스트 자체가 잘못됨 (잘못된 assertion, 타이밍)
+       - `convention-violation`: conventions.md 규칙 위반
+       - `integration`: 개별 모듈 정상이나 결합 시 실패 (API 계약 불일치)
+     - 새 Story의 난이도를 태깅한다:
+       - 원래 Story와 동일한 기준(파일 수/복잡도) 적용
+       - 경향 참고: `impl-bug`, `test-design`, `convention-violation` → 보통 S~M / `spec-gap`, `integration` → 원래 Story 난이도 참고 (M~L)
      - 새 Story를 sprint-status.yaml에 추가
      - 자동으로 새 Story의 `/bf-implement-story {new-story-id}`를 실행하여 Story 루프 재개
 

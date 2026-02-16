@@ -21,7 +21,7 @@ description: Agent Teams 토론 방식으로 Tech Spec을 다관점 리뷰한다
 
 ## Instructions
 
-1. 메인 세션에서 Agent Teams를 구성하여 다관점 리뷰를 수행한다 (컨텍스트 보존).
+1. 메인 세션에서 Principal Engineer에게 리뷰를 위임한다. 메인 세션은 최종 결과만 수신한다 (컨텍스트 보존).
 
 2. **Agent Teams 구성:**
    - Principal Engineer 생성 시 `model: opus` 지정:
@@ -61,3 +61,18 @@ description: Agent Teams 토론 방식으로 Tech Spec을 다관점 리뷰한다
 ## Output Format
 
 리뷰 결과를 대화로 출력한다. 별도 파일 저장 없음.
+
+구조:
+```
+### 🔴 Blocker (N건)
+- [섹션명] 설명 + 수정 방안
+
+### 🟡 Recommended (N건)
+- [섹션명] 설명 + 권장 수정
+
+### 🟢 Confirmed (N건)
+- 확인 완료 항목 요약
+
+### 미합의 쟁점 (Agent Teams discourse 결과)
+- 쟁점 + 각 리뷰어 의견
+```

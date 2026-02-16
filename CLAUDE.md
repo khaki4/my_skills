@@ -106,20 +106,19 @@ Tracks all Epic/Story progress:
 ```yaml
 SPRINT-XX:
   epic-1:
-    story-1: { difficulty: S, tdd: pending, review: pending }
-    story-2: { difficulty: M, tdd: pending, review: pending }
+    story-1: { status: todo, difficulty: S, tdd: pending, review: pending }
+    story-2: { status: todo, difficulty: M, tdd: pending, review: pending }
     e2e: pending
   epic-2:
-    story-3: { difficulty: L, tdd: pending, review: pending }
+    story-3: { status: todo, difficulty: L, tdd: pending, review: pending }
     e2e: pending
 ```
 
 State field values:
+- **status**: `todo` → `in_progress` → `done`
 - **tdd**: `pending` → `done`
 - **review**: `pending` → `approved` (S difficulty skips to `approved` directly)
 - **e2e**: `pending` → `written` → `passed`
-
-Note: No top-level `status` field is used. Progress is tracked through `tdd`, `review`, and `e2e` states.
 
 ### TDD Cycle Implementation
 

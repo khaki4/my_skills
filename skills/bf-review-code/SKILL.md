@@ -27,16 +27,23 @@ description: OCR과 Convention Guard를 사용하여 구현된 코드를 리뷰�
 2. 난이도별 리뷰 방식을 결정한다:
 
    **난이도 M (Medium):**
-   - 메인 세션에서 직접 리뷰 수행 (Opus 모델 권장)
+   - Task tool로 Opus 리뷰어 1명 생성 (`model: opus`)하여 리뷰 위임
+   - 메인 세션은 리뷰 결과만 수신한다 (컨텍스트 보존)
    - Convention Guard + 코드 품질 리뷰
 
    **난이도 L/XL (Large/Complex):**
-   - Agent Teams discourse(토론)를 구성한다:
-     - Task tool로 2~3명의 리뷰어 teammate 생성 (`model: opus`)
+   - 메인 세션에서 Review Lead에게 위임한다 (컨텍스트 보존):
+     - Task tool로 Review Lead 생성 (`model: opus`)
+     - 메인 세션은 최종 결과만 수신한다
+   - Review Lead가 Agent Teams discourse(토론)를 구성한다:
+     - 2~3명의 리뷰어 teammate 생성 (`model: opus`)
      - 리뷰어 역할 예시: Convention Guard, Security Reviewer, Architecture Reviewer
      - 각 리뷰어가 독립적으로 분석 수행
-     - 리뷰어 간 교차 검증: 의견 충돌 시 토론으로 합의 도출
-     - 합의/미합의 쟁점을 분리하여 메인 세션에 전달
+     - 교차 검증 (discourse):
+       - Review Lead가 각 리뷰어의 발견사항을 수집하여 공유
+       - 리뷰어끼리 SendMessage로 직접 challenge/agree/link
+       - Review Lead가 합의/미합의 쟁점을 판정
+     - Review Lead가 최종 결과를 메인 세션에 전달
 
 3. 다음 관점에서 코드 리뷰를 수행한다:
    - **Convention Guard**: docs/conventions.md 기준 컨벤션 준수 여부
@@ -53,6 +60,10 @@ description: OCR과 Convention Guard를 사용하여 구현된 코드를 리뷰�
 5. 사용자 판단을 기다린다 (사람 개입 ②):
    - 승인 → sprint-status.yaml review 상태를 `approved`로 업데이트
    - 수정 요청 → 수정 후 재리뷰
+
+6. 승인 완료 후, 같은 에픽 내 모든 Story의 review가 `approved`인지 확인한다:
+   - 모든 Story가 승인되었으면 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
+   - 미승인 Story가 남아있으면 대기한다
 
 ## Output Format
 

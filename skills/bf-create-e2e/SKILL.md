@@ -22,26 +22,31 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
 
 ## Instructions
 
-1. 대상 에픽의 모든 Story와 AC를 읽는다.
+1. 메인 세션에서 직접 수행한다 (Sonnet이면 충분. AC 읽고 shell script 생성하는 반복 성격 작업).
 
-2. E2E 테스트 시나리오를 도출한다:
+2. 대상 에픽의 모든 Story와 AC를 읽는다.
+
+3. E2E 테스트 시나리오를 도출한다:
    - 각 AC를 E2E 관점에서 시나리오화
    - Happy path + 주요 실패 경로 포함
    - 사용자 플로우 기준으로 시나리오 순서 결정
 
-3. agent-browser CLI 기반 테스트 스크립트를 작성한다:
+4. agent-browser CLI 기반 테스트 스크립트를 작성한다:
    - `snapshot` → `@ref` 또는 `find` semantic locator로 요소 선택
    - CSS 셀렉터 사용 금지 (DOM 변경에 취약)
    - 각 시나리오별 독립 실행 가능한 구조
 
-4. 테스트 스크립트 파일을 저장한다:
+5. 테스트 스크립트 파일을 저장한다:
    - `tests/e2e/{epic-name}/` 디렉토리에 저장
    - 파일명: `{scenario-name}.sh` (shell 스크립트)
-   - agent-browser CLI 명령어를 순차적으로 실행하는 형태
+   - agent-browser는 CLI 도구이므로 shell script로 순차 호출한다 (`.test.ts`가 아님)
+   - 테스트 러너(Vitest/Jest) 없이 `zsh`로 직접 실행
 
-5. sprint-status.yaml의 해당 에픽 e2e 상태를 `written`으로 업데이트한다.
+6. sprint-status.yaml의 해당 에픽 e2e 상태를 `written`으로 업데이트한다.
+   - 업데이트 직전에 파일을 다시 읽어서 최신 상태 확인 (동시성 주의)
+   - read → modify → write 간격을 최소화한다
 
-6. 자동으로 해당 에픽의 Story 구현을 시작한다:
+7. 자동으로 해당 에픽의 Story 구현을 시작한다:
    - sprint-status.yaml에서 현재 에픽의 모든 Story 목록을 읽는다
    - 각 Story에 대해 `/bf-implement-story {story-id}`를 병렬로 트리거한다
    - Story 간 의존성이 있으면 순차 실행한다

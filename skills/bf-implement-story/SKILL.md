@@ -52,14 +52,17 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
        - 구현자: `model: sonnet`
        - 통합 담당: `model: sonnet`
        - 리뷰어: `model: opus`
-     - Agent Teams discourse(토론)로 설계 검증
+     - Agent Teams discourse(토론)로 설계 검증:
+       - Lead가 설계안을 teammate들에게 공유
+       - teammate끼리 SendMessage로 직접 challenge/agree/link
+       - Lead가 합의/미합의를 판정하고 최종 설계 확정
      - 각 teammate에게 역할별 작업 할당
      - 통합 및 최종 리뷰 수행
    - 메인 세션은 완료 통보만 수신
 
 3. TDD 사이클을 실행한다 (모든 난이도 공통):
    - 단위 테스트 작성 (AC 기반)
-   - **Red 확인**: 프로젝트의 테스트 커맨드 실행 (package.json의 `test` 스크립트, pytest, cargo test 등)
+   - **Red 확인**: package.json의 `test` 스크립트 실행 (`npm test` 또는 `npx vitest run` 등)
      - 테스트가 실패하는지 확인
      - 예상대로 실패하지 않으면 테스트 코드 수정
    - 구현
@@ -79,6 +82,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      - 다른 Story가 먼저 업데이트했을 수 있음 (병렬 실행)
      - 해당 Story의 tdd 상태만 `done`으로 변경
      - 다른 Story의 상태는 보존
+     - read → modify → write 간격을 최소화하여 race condition 위험을 줄인다
 
 5. 난이도 M 이상이면 자동으로 `/bf-review-code`를 실행한다.
 
@@ -88,6 +92,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    - sprint-status.yaml 업데이트 (동시성 주의):
      - 파일을 다시 읽어서 최신 상태 확인
      - 해당 Story의 review 상태를 `approved`로 변경
+     - read → modify → write 간격을 최소화한다
    - 같은 에픽 내 모든 Story의 review가 `approved`인지 확인
    - 모든 Story가 승인되었으면 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
 
