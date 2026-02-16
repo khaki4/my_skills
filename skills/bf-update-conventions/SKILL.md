@@ -18,11 +18,14 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
 
 - 아카이브된 스프린트 존재: `docs/archive/{SPRINT-XX}/`
 - 아카이브 내 stories, tech-specs 디렉토리 존재
+- `docs/archive/{SPRINT-XX}/reviews/` 디렉토리 존재 (리뷰 결과 파일) — 미존재 시 git log에서 리뷰 관련 커밋 히스토리를 대안으로 분석
 - docs/conventions.md (없으면 신규 생성)
 
 ## Instructions
 
 1. 아카이브된 스프린트의 리뷰 이력을 분석한다:
+   - **1차 소스**: `docs/archive/{SPRINT-XX}/reviews/*.md` 파일들을 읽는다
+   - **2차 소스** (리뷰 파일 미존재 시): `git log`에서 `fix:` 커밋 메시지와 변경 패턴을 분석하여 반복 지적 패턴을 추론한다
    - 반복적으로 지적된 패턴 추출
    - 블로커로 분류된 이슈 유형 정리
    - Convention Guard가 놓친 패턴 식별

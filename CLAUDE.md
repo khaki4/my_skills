@@ -35,6 +35,8 @@ The BF workflow executes in this sequence:
 11. **`/bf-metrics`** → Analyze sprint metrics and suggest optimizations (optional, manual)
 12. **`/bf-update-conventions`** → Extract patterns and update convention rules
 
+- **`/bf-resume`** → 중단된 워크플로우 복구 (어느 시점에서든 수동 실행 가능)
+
 ## Key Concepts
 
 ### Ralph Loop
@@ -86,12 +88,16 @@ docs/
     {TICKET}-tech-spec.md
   stories/
     {TICKET}-story-{N}.md
+  reviews/
+    {TICKET}-tech-spec-review.md
+    {STORY-ID}-review.md
   sprint-status.yaml
   conventions.md          # Convention Guard rules
   archive/
     {SPRINT-XX}/
       tech-specs/
       stories/
+      reviews/
       sprint-status.yaml
 
 tests/
@@ -170,6 +176,23 @@ Metric field values (recorded by downstream skills, initialized with defaults):
 - **is_regression**: `false` → E2E 실패로 자동 생성된 Story 여부 (bf-run-e2e가 기록)
 - **parent_story**: `null` → regression일 때 원인 Story ID (bf-run-e2e가 기록)
 - **ralph_stuck**: `false` → Ralph Loop 한도 초과 시 `true` (bf-implement-story가 기록)
+
+### sprint-status.yaml 업데이트 프로토콜
+
+sprint-status.yaml은 여러 스킬(bf-implement-story, bf-create-e2e, bf-review-code, bf-run-e2e)이 병렬로 수정할 수 있다. 다음 **Read-Merge-Write with Retry** 프로토콜을 반드시 따른다:
+
+1. **Read**: 수정 직전에 sprint-status.yaml을 읽는다 (캐시된 내용 사용 금지).
+2. **Merge**: 자신이 변경하려는 Story/에픽 블록**만** 수정하고, 나머지 블록은 읽은 그대로 보존한다.
+3. **Write**: Edit 도구로 해당 Story 블록의 `old_string` → `new_string` 치환을 수행한다.
+4. **Verify**: Write 직후 파일을 다시 읽어서 자신의 변경이 정상 반영되었는지 확인한다.
+5. **Retry**: 검증 실패 시 (다른 Agent가 동시에 덮어쓴 경우) step 1부터 최대 **3회** 재시도한다. 3회 초과 시 사용자에게 알린다.
+
+**핵심 원칙:**
+- **전체 파일 재생성 금지**: Write 도구로 전체 파일을 덮어쓰지 않는다. 반드시 Edit 도구로 해당 블록만 치환한다.
+- **최소 범위 수정**: 자신이 담당하는 Story의 필드만 변경한다. 다른 Story 필드를 절대 수정하지 않는다.
+- **Read-Write 간격 최소화**: Read와 Write 사이에 불필요한 작업을 끼우지 않는다.
+
+> 이 프로토콜은 진정한 Optimistic Concurrency (version-based)가 아닌 **Best-Effort Merge** 패턴이다. Claude Code의 Edit 도구가 text-based 치환이므로 동시 쓰기 시 이론적 데이터 손실 가능성이 있으나, 블록 단위 치환 + 검증 + 재시도로 실질적 위험을 최소화한다.
 
 ### TDD Cycle Implementation
 

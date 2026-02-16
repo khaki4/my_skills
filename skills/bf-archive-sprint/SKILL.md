@@ -29,6 +29,7 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 2. 문서를 아카이브 디렉토리로 이동한다:
    - `docs/stories/` → `docs/archive/{SPRINT-XX}/stories/`
    - `docs/tech-specs/` → `docs/archive/{SPRINT-XX}/tech-specs/`
+   - `docs/reviews/` → `docs/archive/{SPRINT-XX}/reviews/` (존재하는 경우)
    - `docs/sprint-status.yaml` → `docs/archive/{SPRINT-XX}/sprint-status.yaml`
 
 3. CLAUDE.md의 changelog에 append-only로 기록한다:
@@ -40,11 +41,10 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - 메시지: `chore: archive sprint {SPRINT-XX}`
    - 아카이브된 파일 + changelog 변경 포함
 
-5. 완료 후 `/bf-metrics` 실행을 안내한다:
-   - 스프린트 메트릭을 분석하여 모델 배당/난이도 태깅 최적화 제안을 받을 수 있음
-   - 선택 사항이며, 사용자가 원하면 실행
-
-6. `/bf-update-conventions` 실행을 안내한다.
+5. 완료 후 다음 순서로 후속 스킬 실행을 안내한다:
+   - **먼저** `/bf-metrics` (선택 사항): 스프린트 메트릭 분석 → 모델 배당/난이도 태깅 최적화 제안
+   - **그 후** `/bf-update-conventions`: 리뷰 패턴 분석 → conventions.md 업데이트
+   - 순서가 중요함: bf-metrics 분석 결과가 bf-update-conventions의 개선 방향에 참고될 수 있음
 
 ## Output Format
 

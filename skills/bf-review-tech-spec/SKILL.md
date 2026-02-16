@@ -52,15 +52,22 @@ description: Agent Teams 토론 방식으로 Tech Spec을 다관점 리뷰한다
    - 미합의 쟁점은 명시적으로 표시
    - 메인 세션에 통합된 리뷰 결과 전달
 
-6. 메인 세션이 리뷰 결과를 사용자에게 제시한다.
+6. 리뷰 결과를 `docs/reviews/{TICKET}-tech-spec-review.md`에 저장한다:
+   - `docs/reviews/` 디렉토리가 없으면 생성
+   - Output Format 구조 그대로 마크다운 파일로 저장
+   - 재리뷰 시에는 기존 파일에 `## Re-review ({날짜})` 섹션을 append
+   - Agent Teams 실패 시 fallback: 메인 세션에서 단일 Opus로 리뷰 수행
 
-7. 사용자 판단을 기다린다 (사람 개입 ①):
-   - 승인 → `/bf-create-epics-and-stories` 실행 안내
+7. 메인 세션이 리뷰 결과를 사용자에게 대화로도 제시한다.
+
+8. 사용자 판단을 기다린다 (사람 개입 ①):
+   - 승인 → 자동으로 `/bf-create-epics-and-stories`를 실행한다
    - 수정 요청 → Tech Spec 수정 후 재리뷰
 
 ## Output Format
 
-리뷰 결과를 대화로 출력한다. 별도 파일 저장 없음.
+- `docs/reviews/{TICKET}-tech-spec-review.md` — 리뷰 결과 파일 (아카이빙용)
+- 리뷰 결과를 대화로도 출력한다.
 
 구조:
 ```

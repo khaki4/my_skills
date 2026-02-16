@@ -57,24 +57,29 @@ description: OCR과 Convention Guard를 사용하여 구현된 코드를 리뷰�
    - 🟡 권장 수정
    - 🟢 확인 완료
 
-5. 리뷰 메트릭을 sprint-status.yaml에 기록한다:
-   - **중요**: 업데이트 직전에 파일을 다시 읽어서 최신 상태 확인 (동시성 주의)
-   - 해당 Story의 `review_blockers`: 🔴 Blocker 건수
-   - 해당 Story의 `review_recommended`: 🟡 Recommended 건수
-   - 다른 Story의 상태는 보존
-   - read → modify → write 간격을 최소화하여 race condition 위험을 줄인다
+5. 리뷰 결과를 `docs/reviews/{STORY-ID}-review.md`에 저장한다:
+   - `docs/reviews/` 디렉토리가 없으면 생성
+   - Output Format 구조 그대로 마크다운 파일로 저장
+   - 재리뷰 시에는 기존 파일에 `## Re-review ({날짜})` 섹션을 append
+   - 이 파일은 bf-update-conventions에서 패턴 분석 소스로 사용됨
 
-6. 사용자 판단을 기다린다 (사람 개입 ②):
+6. 리뷰 메트릭을 sprint-status.yaml에 기록한다 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:
+   - 해당 Story의 `review_blockers`: 🔴 Blocker 건수 (0건이어도 명시적으로 기록)
+   - 해당 Story의 `review_recommended`: 🟡 Recommended 건수 (0건이어도 명시적으로 기록)
+
+7. 사용자 판단을 기다린다 (사람 개입 ②):
    - 승인 → sprint-status.yaml review 상태를 `approved`로 업데이트
    - 수정 요청 → 수정 후 재리뷰
 
-7. 승인 완료 후, 같은 에픽 내 모든 Story의 review가 `approved`인지 확인한다:
-   - 모든 Story가 승인되었으면 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
+8. 승인 완료 후, 같은 에픽 내 모든 Story의 review가 `approved`인지 확인한다:
+   - 모든 Story가 승인되었고, 해당 에픽의 `e2e` 상태가 아직 `written`이면 (중복 트리거 방지) 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
+   - `e2e`가 이미 `passed`이거나 다른 스킬이 이미 트리거한 경우 skip한다
    - 미승인 Story가 남아있으면 대기한다
 
 ## Output Format
 
-리뷰 결과를 대화로 출력한다.
+- `docs/reviews/{STORY-ID}-review.md` — 리뷰 결과 파일 (아카이빙 및 패턴 분석용)
+- 리뷰 결과를 대화로도 출력한다.
 
 구조:
 ```

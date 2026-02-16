@@ -39,6 +39,7 @@ description: 승인된 Tech Spec을 기반으로 Epic, Sprint, Story를 생성�
    - Story는 병렬 실행 가능한 단위로 분리
    - 각 Story에 명확한 AC 포함
    - Story 간 의존성이 있으면 명시
+   - **Story 0개 에픽 처리**: 인프라 준비, 설정 변경 등 Story로 분해할 수 없는 에픽은 sprint-status.yaml에 Story 없이 에픽만 등록하고, `e2e: passed`로 초기화하여 자동 skip 처리한다. 사용자에게 skip 사유를 안내한다.
 
    d. 각 Story에 난이도를 태깅한다:
    - **S (Simple)**: 단일 파일, 명확한 AC, 의존성 없음
@@ -134,3 +135,29 @@ SPRINT-XX:
 
 - `docs/stories/{TICKET}-story-{N}.md` — 각 Story 파일
 - `docs/sprint-status.yaml` — 스프린트 상태 추적
+
+### Story 문서 템플릿
+
+각 Story 파일은 다음 섹션을 포함해야 한다:
+
+```markdown
+# {TICKET}-story-{N}: {Story Title}
+
+## Epic
+{소속 에픽 ID 및 이름}
+
+## Difficulty
+{S | M | L | XL} — {난이도 판정 근거}
+
+## Acceptance Criteria
+- [ ] AC 1: {구체적이고 테스트 가능한 기준}
+- [ ] AC 2: ...
+
+## Technical Notes
+- 변경 대상 파일/모듈
+- 의존성 (다른 Story와의 관계)
+- 주의사항
+
+## Dependencies
+- {의존하는 Story ID} (있는 경우)
+```

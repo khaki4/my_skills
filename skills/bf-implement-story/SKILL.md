@@ -25,7 +25,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
 
 1. 대상 Story 파일을 읽고 AC를 확인한다.
 
-2. sprint-status.yaml에서 해당 Story의 `status`를 `in_progress`로 변경한다 (동시성 주의: 직전에 파일을 다시 읽고, 해당 Story 필드만 변경).
+2. sprint-status.yaml에서 해당 Story의 `status`를 `in_progress`로 변경한다 (**CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**).
 
 3. sprint-status.yaml에서 Story의 난이도를 확인하고 실행 방식을 결정한다:
 
@@ -113,31 +113,25 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      - 메시지 포맷: `feat: implement {STORY-ID} - {brief description}`
      - 예: `feat: implement PROJ-123-story-1 - add user authentication`
      - Bug fix인 경우: `fix: implement {STORY-ID} - {brief description}`
-   - sprint-status.yaml 업데이트 (동시성 주의):
-     - **중요**: 업데이트 직전에 파일을 다시 읽어서 최신 상태 확인
-     - 다른 Story가 먼저 업데이트했을 수 있음 (병렬 실행)
+   - sprint-status.yaml 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:
      - 해당 Story의 tdd 상태를 `done`으로 변경
      - 메트릭 필드를 기록:
        - `model_used`: 실제 사용한 모델 전략 (`"sonnet"` / `"opus-lead"` / `"opus-lead+3"` 등)
        - `ralph_retries`: 최종 `retry_count` 값
        - `ralph_approaches`: 최종 `approaches_count` 값
-     - 다른 Story의 상태는 보존
-     - read → modify → write 간격을 최소화하여 race condition 위험을 줄인다
-
-   > **Optimistic Concurrency 패턴**: 쓰기 직전 re-read하여 자신이 변경하려는 Story 외 필드가 변경되었으면, 변경된 내용을 보존하면서 자신의 변경만 적용한다. 전체 파일을 재생성하지 않고 해당 Story 블록만 수정한다.
+       - `ralph_stuck`: `false` (정상 완료 시 명시적으로 기록)
 
 5. 난이도 M 이상이면 자동으로 `/bf-review-code`를 실행한다.
 
 6. 난이도 S이면 리뷰 없이 사용자 승인(사람 개입 ②)을 요청한다.
 
 7. 사용자 승인 완료 후:
-   - sprint-status.yaml 업데이트 (동시성 주의):
-     - 파일을 다시 읽어서 최신 상태 확인
+   - sprint-status.yaml 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:
      - 해당 Story의 review 상태를 `approved`로 변경
      - 해당 Story의 `status`를 `done`으로 변경
-     - read → modify → write 간격을 최소화한다
    - 같은 에픽 내 모든 Story의 review가 `approved`인지 확인
-   - 모든 Story가 승인되었으면 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
+   - 모든 Story가 승인되었고, 해당 에픽의 `e2e` 상태가 아직 `written`이면 (중복 트리거 방지) 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
+   - `e2e`가 이미 `passed`이거나 다른 스킬이 이미 트리거한 경우 skip한다
 
 ## Output Format
 

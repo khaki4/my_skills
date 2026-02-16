@@ -26,15 +26,26 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
    - 모든 Story의 review가 `approved`인지 검증
    - 미승인 Story가 있으면 실행 중단 및 안내
 
-2. `tests/e2e/{epic-name}/*.sh` 스크립트를 순차 실행한다:
+2. 해당 에픽의 **전체** E2E 테스트를 실행한다 (regression 수정 후 재실행 시에도 전체 재실행하여 회귀 방지).
+
+   `tests/e2e/{epic-name}/*.sh` 스크립트를 순차 실행한다:
    - 각 `.sh` 파일을 `zsh`로 실행
    - agent-browser CLI가 실제 브라우저를 조작
    - `--session` 플래그로 세션 격리 (병렬 실행 시)
-   - **인프라 오류 vs 테스트 실패 구분**: agent-browser 미설치, 브라우저 미시작, 네트워크 타임아웃 등 인프라 오류는 regression Story를 생성하지 않고 사용자에게 인프라 문제를 안내한다. 실제 assertion 실패만 테스트 실패로 처리한다.
+   - **인프라 오류 vs 테스트 실패 구분**:
+     - **인프라 오류** (regression Story 생성하지 않음, 사용자에게 인프라 문제 안내):
+       - exit code 127 (`command not found` — agent-browser/curl 미설치)
+       - `ECONNREFUSED` (서버 미시작)
+       - `browser not started`, `browser crashed` 패턴
+       - 스크립트 syntax error
+     - **테스트 실패** (regression Story 생성 대상):
+       - assertion 실패 (`is visible` 실패, grep 불일치, diff 차이)
+       - `wait` 타임아웃 (UI 요소가 나타나지 않음 — 구현 문제)
+       - 예상과 다른 HTTP status code
 
 3. 결과를 판정한다:
    - **전체 통과**:
-     - sprint-status.yaml의 해당 에픽 e2e를 `passed`로 업데이트 (직전에 파일을 다시 읽어서 최신 상태 확인, read → modify → write 간격 최소화)
+     - sprint-status.yaml의 해당 에픽 e2e를 `passed`로 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**
      - 에픽 완료 처리
      - sprint-status.yaml을 확인하여 다음 에픽 존재 여부 확인:
        - 다음 에픽이 있으면: 자동으로 다음 에픽의 `/bf-create-e2e {next-epic-id}`를 실행
@@ -51,6 +62,7 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
          - 실패 태그 이력: {tag1, tag2, ...}
          ```
        - 또한 `parent_story` 체인 depth가 **2 이상**인 경우에도 에스컬레이션한다 (regression이 또 regression을 만드는 상황).
+       - **depth 계산 방법**: 새 regression Story 생성 시, 원인 Story의 `parent_story`를 확인한다. `parent_story`가 `null`이면 depth=0, 그렇지 않으면 parent의 depth+1로 재귀 계산한다. 예: A(원본)→B(regression)→C(regression)에서 C의 depth=2.
      - 가드레일 통과 시, 실패 원인을 분석하여 새 Story를 생성
      - 실패 태그를 판정하여 추가:
        - `spec-gap`: AC/Tech Spec이 이 시나리오를 예상하지 못함 (누락된 요구사항)
@@ -65,10 +77,11 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
        - `failure_tag`: 위에서 판정한 실패 태그 (`spec-gap` | `impl-bug` | `test-design` | `convention-violation` | `integration`)
        - `is_regression: true`
        - `parent_story`: 원인이 된 원본 Story ID
+     - 새 Story 파일을 `docs/stories/{TICKET}-story-{N+1}.md`로 생성한다 (기존 Story 번호에서 순번을 이어감)
      - 자동으로 새 Story의 `/bf-implement-story {new-story-id}`를 실행하여 Story 루프 재개
 
 ## Output Format
 
 - 테스트 실행 결과 요약 (대화 출력)
 - sprint-status.yaml 업데이트
-- 실패 시: 새 Story 파일 생성
+- 실패 시: `docs/stories/{TICKET}-story-{N+1}.md` — 새 regression Story 파일 생성
