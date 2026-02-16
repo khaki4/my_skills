@@ -42,11 +42,11 @@ The BF workflow executes in this sequence:
 1. Write test based on AC
 2. Run test → verify Red (failure)
 3. Implement code to pass test
-4. Run test → verify Green (success)
+4. Run test → verify Green (success) — **최대 5회 재시도, 동일 에러 2연속 시 접근 전환**
 5. Refactor if needed
 6. Commit changes
 
-Used for S and M difficulty stories where a single agent (typically Sonnet) can complete the work independently without requiring Agent Teams coordination.
+Used for S and M difficulty stories where a single agent (typically Sonnet) can complete the work independently without requiring Agent Teams coordination. 무한 루프 방지를 위한 가드레일은 `skills/bf-implement-story/SKILL.md`의 "Ralph Loop 가드레일" 섹션 참조.
 
 ### Difficulty-Based Execution Strategies
 
