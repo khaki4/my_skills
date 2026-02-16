@@ -49,7 +49,10 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
      - 새 Story의 난이도를 태깅한다:
        - 원래 Story와 동일한 기준(파일 수/복잡도) 적용
        - 경향 참고: `impl-bug`, `test-design`, `convention-violation` → 보통 S~M / `spec-gap`, `integration` → 원래 Story 난이도 참고 (M~L)
-     - 새 Story를 sprint-status.yaml에 추가
+     - 새 Story를 sprint-status.yaml에 추가할 때 메트릭 필드도 함께 설정:
+       - `failure_tag`: 위에서 판정한 실패 태그 (`spec-gap` | `impl-bug` | `test-design` | `convention-violation` | `integration`)
+       - `is_regression: true`
+       - `parent_story`: 원인이 된 원본 Story ID
      - 자동으로 새 Story의 `/bf-implement-story {new-story-id}`를 실행하여 Story 루프 재개
 
 ## Output Format

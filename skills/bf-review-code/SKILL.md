@@ -57,11 +57,18 @@ description: OCR과 Convention Guard를 사용하여 구현된 코드를 리뷰�
    - 🟡 권장 수정
    - 🟢 확인 완료
 
-5. 사용자 판단을 기다린다 (사람 개입 ②):
+5. 리뷰 메트릭을 sprint-status.yaml에 기록한다:
+   - **중요**: 업데이트 직전에 파일을 다시 읽어서 최신 상태 확인 (동시성 주의)
+   - 해당 Story의 `review_blockers`: 🔴 Blocker 건수
+   - 해당 Story의 `review_recommended`: 🟡 Recommended 건수
+   - 다른 Story의 상태는 보존
+   - read → modify → write 간격을 최소화하여 race condition 위험을 줄인다
+
+6. 사용자 판단을 기다린다 (사람 개입 ②):
    - 승인 → sprint-status.yaml review 상태를 `approved`로 업데이트
    - 수정 요청 → 수정 후 재리뷰
 
-6. 승인 완료 후, 같은 에픽 내 모든 Story의 review가 `approved`인지 확인한다:
+7. 승인 완료 후, 같은 에픽 내 모든 Story의 review가 `approved`인지 확인한다:
    - 모든 Story가 승인되었으면 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
    - 미승인 Story가 남아있으면 대기한다
 

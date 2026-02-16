@@ -32,7 +32,8 @@ The BF workflow executes in this sequence:
 8. **Human approval checkpoint ②** → Approve or request revisions per story
 9. **`/bf-run-e2e`** → Execute E2E tests after all stories approved (auto)
 10. **`/bf-archive-sprint`** → Move docs to archive, update changelog
-11. **`/bf-update-conventions`** → Extract patterns and update convention rules
+11. **`/bf-metrics`** → Analyze sprint metrics and suggest optimizations (optional, manual)
+12. **`/bf-update-conventions`** → Extract patterns and update convention rules
 
 ## Key Concepts
 
@@ -106,11 +107,47 @@ Tracks all Epic/Story progress:
 ```yaml
 SPRINT-XX:
   epic-1:
-    story-1: { status: todo, difficulty: S, tdd: pending, review: pending }
-    story-2: { status: todo, difficulty: M, tdd: pending, review: pending }
+    story-1:
+      status: todo
+      difficulty: S
+      tdd: pending
+      review: pending
+      model_used: null
+      ralph_retries: 0
+      ralph_approaches: 0
+      review_blockers: 0
+      review_recommended: 0
+      failure_tag: null
+      is_regression: false
+      parent_story: null
+    story-2:
+      status: todo
+      difficulty: M
+      tdd: pending
+      review: pending
+      model_used: null
+      ralph_retries: 0
+      ralph_approaches: 0
+      review_blockers: 0
+      review_recommended: 0
+      failure_tag: null
+      is_regression: false
+      parent_story: null
     e2e: pending
   epic-2:
-    story-3: { status: todo, difficulty: L, tdd: pending, review: pending }
+    story-3:
+      status: todo
+      difficulty: L
+      tdd: pending
+      review: pending
+      model_used: null
+      ralph_retries: 0
+      ralph_approaches: 0
+      review_blockers: 0
+      review_recommended: 0
+      failure_tag: null
+      is_regression: false
+      parent_story: null
     e2e: pending
 ```
 
@@ -119,6 +156,16 @@ State field values:
 - **tdd**: `pending` → `done`
 - **review**: `pending` → `approved` (S difficulty skips to `approved` directly)
 - **e2e**: `pending` → `written` → `passed`
+
+Metric field values (recorded by downstream skills, initialized with defaults):
+- **model_used**: `null` → `"sonnet"` | `"opus-lead"` | `"opus-lead+3"` (bf-implement-story가 기록)
+- **ralph_retries**: `0` → Green 검증 실패 재시도 횟수 (bf-implement-story가 기록)
+- **ralph_approaches**: `0` → Stuck Detection 접근 전환 횟수 (bf-implement-story가 기록)
+- **review_blockers**: `0` → 🔴 Blocker 건수 (bf-review-code가 기록)
+- **review_recommended**: `0` → 🟡 Recommended 건수 (bf-review-code가 기록)
+- **failure_tag**: `null` → 실패 태그 (bf-run-e2e가 regression Story에만 기록)
+- **is_regression**: `false` → E2E 실패로 자동 생성된 Story 여부 (bf-run-e2e가 기록)
+- **parent_story**: `null` → regression일 때 원인 Story ID (bf-run-e2e가 기록)
 
 ### TDD Cycle Implementation
 
@@ -136,6 +183,20 @@ All stories follow strict TDD:
 - **Convention Guard**: Automated enforcement of `docs/conventions.md` rules
 - Reviews check: convention compliance, duplication, test coverage, security, code quality
 - Findings categorized as: 🔴 Blocker, 🟡 Recommended, 🟢 Confirmed
+
+### Metrics and Optimization
+
+`/bf-metrics`는 sprint-status.yaml에 기록된 메트릭 데이터를 분석하여 워크플로우 최적화를 **제안**하는 read-only 스킬이다.
+
+- **제안만 제공**: 모델 배당 변경이나 난이도 재태깅을 자동 적용하지 않음. 사람이 판단.
+- **실행 시점**: `/bf-archive-sprint` 후, `/bf-update-conventions` 전에 선택적으로 실행
+- **분석 범위**: 현재 + 아카이브된 모든 스프린트의 완료된 Story
+- **주요 분석**:
+  - (difficulty, model_used) 페어별 집계 (retries, stuck rate, blockers, regression rate)
+  - 모델 배당 최적화 제안 (임계값 기반)
+  - 난이도 과소/과대평가 재태깅 제안
+  - E2E 실패 태그 패턴 분석
+- **레거시 호환**: 메트릭 필드 없는 이전 스프린트 Story는 건너뜀
 
 ## Adding New Skills
 

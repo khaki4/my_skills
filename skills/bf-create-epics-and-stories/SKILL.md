@@ -60,15 +60,61 @@ description: 승인된 Tech Spec을 기반으로 Epic, Sprint, Story를 생성�
 ```yaml
 SPRINT-XX:
   epic-1:
-    story-1: { status: todo, difficulty: S, tdd: pending, review: pending }
-    story-2: { status: todo, difficulty: M, tdd: pending, review: pending }
+    story-1:
+      status: todo
+      difficulty: S
+      tdd: pending
+      review: pending
+      model_used: null
+      ralph_retries: 0
+      ralph_approaches: 0
+      review_blockers: 0
+      review_recommended: 0
+      failure_tag: null
+      is_regression: false
+      parent_story: null
+    story-2:
+      status: todo
+      difficulty: M
+      tdd: pending
+      review: pending
+      model_used: null
+      ralph_retries: 0
+      ralph_approaches: 0
+      review_blockers: 0
+      review_recommended: 0
+      failure_tag: null
+      is_regression: false
+      parent_story: null
     e2e: pending
   epic-2:
-    story-3: { status: todo, difficulty: L, tdd: pending, review: pending }
+    story-3:
+      status: todo
+      difficulty: L
+      tdd: pending
+      review: pending
+      model_used: null
+      ralph_retries: 0
+      ralph_approaches: 0
+      review_blockers: 0
+      review_recommended: 0
+      failure_tag: null
+      is_regression: false
+      parent_story: null
     e2e: pending
 ```
 
-h. Story 파일을 `docs/stories/`에 저장한다.
+   > 메트릭 필드 기본값 설명:
+   > - `model_used`: 실제 사용된 모델 전략 (`"sonnet"` | `"opus-lead"` | `"opus-lead+3"` 등). bf-implement-story가 기록.
+   > - `ralph_retries`: Green 검증 실패 재시도 횟수. bf-implement-story가 기록.
+   > - `ralph_approaches`: Stuck Detection으로 접근 방식을 전환한 횟수. bf-implement-story가 기록.
+   > - `review_blockers`: 🔴 Blocker 건수. bf-review-code가 기록.
+   > - `review_recommended`: 🟡 Recommended 건수. bf-review-code가 기록.
+   > - `failure_tag`: E2E 실패 태그. bf-run-e2e가 기록 (regression Story만 해당).
+   > - `is_regression`: E2E 실패로 자동 생성된 Story 여부. bf-run-e2e가 기록.
+   > - `parent_story`: regression일 때 원인 Story ID. bf-run-e2e가 기록.
+
+   h. Story 파일을 `docs/stories/`에 저장한다.
 
 3. 메인 세션이 완료 통보를 수신한다.
    - 생성된 에픽/스토리 수와 난이도 분포만 표시

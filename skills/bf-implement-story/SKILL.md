@@ -83,6 +83,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    **b) 반복 실패 감지 (Stuck Detection)**
    - 매 실패 시 에러 메시지의 핵심 내용을 기록한다.
    - 직전 시도와 동일한 에러가 연속 2회 발생하면, 같은 접근 방식으로는 해결 불가능으로 판단한다.
+   - 접근 전환 횟수(`approaches_count`)를 0부터 시작하여 Stuck Detection 발동 시마다 1 증가시킨다.
    - 이 경우 즉시 접근 방식을 전환한다:
      1. 테스트 코드의 기대값이 잘못되었는지 재검토
      2. AC 해석이 올바른지 Story 파일 재확인
@@ -100,6 +101,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      - 시도한 접근 방식: {approaches_tried}
      ```
    - sprint-status.yaml의 해당 Story에 `ralph_stuck: true`를 기록한다.
+   - 동시에 `ralph_retries`, `ralph_approaches` 메트릭도 함께 기록한다.
    - 사용자가 방향을 제시하면 `retry_count`를 0으로 리셋하고 재개한다.
 
 4. 구현 완료 시:
@@ -110,7 +112,11 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    - sprint-status.yaml 업데이트 (동시성 주의):
      - **중요**: 업데이트 직전에 파일을 다시 읽어서 최신 상태 확인
      - 다른 Story가 먼저 업데이트했을 수 있음 (병렬 실행)
-     - 해당 Story의 tdd 상태만 `done`으로 변경
+     - 해당 Story의 tdd 상태를 `done`으로 변경
+     - 메트릭 필드를 기록:
+       - `model_used`: 실제 사용한 모델 전략 (`"sonnet"` / `"opus-lead"` / `"opus-lead+3"` 등)
+       - `ralph_retries`: 최종 `retry_count` 값
+       - `ralph_approaches`: 최종 `approaches_count` 값
      - 다른 Story의 상태는 보존
      - read → modify → write 간격을 최소화하여 race condition 위험을 줄인다
 

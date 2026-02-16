@@ -40,7 +40,11 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - 메시지: `chore: archive sprint {SPRINT-XX}`
    - 아카이브된 파일 + changelog 변경 포함
 
-5. 완료 후 `/bf-update-conventions` 실행을 안내한다.
+5. 완료 후 `/bf-metrics` 실행을 안내한다:
+   - 스프린트 메트릭을 분석하여 모델 배당/난이도 태깅 최적화 제안을 받을 수 있음
+   - 선택 사항이며, 사용자가 원하면 실행
+
+6. `/bf-update-conventions` 실행을 안내한다.
 
 ## Output Format
 
