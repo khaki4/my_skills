@@ -38,7 +38,7 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - 아카이브 경로 링크
 
 4. git commit을 수행한다:
-   - 메시지: `chore: archive sprint {SPRINT-XX}`
+   - 메시지: `chore({SPRINT-XX}): archive sprint`
    - 아카이브된 파일 + changelog 변경 포함
 
 5. 완료 후 다음 순서로 후속 스킬 실행을 안내한다:

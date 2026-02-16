@@ -41,7 +41,7 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
    - **CLAUDE.md**: 필요 시 고정 영역에 핵심 규칙 반영
 
 4. git commit을 수행한다:
-   - 메시지: `docs: update conventions from sprint {SPRINT-XX}`
+   - 메시지: `docs({SPRINT-XX}): update conventions`
 
 ## Output Format
 

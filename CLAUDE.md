@@ -26,6 +26,7 @@ The BF workflow executes in this sequence:
 2. **`/bf-review-tech-spec`** → Agent Teams multi-perspective review (auto)
 3. **Human approval checkpoint ①** → Approve or request revisions
 4. **`/bf-create-epics-and-stories`** → Generate Epic/Story structure with difficulty tags
+4a. **Human confirmation** → Review epic/story structure, adjust difficulty tags if needed
 5. **`/bf-create-e2e`** → Write E2E tests before implementation (auto, per epic)
 6. **`/bf-implement-story`** → TDD implementation with difficulty-based strategies (auto, per story)
 7. **`/bf-review-code`** → OCR + Convention Guard review (auto, for M+ difficulty)

@@ -121,6 +121,10 @@ SPRINT-XX:
 
    h. Story 파일을 `docs/stories/`에 저장한다.
 
+   i. git commit을 수행한다:
+      - 메시지: `docs({TICKET}): create epics and stories`
+      - 세션 중단 시 작업 유실 방지를 위해 반드시 커밋한다
+
 3. 메인 세션이 완료 통보를 수신한다.
    - 생성된 에픽/스토리 수와 난이도 분포만 표시
    - 컨텍스트가 깨끗한 상태 유지

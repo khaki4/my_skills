@@ -107,12 +107,14 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    - sprint-status.yaml의 해당 Story에 `ralph_stuck: true`를 기록한다.
    - 동시에 `ralph_retries`, `ralph_approaches` 메트릭도 함께 기록한다.
    - 사용자가 방향을 제시하면 `retry_count`를 0으로 리셋하고 재개한다. (`approaches_count`는 리셋하지 않고 누적 유지한다)
+   - **총 에스컬레이션 soft limit**: 같은 Story에서 에스컬레이션이 **3회** 누적되면, 추가 재시도 대신 Story 재설계(난이도 상향 또는 AC 재검토)를 권장한다. 사용자가 명시적으로 계속을 요청하면 진행 가능하나, 권장 메시지를 반드시 표시한다.
 
 4. 구현 완료 시:
    - git commit 실행 (Story 단위):
-     - 메시지 포맷: `feat: implement {STORY-ID} - {brief description}`
-     - 예: `feat: implement PROJ-123-story-1 - add user authentication`
-     - Bug fix인 경우: `fix: implement {STORY-ID} - {brief description}`
+     - 메시지 포맷: `feat({STORY-ID}): {brief description}`
+     - 예: `feat(PROJ-123-story-1): add user authentication`
+     - Bug fix인 경우: `fix({STORY-ID}): {brief description}`
+     - **병렬 실행 시 커밋 충돌 방지**: 구현 코드와 테스트 파일만 먼저 커밋한다. sprint-status.yaml은 커밋에 포함하지 않는다 (별도 업데이트 후 자동으로 다음 스킬이 커밋).
    - sprint-status.yaml 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:
      - 해당 Story의 tdd 상태를 `done`으로 변경
      - 메트릭 필드를 기록:
@@ -123,7 +125,9 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
 
 5. 난이도 M 이상이면 자동으로 `/bf-review-code`를 실행한다.
 
-6. 난이도 S이면 리뷰 없이 사용자 승인(사람 개입 ②)을 요청한다.
+6. 난이도 S이면:
+   - **All-S 스프린트 가드**: sprint-status.yaml에서 현재 에픽 내 모든 Story가 S 난이도인지 확인한다. 모든 Story가 S이면, **마지막 S Story**에 한해 경량 리뷰(Opus 단일 리뷰어)를 수행하여 최소 1회의 코드 품질 검증을 보장한다.
+   - 그 외에는 리뷰 없이 사용자 승인(사람 개입 ②)을 요청한다.
 
 7. 사용자 승인 완료 후:
    - sprint-status.yaml 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:

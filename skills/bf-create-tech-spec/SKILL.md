@@ -43,7 +43,11 @@ description: 기획자 AC와 Slack 논의 내용을 입력받아 브라운필드
 
 4. 문서를 `docs/tech-specs/{TICKET}-tech-spec.md`에 저장한다.
 
-5. 완료 후 자동으로 `/bf-review-tech-spec`을 실행한다.
+5. git commit을 수행한다:
+   - 메시지: `docs({TICKET}): create tech spec`
+   - 세션 중단 시 작업 유실 방지를 위해 반드시 커밋한다
+
+6. 완료 후 자동으로 `/bf-review-tech-spec`을 실행한다.
 
 ## Output Format
 
