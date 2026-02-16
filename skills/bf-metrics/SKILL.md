@@ -32,7 +32,7 @@ b. 아카이브된 스프린트 데이터를 수집한다:
 
 c. 분석 대상 필터링:
    - `status: done`인 Story만 분석 대상에 포함
-   - 메트릭 필드(`model_used`, `ralph_retries` 등)가 없는 레거시 Story는 건너뜀
+   - 레거시 Story 판정 기준: `model_used` YAML key 자체가 존재하지 않는 Story는 레거시로 간주하여 건너뜀 (`model_used: null`은 미완료 Story이므로 `status: done` 조건에서 이미 필터됨)
    - 건너뛴 Story 수를 기록하여 리포트에 표시
 
 ### 2. 집계 테이블 생성

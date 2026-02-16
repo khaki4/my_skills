@@ -83,7 +83,7 @@ When using these skills, the following directory structure will be created in th
 ```
 docs/
   tech-specs/
-    {TICKET-NUMBER}-tech-spec.md
+    {TICKET}-tech-spec.md
   stories/
     {TICKET}-story-{N}.md
   sprint-status.yaml

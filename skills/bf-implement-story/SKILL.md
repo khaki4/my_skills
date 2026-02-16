@@ -25,7 +25,9 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
 
 1. 대상 Story 파일을 읽고 AC를 확인한다.
 
-2. sprint-status.yaml에서 Story의 난이도를 확인하고 실행 방식을 결정한다:
+2. sprint-status.yaml에서 해당 Story의 `status`를 `in_progress`로 변경한다 (동시성 주의: 직전에 파일을 다시 읽고, 해당 Story 필드만 변경).
+
+3. sprint-status.yaml에서 Story의 난이도를 확인하고 실행 방식을 결정한다:
 
    **난이도 S (Simple):**
    - 메인 세션에서 직접 구현 (Sonnet 단독, ralph-loop)
@@ -42,6 +44,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      - Sonnet 모델 구현자 teammate 생성 (Task tool의 `model: sonnet` 파라미터 사용)
      - 구현자가 TDD 수행하도록 지시
      - 구현 완료 후 리뷰 수행
+   - **Agent Teams 실패 시 fallback**: Lead 생성 또는 teammate 통신 실패 시, 메인 세션에서 직접 ralph-loop으로 구현한다 (M 난이도와 동일 방식).
    - 메인 세션은 완료 통보만 수신
 
    **난이도 XL (Complex):**
@@ -58,6 +61,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
        - Lead가 합의/미합의를 판정하고 최종 설계 확정
      - 각 teammate에게 역할별 작업 할당
      - 통합 및 최종 리뷰 수행
+   - **Agent Teams 실패 시 fallback**: Lead 생성 또는 teammate 통신 실패 시, 사용자에게 알리고 메인 세션에서 직접 ralph-loop으로 fallback할지 재시도할지 확인한다.
    - 메인 세션은 완료 통보만 수신
 
 3. TDD 사이클을 실행한다 (모든 난이도 공통):
@@ -81,8 +85,8 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    - 재시도 횟수(`retry_count`)를 0부터 시작하여 매 실패마다 1 증가시킨다.
 
    **b) 반복 실패 감지 (Stuck Detection)**
-   - 매 실패 시 에러 메시지의 핵심 내용을 기록한다.
-   - 직전 시도와 동일한 에러가 연속 2회 발생하면, 같은 접근 방식으로는 해결 불가능으로 판단한다.
+   - 매 실패 시 에러 메시지의 핵심 내용(에러 타입 + 발생 파일)을 기록한다.
+   - 직전 시도와 본질적으로 같은 근본 원인의 에러가 연속 2회 발생하면, 같은 접근 방식으로는 해결 불가능으로 판단한다. (판정 기준: 에러 타입과 발생 파일이 동일하면 같은 에러로 간주)
    - 접근 전환 횟수(`approaches_count`)를 0부터 시작하여 Stuck Detection 발동 시마다 1 증가시킨다.
    - 이 경우 즉시 접근 방식을 전환한다:
      1. 테스트 코드의 기대값이 잘못되었는지 재검토
@@ -102,7 +106,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      ```
    - sprint-status.yaml의 해당 Story에 `ralph_stuck: true`를 기록한다.
    - 동시에 `ralph_retries`, `ralph_approaches` 메트릭도 함께 기록한다.
-   - 사용자가 방향을 제시하면 `retry_count`를 0으로 리셋하고 재개한다.
+   - 사용자가 방향을 제시하면 `retry_count`를 0으로 리셋하고 재개한다. (`approaches_count`는 리셋하지 않고 누적 유지한다)
 
 4. 구현 완료 시:
    - git commit 실행 (Story 단위):
@@ -120,6 +124,8 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      - 다른 Story의 상태는 보존
      - read → modify → write 간격을 최소화하여 race condition 위험을 줄인다
 
+   > **Optimistic Concurrency 패턴**: 쓰기 직전 re-read하여 자신이 변경하려는 Story 외 필드가 변경되었으면, 변경된 내용을 보존하면서 자신의 변경만 적용한다. 전체 파일을 재생성하지 않고 해당 Story 블록만 수정한다.
+
 5. 난이도 M 이상이면 자동으로 `/bf-review-code`를 실행한다.
 
 6. 난이도 S이면 리뷰 없이 사용자 승인(사람 개입 ②)을 요청한다.
@@ -128,6 +134,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    - sprint-status.yaml 업데이트 (동시성 주의):
      - 파일을 다시 읽어서 최신 상태 확인
      - 해당 Story의 review 상태를 `approved`로 변경
+     - 해당 Story의 `status`를 `done`으로 변경
      - read → modify → write 간격을 최소화한다
    - 같은 에픽 내 모든 Story의 review가 `approved`인지 확인
    - 모든 Story가 승인되었으면 자동으로 `/bf-run-e2e {epic-id}`를 실행한다

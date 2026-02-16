@@ -16,7 +16,7 @@ description: 승인된 Tech Spec을 기반으로 Epic, Sprint, Story를 생성�
 
 ## Prerequisites
 
-- 승인된 Tech Spec: `docs/tech-specs/{TICKET-NUMBER}-tech-spec.md`
+- 승인된 Tech Spec: `docs/tech-specs/{TICKET}-tech-spec.md`
 - Tech Spec 리뷰 통과 (사람 개입 ① 완료)
 - `docs/` 디렉토리 존재
 
@@ -124,7 +124,10 @@ SPRINT-XX:
    - 생성된 에픽/스토리 수와 난이도 분포만 표시
    - 컨텍스트가 깨끗한 상태 유지
 
-4. 자동으로 첫 번째 에픽의 `/bf-create-e2e`를 실행한다.
+4. 사용자에게 에픽/스토리 구조를 확인받는다:
+   - 생성된 에픽 목록, 각 에픽 내 스토리 수, 난이도 분포를 표시
+   - 사용자가 난이도 태깅 조정이나 에픽 순서 변경을 요청하면 반영
+   - 사용자 승인 후 자동으로 첫 번째 에픽의 `/bf-create-e2e`를 실행한다
    - Epic loop가 자동으로 시작됨
 
 ## Output Format

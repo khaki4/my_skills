@@ -16,8 +16,8 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
 
 ## Prerequisites
 
-- Story 파일들 존재: `docs/stories/{TICKET}-story-*.md`
-- sprint-status.yaml 존재 및 해당 에픽 정의됨
+- Story 파일들 존재: `docs/stories/{TICKET}-story-*.md` — 미존재 시 실행 중단 및 `/bf-create-epics-and-stories` 선행 실행 안내
+- sprint-status.yaml 존재 및 해당 에픽 정의됨 — 미존재 시 실행 중단 및 안내
 - `tests/e2e/` 디렉토리 존재 (없으면 생성)
 
 ## Instructions

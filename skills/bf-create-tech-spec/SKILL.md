@@ -15,6 +15,11 @@ description: 기획자 AC와 Slack 논의 내용을 입력받아 브라운필드
 - 새로운 기능 개발 또는 변경 요청이 있을 때
 - 기획자의 AC가 준비된 상태에서 기술 명세가 필요할 때
 
+## Prerequisites
+
+- 워크플로우 진입점이므로 별도 전제조건 없음
+- 사용자가 기획자 AC 또는 변경 요청 내용을 준비한 상태여야 함
+
 ## Instructions
 
 1. 사용자에게 다음 입력을 요청한다:
@@ -36,12 +41,12 @@ description: 기획자 AC와 Slack 논의 내용을 입력받아 브라운필드
    - 기술 제약사항 및 리스크
    - 테스트 전략 개요
 
-4. 문서를 `docs/tech-specs/{TICKET-NUMBER}-tech-spec.md`에 저장한다.
+4. 문서를 `docs/tech-specs/{TICKET}-tech-spec.md`에 저장한다.
 
 5. 완료 후 자동으로 `/bf-review-tech-spec`을 실행한다.
 
 ## Output Format
 
-docs/tech-specs/{TICKET-NUMBER}-tech-spec.md
+docs/tech-specs/{TICKET}-tech-spec.md
 
 마크다운 형식. 섹션: Background, As-Is, To-Be, Impact Analysis, Acceptance Criteria, Technical Constraints, Test Strategy.

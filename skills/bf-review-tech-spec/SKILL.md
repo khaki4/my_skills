@@ -16,7 +16,7 @@ description: Agent Teams 토론 방식으로 Tech Spec을 다관점 리뷰한다
 
 ## Prerequisites
 
-- Tech Spec 문서 존재: `docs/tech-specs/{TICKET-NUMBER}-tech-spec.md`
+- Tech Spec 문서 존재: `docs/tech-specs/{TICKET}-tech-spec.md`
 - 문서가 없으면 `/bf-create-tech-spec`을 먼저 실행해야 함
 
 ## Instructions
