@@ -16,7 +16,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
 
 ## Prerequisites
 
-- Story 파일 존재: `docs/stories/{STORY-ID}.md`
+- Story 파일 존재: `docs/stories/{TICKET}-story-{N}.md` (STORY-ID = `{TICKET}-story-{N}` 형식)
 - sprint-status.yaml에 해당 Story 정의됨
 - E2E 테스트 작성 완료 (해당 에픽의 `e2e: written`)
 - 프로젝트에 테스트 프레임워크 설정됨

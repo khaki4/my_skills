@@ -120,6 +120,7 @@ SPRINT-XX:
       failure_tag: null
       is_regression: false
       parent_story: null
+      ralph_stuck: false
     story-2:
       status: todo
       difficulty: M
@@ -133,6 +134,7 @@ SPRINT-XX:
       failure_tag: null
       is_regression: false
       parent_story: null
+      ralph_stuck: false
     e2e: pending
   epic-2:
     story-3:
@@ -148,6 +150,7 @@ SPRINT-XX:
       failure_tag: null
       is_regression: false
       parent_story: null
+      ralph_stuck: false
     e2e: pending
 ```
 
@@ -166,6 +169,7 @@ Metric field values (recorded by downstream skills, initialized with defaults):
 - **failure_tag**: `null` → 실패 태그 (bf-run-e2e가 regression Story에만 기록)
 - **is_regression**: `false` → E2E 실패로 자동 생성된 Story 여부 (bf-run-e2e가 기록)
 - **parent_story**: `null` → regression일 때 원인 Story ID (bf-run-e2e가 기록)
+- **ralph_stuck**: `false` → Ralph Loop 한도 초과 시 `true` (bf-implement-story가 기록)
 
 ### TDD Cycle Implementation
 

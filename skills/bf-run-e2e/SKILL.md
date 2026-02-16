@@ -39,7 +39,18 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
        - 다음 에픽이 있으면: 자동으로 다음 에픽의 `/bf-create-e2e {next-epic-id}`를 실행
        - 스프린트 내 모든 에픽 완료 시: `/bf-archive-sprint` 실행 안내 (사용자 수동 트리거)
    - **실패**:
-     - 실패 원인을 분석하여 새 Story를 생성
+     - **Regression 가드레일**: 무한 루프를 방지하기 위해 다음 규칙을 적용한다:
+       - 해당 에픽 내 `is_regression: true`인 Story 수를 센다.
+       - **3개 이상**이면 새 Story를 생성하지 않고 즉시 사용자에게 에스컬레이션한다:
+         ```
+         ⚠️ Regression Loop 한도 초과 — 사람 개입 필요
+         - Epic: {epic-id}
+         - 누적 regression Story: {count}/3
+         - 마지막 실패 E2E: {failed-test-name}
+         - 실패 태그 이력: {tag1, tag2, ...}
+         ```
+       - 또한 `parent_story` 체인 depth가 **2 이상**인 경우에도 에스컬레이션한다 (regression이 또 regression을 만드는 상황).
+     - 가드레일 통과 시, 실패 원인을 분석하여 새 Story를 생성
      - 실패 태그를 판정하여 추가:
        - `spec-gap`: AC/Tech Spec이 이 시나리오를 예상하지 못함 (누락된 요구사항)
        - `impl-bug`: AC는 맞으나 구현에 결함 (로직 오류, 오타)

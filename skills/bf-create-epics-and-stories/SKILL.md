@@ -73,6 +73,7 @@ SPRINT-XX:
       failure_tag: null
       is_regression: false
       parent_story: null
+      ralph_stuck: false
     story-2:
       status: todo
       difficulty: M
@@ -86,6 +87,7 @@ SPRINT-XX:
       failure_tag: null
       is_regression: false
       parent_story: null
+      ralph_stuck: false
     e2e: pending
   epic-2:
     story-3:
@@ -101,6 +103,7 @@ SPRINT-XX:
       failure_tag: null
       is_regression: false
       parent_story: null
+      ralph_stuck: false
     e2e: pending
 ```
 
@@ -113,6 +116,7 @@ SPRINT-XX:
    > - `failure_tag`: E2E 실패 태그. bf-run-e2e가 기록 (regression Story만 해당).
    > - `is_regression`: E2E 실패로 자동 생성된 Story 여부. bf-run-e2e가 기록.
    > - `parent_story`: regression일 때 원인 Story ID. bf-run-e2e가 기록.
+   > - `ralph_stuck`: Ralph Loop 한도 초과 여부. bf-implement-story가 기록.
 
    h. Story 파일을 `docs/stories/`에 저장한다.
 
