@@ -1,5 +1,5 @@
 ---
-name: archive-sprint
+name: bf-archive-sprint
 description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서를 아카이빙한다. 문서 이동, changelog 업데이트, git commit을 자동으로 수행한다.
 ---
 

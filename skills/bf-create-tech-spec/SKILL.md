@@ -1,5 +1,5 @@
 ---
-name: create-tech-spec
+name: bf-create-tech-spec
 description: 기획자 AC와 Slack 논의 내용을 입력받아 브라운필드 프로젝트의 Tech Spec 문서를 생성한다. 기존 코드베이스를 분석하고 변경 영향도, AC, 기술 제약사항을 포함한 명세를 작성할 때 사용한다.
 ---
 

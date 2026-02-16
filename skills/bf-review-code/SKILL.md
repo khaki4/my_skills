@@ -1,5 +1,5 @@
 ---
-name: review-code
+name: bf-review-code
 description: OCR과 Convention Guard를 사용하여 구현된 코드를 리뷰한다. 컨벤션 준수, 중복 구현, 보안, 테스트 커버리지를 검토하고 결과를 사람에게 제시한다.
 ---
 

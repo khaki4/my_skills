@@ -58,7 +58,10 @@ g. Story 파일을 `docs/stories/`에 저장한다.
 
 3. 메인 세션이 완료 통보를 수신한다.
    - 생성된 에픽/스토리 수와 난이도 분포만 표시
-   - 컨텍스트가 깨끗한 상태로 에픽 1부터 `/bf-create-e2e` → `/bf-implement-story` 순으로 실행을 안내한다.
+   - 컨텍스트가 깨끗한 상태 유지
+
+4. 자동으로 첫 번째 에픽의 `/bf-create-e2e`를 실행한다.
+   - Epic loop가 자동으로 시작됨
 
 ## Output Format
 

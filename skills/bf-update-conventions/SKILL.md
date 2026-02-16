@@ -1,5 +1,5 @@
 ---
-name: update-conventions
+name: bf-update-conventions
 description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 conventions.md와 OCR 룰에 반영한다. 자기 강화 루프의 축적 단계로, 다음 스프린트의 리뷰 품질을 높인다.
 ---
 

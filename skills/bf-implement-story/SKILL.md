@@ -1,5 +1,5 @@
 ---
-name: implement-story
+name: bf-implement-story
 description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당하고 단위 테스트 작성 → Red → 구현 → Green 순서로 진행한다. 구현 완료마다 커밋한다.
 ---
 
@@ -18,13 +18,36 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
 
 1. 대상 Story 파일을 읽고 AC를 확인한다.
 
-2. 난이도별 실행 방식을 결정한다:
-   - **S**: ralph-loop (Sonnet 단독)
-   - **M**: ralph-loop + OCR 리뷰 (Sonnet 구현, Opus 리뷰)
-   - **L**: Agent Teams 2 teammates (Opus Lead+리뷰, Sonnet 구현)
-   - **XL**: Agent Teams 3 teammates + discourse (Opus Lead+리뷰, Sonnet 구현+통합)
+2. sprint-status.yaml에서 Story의 난이도를 확인하고 실행 방식을 결정한다:
 
-3. TDD 사이클을 실행한다:
+   **난이도 S (Simple):**
+   - 메인 세션에서 직접 구현 (Sonnet 단독, ralph-loop)
+   - Agent Teams 위임 없음
+
+   **난이도 M (Medium):**
+   - 메인 세션에서 직접 구현 (Sonnet, ralph-loop)
+   - 구현 완료 후 Opus로 OCR 리뷰 수행
+
+   **난이도 L (Large):**
+   - 메인 세션에서 Agent Teams Lead에게 위임 (컨텍스트 보존)
+   - Lead 에이전트 (Opus 모델):
+     - Story AC 분석 및 구현 계획 수립
+     - Sonnet 모델 구현자 teammate 생성
+     - 구현자가 TDD 수행하도록 지시
+     - 구현 완료 후 리뷰 수행
+   - 메인 세션은 완료 통보만 수신
+
+   **난이도 XL (Complex):**
+   - 메인 세션에서 Agent Teams Lead에게 위임 (컨텍스트 보존)
+   - Lead 에이전트 (Opus 모델):
+     - Story AC 분석 및 아키텍처 설계
+     - 3+ teammates 생성 (구현자: Sonnet, 통합 담당: Sonnet, 리뷰어: Opus)
+     - Agent Teams discourse(토론)로 설계 검증
+     - 각 teammate에게 역할별 작업 할당
+     - 통합 및 최종 리뷰 수행
+   - 메인 세션은 완료 통보만 수신
+
+3. TDD 사이클을 실행한다 (모든 난이도 공통):
    - 단위 테스트 작성 (AC 기반)
    - Red 확인 (테스트 실패)
    - 구현
@@ -38,6 +61,11 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
 5. 난이도 M 이상이면 자동으로 `/review-code`를 실행한다.
 
 6. 난이도 S이면 리뷰 없이 사용자 승인(사람 개입 ②)을 요청한다.
+
+7. 사용자 승인 완료 후:
+   - sprint-status.yaml의 해당 Story review 상태를 `approved`로 업데이트
+   - 같은 에픽 내 모든 Story의 review가 `approved`인지 확인
+   - 모든 Story가 승인되었으면 자동으로 `/bf-run-e2e {epic-id}`를 실행한다
 
 ## Output Format
 

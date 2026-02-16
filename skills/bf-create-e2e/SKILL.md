@@ -1,5 +1,5 @@
 ---
-name: create-e2e
+name: bf-create-e2e
 description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. agent-browser 기반으로 접근성 트리의 @ref를 활용한 테스트 코드를 생성한다.
 ---
 
@@ -32,6 +32,11 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
    - 파일명: `{scenario-name}.test.ts`
 
 5. sprint-status.yaml의 해당 에픽 e2e 상태를 `written`으로 업데이트한다.
+
+6. 자동으로 해당 에픽의 Story 구현을 시작한다:
+   - sprint-status.yaml에서 현재 에픽의 모든 Story 목록을 읽는다
+   - 각 Story에 대해 `/bf-implement-story {story-id}`를 병렬로 트리거한다
+   - Story 간 의존성이 있으면 순차 실행한다
 
 ## Output Format
 
