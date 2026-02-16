@@ -68,7 +68,9 @@ description: OCR과 Convention Guard를 사용하여 구현된 코드를 리뷰�
    - 해당 Story의 `review_recommended`: 🟡 Recommended 건수 (0건이어도 명시적으로 기록)
 
 7. 사용자 판단을 기다린다 (사람 개입 ②):
-   - 승인 → sprint-status.yaml review 상태를 `approved`로 업데이트
+   - 승인 → sprint-status.yaml 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:
+     - 해당 Story의 review 상태를 `approved`로 변경
+     - 해당 Story의 `status`를 `done`으로 변경
    - 수정 요청 → 수정 후 재리뷰
 
 8. 승인 완료 후, 같은 에픽 내 모든 Story의 review가 `approved`인지 확인한다:

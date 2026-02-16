@@ -44,7 +44,10 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
      - Sonnet 모델 구현자 teammate 생성 (Task tool의 `model: sonnet` 파라미터 사용)
      - 구현자가 TDD 수행하도록 지시
      - 구현 완료 후 리뷰 수행
-   - **Agent Teams 실패 시 fallback**: Lead 생성 또는 teammate 통신 실패 시, 메인 세션에서 직접 ralph-loop으로 구현한다 (M 난이도와 동일 방식).
+   - **Agent Teams 실패 시 fallback**: 아래 조건에 해당하면 메인 세션에서 직접 ralph-loop으로 구현한다 (M 난이도와 동일 방식):
+     - Task tool이 에러를 반환한 경우 (Lead/teammate 생성 실패)
+     - teammate가 10분 이상 응답 없는 경우 (타임아웃)
+     - teammate 프로세스가 비정상 종료한 경우 (idle 상태가 아닌 완전 종료)
    - 메인 세션은 완료 통보만 수신
 
    **난이도 XL (Complex):**
@@ -61,10 +64,13 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
        - Lead가 합의/미합의를 판정하고 최종 설계 확정
      - 각 teammate에게 역할별 작업 할당
      - 통합 및 최종 리뷰 수행
-   - **Agent Teams 실패 시 fallback**: Lead 생성 또는 teammate 통신 실패 시, 사용자에게 알리고 메인 세션에서 직접 ralph-loop으로 fallback할지 재시도할지 확인한다.
+   - **Agent Teams 실패 시 fallback**: 아래 조건에 해당하면 사용자에게 알리고 메인 세션에서 직접 ralph-loop으로 fallback할지 재시도할지 확인한다:
+     - Task tool이 에러를 반환한 경우 (Lead/teammate 생성 실패)
+     - teammate가 10분 이상 응답 없는 경우 (타임아웃)
+     - teammate 프로세스가 비정상 종료한 경우
    - 메인 세션은 완료 통보만 수신
 
-3. TDD 사이클을 실행한다 (모든 난이도 공통):
+4. TDD 사이클을 실행한다 (모든 난이도 공통):
    - 단위 테스트 작성 (AC 기반)
    - **Red 확인**: package.json의 `test` 스크립트 실행 (`npm test` 또는 `npx vitest run` 등)
      - 테스트가 실패하는지 확인
@@ -83,6 +89,7 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    **a) 최대 재시도 횟수: 5회**
    - Green 검증 실패 → 구현 수정 → 재실행을 최대 5회까지만 반복한다.
    - 재시도 횟수(`retry_count`)를 0부터 시작하여 매 실패마다 1 증가시킨다.
+   - **세션 복구 시 카운터 초기화**: bf-resume으로 재개하는 경우, sprint-status.yaml의 `ralph_retries` 값을 `retry_count` 초기값으로, `ralph_approaches` 값을 `approaches_count` 초기값으로 사용한다 (이전 세션의 누적값 이어서 카운트).
 
    **b) 반복 실패 감지 (Stuck Detection)**
    - 매 실패 시 에러 메시지의 핵심 내용(에러 타입 + 발생 파일)을 기록한다.
@@ -109,12 +116,13 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
    - 사용자가 방향을 제시하면 `retry_count`를 0으로 리셋하고 재개한다. (`approaches_count`는 리셋하지 않고 누적 유지한다)
    - **총 에스컬레이션 soft limit**: 같은 Story에서 에스컬레이션이 **3회** 누적되면, 추가 재시도 대신 Story 재설계(난이도 상향 또는 AC 재검토)를 권장한다. 사용자가 명시적으로 계속을 요청하면 진행 가능하나, 권장 메시지를 반드시 표시한다.
 
-4. 구현 완료 시:
+5. 구현 완료 시:
    - git commit 실행 (Story 단위):
      - 메시지 포맷: `feat({STORY-ID}): {brief description}`
      - 예: `feat(PROJ-123-story-1): add user authentication`
      - Bug fix인 경우: `fix({STORY-ID}): {brief description}`
      - **병렬 실행 시 커밋 충돌 방지**: 구현 코드와 테스트 파일만 먼저 커밋한다. sprint-status.yaml은 커밋에 포함하지 않는다 (별도 업데이트 후 자동으로 다음 스킬이 커밋).
+     - **git conflict 발생 시**: 다른 병렬 Story의 커밋과 충돌이 발생하면 `git pull --rebase`를 시도한다. rebase 후에도 충돌이 해결되지 않으면 사용자에게 에스컬레이션한다 (충돌 파일 목록과 양쪽 변경 내용을 표시).
    - sprint-status.yaml 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:
      - 해당 Story의 tdd 상태를 `done`으로 변경
      - 메트릭 필드를 기록:
@@ -123,13 +131,19 @@ description: Story를 TDD로 구현한다. 난이도에 따라 모델을 배당�
        - `ralph_approaches`: 최종 `approaches_count` 값
        - `ralph_stuck`: `false` (정상 완료 시 명시적으로 기록)
 
-5. 난이도 M 이상이면 자동으로 `/bf-review-code`를 실행한다.
+6. 난이도에 따라 후속 흐름이 분기된다:
 
-6. 난이도 S이면:
+   **난이도 M 이상 (M/L/XL):**
+   - 자동으로 `/bf-review-code`를 실행한다.
+   - `/bf-review-code`가 사용자 승인(사람 개입 ②), `review → approved`, `status → done`, E2E 트리거까지 모두 처리한다.
+   - **이 스킬의 작업은 여기서 종료된다** — 후속 단계는 `/bf-review-code`에 위임.
+
+   **난이도 S (Simple):**
    - **All-S 스프린트 가드**: sprint-status.yaml에서 현재 에픽 내 모든 Story가 S 난이도인지 확인한다. 모든 Story가 S이면, **마지막 S Story**에 한해 경량 리뷰(Opus 단일 리뷰어)를 수행하여 최소 1회의 코드 품질 검증을 보장한다.
    - 그 외에는 리뷰 없이 사용자 승인(사람 개입 ②)을 요청한다.
+   - 사용자 승인 완료 후 step 7로 진행한다.
 
-7. 사용자 승인 완료 후:
+7. **(S 난이도 전용)** 사용자 승인 완료 후:
    - sprint-status.yaml 업데이트 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**:
      - 해당 Story의 review 상태를 `approved`로 변경
      - 해당 Story의 `status`를 `done`으로 변경

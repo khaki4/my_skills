@@ -36,8 +36,7 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
    - 제안하는 룰 내용
 
 3. 사용자 승인 후 다음을 업데이트한다:
-   - **docs/conventions.md**: 새 컨벤션 룰 추가
-   - **OCR 룰**: Convention Guard 리뷰어에 새 체크 항목 추가
+   - **docs/conventions.md**: 새 컨벤션 룰 추가. 이 파일이 Convention Guard(OCR 리뷰)의 단일 규칙 소스이므로, 새 체크 항목도 이 파일에 추가한다.
    - **CLAUDE.md**: 필요 시 고정 영역에 핵심 규칙 반영
 
 4. git commit을 수행한다:
@@ -45,6 +44,6 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
 
 ## Output Format
 
-- docs/conventions.md 업데이트
-- OCR 룰 업데이트
+- docs/conventions.md 업데이트 (Convention Guard 규칙 포함)
+- CLAUDE.md 업데이트 (필요 시)
 - git commit

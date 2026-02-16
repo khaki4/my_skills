@@ -77,7 +77,7 @@ description: 에픽 단위로 E2E 테스트를 실행한다. agent-browser로 �
        - `failure_tag`: 위에서 판정한 실패 태그 (`spec-gap` | `impl-bug` | `test-design` | `convention-violation` | `integration`)
        - `is_regression: true`
        - `parent_story`: 원인이 된 원본 Story ID
-     - 새 Story 파일을 `docs/stories/{TICKET}-story-{N+1}.md`로 생성한다 (기존 Story 번호에서 순번을 이어감)
+     - 새 Story 파일을 `docs/stories/{TICKET}-story-{N+1}.md`로 생성한다. 번호 결정 시 `docs/stories/` 디렉토리의 **전체 Story 파일**에서 가장 큰 번호를 찾아 +1한다 (에픽별이 아닌 글로벌 순번으로 충돌 방지)
      - 자동으로 새 Story의 `/bf-implement-story {new-story-id}`를 실행하여 Story 루프 재개
 
 ## Output Format

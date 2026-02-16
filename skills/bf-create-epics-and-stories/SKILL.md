@@ -47,8 +47,9 @@ description: 승인된 Tech Spec을 기반으로 Epic, Sprint, Story를 생성�
    - **L (Large)**: 다수 파일, 아키텍처 영향 큼
    - **XL (Complex)**: 크로스 레이어, 보안/성능 고려, 설계 판단 포함
 
-   e. 서브에이전트들에게 각 Story 문서 작성을 병렬 위임한다.
-   - Story 문서 작성은 단순 작업이므로 `model: sonnet` 사용
+   e. Story 문서를 작성한다:
+   - **Story 5개 이상**: 서브에이전트들에게 각 Story 문서 작성을 병렬 위임한다 (`model: sonnet` 사용). Agent Teams 오버헤드 대비 병렬화 이점이 충분.
+   - **Story 4개 이하**: Lead가 직접 순차적으로 Story 문서를 작성한다. 소규모에서는 Agent Teams 위임 오버헤드가 더 큼.
 
    f. Sprint 번호를 결정한다:
    - `docs/archive/` 디렉토리가 존재하면 기존 스프린트 확인

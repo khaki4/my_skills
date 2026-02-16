@@ -25,11 +25,15 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
 1. 메인 세션에서 직접 수행한다 (단순 반복 작업이므로 Agent Teams 위임 없이 직접 처리. 컨텍스트 오버헤드가 E2E 작성보다 큼).
 
 2. **프로젝트 E2E 타입을 판별한다:**
-   - 프로젝트 루트에서 `package.json`, `index.html`, 프론트엔드 프레임워크 설정 파일 등을 확인
-   - **브라우저 UI 프로젝트**: agent-browser CLI 기반 E2E 작성 (step 4a)
-   - **API-only 프로젝트** (프론트엔드 없음, REST/GraphQL API만 제공): curl/httpie 기반 API E2E 작성 (step 4b)
-   - **CLI 도구 프로젝트**: shell script 기반 CLI E2E 작성 (step 4c)
-   - **E2E 불가 프로젝트** (라이브러리, 유틸리티 패키지 등): E2E를 skip하고 sprint-status.yaml의 e2e를 바로 `passed`로 설정. 사용자에게 skip 사유를 안내한다.
+   프로젝트 루트를 분석하여 아래 기준으로 타입을 결정한다:
+   - **브라우저 UI 프로젝트** — 다음 중 하나 이상 해당: `package.json`에 React/Vue/Angular/Svelte/Next.js dependency 존재, `public/index.html` 또는 `src/App.*` 파일 존재, `next.config.*`/`vite.config.*`/`angular.json` 존재
+     → agent-browser CLI 기반 E2E 작성 (step 5a)
+   - **API-only 프로젝트** — 프론트엔드 프레임워크 없이 Express/Fastify/NestJS/Django/Flask 등 백엔드 프레임워크만 존재, 또는 REST/GraphQL 엔드포인트만 제공
+     → curl/httpie 기반 API E2E 작성 (step 5b)
+   - **CLI 도구 프로젝트** — `package.json`의 `bin` 필드 존재, 또는 실행 가능한 CLI 엔트리포인트가 있는 프로젝트
+     → shell script 기반 CLI E2E 작성 (step 5c)
+   - **E2E 불가 프로젝트** — 라이브러리, 유틸리티 패키지, 순수 SDK 등 사용자 인터페이스 없음
+     → E2E를 skip하고 sprint-status.yaml의 e2e를 바로 `passed`로 설정. 사용자에게 skip 사유를 안내한다.
 
 3. 대상 에픽의 모든 Story와 AC를 읽는다.
    - **Story 0개 에픽인 경우**: sprint-status.yaml에 해당 에픽의 Story가 없으면 E2E 작성을 skip한다. e2e를 바로 `passed`로 설정하고 다음 에픽으로 진행한다.
@@ -63,15 +67,23 @@ description: 에픽 단위로 E2E 테스트 케이스를 선행 작성한다. ag
 
 7. sprint-status.yaml의 해당 에픽 e2e 상태를 `written`으로 업데이트한다 — **CLAUDE.md의 "sprint-status.yaml 업데이트 프로토콜"을 따른다**.
 
-8. 자동으로 해당 에픽의 Story 구현을 시작한다:
+8. git commit을 수행한다:
+   - 메시지: `test({epic-name}): create e2e test scripts`
+   - E2E 스크립트 파일 + sprint-status.yaml 변경을 포함한다
+   - 세션 중단 시 작업 유실 방지를 위해 반드시 커밋한다
+
+9. 자동으로 해당 에픽의 Story 구현을 시작한다:
    - sprint-status.yaml에서 현재 에픽의 모든 Story 목록을 읽는다
-   - 각 Story에 대해 `/bf-implement-story {story-id}`를 병렬로 트리거한다
-   - Story 간 의존성이 있으면 순차 실행한다
+   - **파일 겹침 검사**: 각 Story의 Technical Notes(변경 대상 파일/모듈)를 확인하여 Story 간 수정 파일이 겹치는지 검사한다
+     - 겹치는 파일이 없는 Story들: 병렬로 `/bf-implement-story {story-id}`를 트리거한다
+     - 겹치는 파일이 있는 Story들: 순차적으로 실행한다 (선행 Story 완료 후 후행 Story 시작)
+   - Story 간 의존성(Dependencies 섹션)이 있으면 순차 실행한다
 
 ## Output Format
 
 - `tests/e2e/{epic-name}/*.sh` — E2E 테스트 스크립트 (agent-browser CLI)
 - sprint-status.yaml 업데이트
+- git commit
 
 ### E2E 테스트 스크립트 예제 (agent-browser CLI)
 

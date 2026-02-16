@@ -32,10 +32,17 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - `docs/reviews/` → `docs/archive/{SPRINT-XX}/reviews/` (존재하는 경우)
    - `docs/sprint-status.yaml` → `docs/archive/{SPRINT-XX}/sprint-status.yaml`
 
-3. CLAUDE.md의 changelog에 append-only로 기록한다:
-   - 스프린트 번호
-   - 완료된 에픽/스토리 요약
-   - 아카이브 경로 링크
+3. CLAUDE.md의 `## Changelog` 섹션에 append-only로 기록한다 (섹션이 없으면 파일 끝에 생성):
+   - 아래 포맷을 따른다:
+     ```markdown
+     ## Changelog
+
+     ### {SPRINT-XX} ({YYYY-MM-DD})
+     - **Epic 1** ({epic-name}): Story N개 완료 ({난이도 분포 요약})
+     - **Epic 2** ({epic-name}): Story N개 완료
+     - Archive: `docs/archive/{SPRINT-XX}/`
+     ```
+   - 기존 Changelog 항목 아래에 새 스프린트를 append한다 (기존 항목 수정 금지)
 
 4. git commit을 수행한다:
    - 메시지: `chore({SPRINT-XX}): archive sprint`

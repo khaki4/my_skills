@@ -249,3 +249,4 @@ When creating new skills in this repository:
 - **Append-only changelog**: CLAUDE.md changelog in target projects is append-only to track sprint history
 - **Convention accumulation**: `docs/conventions.md` grows over sprints as patterns are discovered and codified
 - **Agent-browser for E2E**: E2E tests use @ref-based element selection from accessibility trees, not CSS selectors
+- **Language convention**: This CLAUDE.md uses English for international readability. Individual skill files (`SKILL.md`) use Korean as the primary language, with technical terms in English (e.g., Agent Teams, Ralph Loop, sprint-status.yaml). Mapping: "Human approval checkpoint ①②" (CLAUDE.md) = "사람 개입 ①②" (SKILL.md)
