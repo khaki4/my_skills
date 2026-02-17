@@ -92,18 +92,30 @@ description: Monitor 패턴으로 에픽 내 모든 Story의 구현을 조율한
 각 Story agent로부터 완료 신호를 수신한다:
 
 **"done" + commit hash 수신 시:**
-- sprint-status.yaml 업데이트 (Lead가 직접, Edit 도구 사용):
-  - `status: done`
-  - `tdd: done`
+- sprint-status.yaml 업데이트 (Lead가 직접, `yq -i` 명령어 사용):
+  ```bash
+  yq -i '
+    .<SPRINT>.<EPIC>.<STORY>.status = "done" |
+    .<SPRINT>.<EPIC>.<STORY>.tdd = "done" |
+    .<SPRINT>.<EPIC>.<STORY>.model_used = "sonnet" |
+    .<SPRINT>.<EPIC>.<STORY>.ralph_retries = 1 |
+    .<SPRINT>.<EPIC>.<STORY>.ralph_approaches = 0 |
+    .<SPRINT>.<EPIC>.<STORY>.ralph_stuck = false
+  ' docs/sprint-status.yaml
+  ```
   - `model_used`: 실제 사용된 모델 전략 (`"sonnet"` / `"opus-lead"` / `"opus-lead+3"`)
   - `ralph_retries`: agent가 보고한 재시도 횟수
   - `ralph_approaches`: agent가 보고한 접근 전환 횟수
-  - `ralph_stuck: false`
 
 **"stuck" + stuck.md 수신 시:**
 - sprint-status.yaml 업데이트:
-  - `ralph_stuck: true`
-  - `ralph_retries`, `ralph_approaches` 기록
+  ```bash
+  yq -i '
+    .<SPRINT>.<EPIC>.<STORY>.ralph_stuck = true |
+    .<SPRINT>.<EPIC>.<STORY>.ralph_retries = 3 |
+    .<SPRINT>.<EPIC>.<STORY>.ralph_approaches = 2
+  ' docs/sprint-status.yaml
+  ```
 - stuck.md를 저장한다.
 - **다른 Story들은 계속 진행한다** (stuck Story가 있어도 나머지를 중단하지 않음).
 

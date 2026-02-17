@@ -117,8 +117,14 @@ Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다
 #### epic-review 모드:
 
 1. `docs/reviews/{EPIC-ID}-review.md`에 저장한다.
-2. sprint-status.yaml 업데이트:
+2. sprint-status.yaml 업데이트 (`yq -i` 명령어 사용):
    - 에픽 내 각 Story의 `review_blockers`, `review_recommended` 건수 기록
+   ```bash
+   yq -i '
+     .<SPRINT>.<EPIC>.<STORY>.review_blockers = 2 |
+     .<SPRINT>.<EPIC>.<STORY>.review_recommended = 5
+   ' docs/sprint-status.yaml
+   ```
 3. git commit: `docs({EPIC-ID}): review epic`
 
 4. **사람 개입 ② — 리뷰어 에이전트와 함께 수행:**
@@ -129,7 +135,10 @@ Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다
 5. 사람의 결정에 따라:
 
    **승인 시:**
-   - sprint-status.yaml: 에픽 내 모든 Story `review: approved`
+   - sprint-status.yaml: 에픽 내 모든 Story `review: approved` (각 Story에 대해):
+     ```bash
+     yq -i '.<SPRINT>.<EPIC>.<STORY>.review = "approved"' docs/sprint-status.yaml
+     ```
    - 스폰한 상위 에이전트에 전달: `"승인"`
    - 종료 (컨텍스트 소멸).
 

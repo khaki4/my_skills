@@ -79,7 +79,10 @@ Story {STORY-ID}가 stuck 상태입니다.
 ```
 
 사람의 선택에 따라:
-- **AC 수정 / 접근 변경**: 해당 Story의 status를 `in_progress`로 변경, 4a 재실행
+- **AC 수정 / 접근 변경**: 해당 Story의 status를 `in_progress`로 변경 후 4a 재실행:
+  ```bash
+  yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml
+  ```
 - **Story 스킵**: 해당 Story를 에픽에서 제외 (`status: skipped`), 4b로 진행
 - **에픽 재설계**: lead-plan을 다시 스폰 (2단계로)
 
@@ -109,7 +112,7 @@ E2E agent는 아래 **"E2E Agent 지침"**을 따른다.
 | 수신 | 다음 행동 |
 |------|----------|
 | `"승인"` | 에픽 완료, 다음 에픽으로 |
-| `"수정 지시"` + review.md + Story 목록 | 해당 Story만 `in_progress`로 변경, 4a로 돌아감 |
+| `"수정 지시"` + review.md + Story 목록 | 해당 Story만 `in_progress`로 변경 (`yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml`), 4a로 돌아감 |
 
 ### 5. 전체 완료 — Done 신호
 
@@ -168,7 +171,10 @@ E2E agent에게 전달할 인라인 지침이다. Agent는 이 지침을 그대�
 ### 5. 결과 판정
 
 **전체 통과:**
-- sprint-status.yaml: e2e → `passed`
+- sprint-status.yaml 업데이트:
+  ```bash
+  yq -i '.<SPRINT>.<EPIC>.e2e = "passed"' docs/sprint-status.yaml
+  ```
 - `"passed"` + tests/e2e/ 경로를 Lead에 보고
 - git commit: `test({epic-name}): create and pass e2e tests`
 
@@ -186,6 +192,15 @@ E2E agent에게 전달할 인라인 지침이다. Agent는 이 지침을 그대�
   - 새 regression Story 문서 생성: `docs/stories/{TICKET}-story-{N+1}.md`
     - 번호: stories/ 전체에서 가장 큰 번호 + 1
   - sprint-status.yaml에 새 Story 추가:
+    ```bash
+    yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {
+      "status":"todo","difficulty":"S","tdd":"pending","review":"pending",
+      "model_used":null,"ralph_retries":0,"ralph_approaches":0,
+      "review_blockers":0,"review_recommended":0,
+      "failure_tag":"impl-bug","is_regression":true,
+      "parent_story":"story-1","ralph_stuck":false
+    }' docs/sprint-status.yaml
+    ```
     - `failure_tag`: 판정한 태그
     - `is_regression: true`
     - `parent_story`: 원인 Story ID
@@ -196,12 +211,10 @@ E2E agent에게 전달할 인라인 지침이다. Agent는 이 지침을 그대�
 
 ### 6. sprint-status.yaml 업데이트 프로토콜
 
-E2E agent는 CLAUDE.md의 **Read-Merge-Write with Retry** 프로토콜을 따른다:
-1. 수정 직전에 sprint-status.yaml을 읽는다 (캐시 금지)
-2. 자신이 변경하려는 블록**만** 수정
-3. Edit 도구로 해당 블록의 `old_string` → `new_string` 치환
-4. Write 직후 파일을 다시 읽어서 검증
-5. 검증 실패 시 최대 3회 재시도
+E2E agent는 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따른다:
+1. 수정 전에 sprint-status.yaml을 읽어 현재 상태 확인
+2. `yq -i` 명령어로 대상 필드만 수정
+3. 수정 후 파일을 읽어 변경 확인
 
 ## Output Format
 

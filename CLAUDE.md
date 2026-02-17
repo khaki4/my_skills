@@ -214,18 +214,31 @@ Each phase is sequential, so no concurrent writes occur. Story agents never touc
 
 ### sprint-status.yaml Update Protocol
 
-When updating sprint-status.yaml, follow this **Read-Merge-Write with Retry** protocol:
+When updating sprint-status.yaml, follow this **Read-yq-Verify** protocol:
 
-1. **Read**: Read sprint-status.yaml immediately before modification (no cached content).
-2. **Merge**: Modify only the Story/Epic block you own. Preserve all other blocks as-is.
-3. **Write**: Use Edit tool for `old_string` → `new_string` replacement of the target block.
-4. **Verify**: Re-read file immediately after write to confirm changes applied correctly.
-5. **Retry**: On verification failure, retry from step 1 up to **3 times**. Alert user after 3 failures.
+1. **Read**: Read sprint-status.yaml to confirm current state before modification.
+2. **Update**: Use `yq -i` command via Bash tool for programmatic YAML field update.
+3. **Verify**: Re-read file after update to confirm changes applied correctly.
 
 **Core rules:**
-- **Never regenerate entire file**: Always use Edit tool for block-level replacement, never Write tool for full file.
-- **Minimum scope**: Only change fields in your assigned Story. Never modify other Stories.
-- **Minimize Read-Write gap**: No unnecessary operations between Read and Write.
+- **Minimum scope**: Only change fields in your assigned Story/Epic. Never modify other Stories.
+
+**yq prerequisite**: `yq` (Mike Farah's Go-based, v4+) must be installed. Each Lead/E2E agent checks once at startup:
+```bash
+command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install and retry:"; echo "  macOS: brew install yq"; echo "  Linux: https://github.com/mikefarah/yq#install"; exit 1; }
+```
+
+**yq usage examples:**
+```bash
+# Update story status
+yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "done"' docs/sprint-status.yaml
+
+# Update multiple fields at once
+yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "done" | .<SPRINT>.<EPIC>.<STORY>.tdd = "done"' docs/sprint-status.yaml
+
+# Add regression story
+yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"pending","review":"pending","model_used":null,"ralph_retries":0,"ralph_approaches":0,"review_blockers":0,"review_recommended":0,"failure_tag":"impl-bug","is_regression":true,"parent_story":"story-1","ralph_stuck":false}' docs/sprint-status.yaml
+```
 
 ### TDD Cycle Implementation
 

@@ -29,7 +29,14 @@ description: 중단된 BF 워크플로우를 복구한다. sprint-status.yaml에
 ### 2. --from 옵션 처리
 
 `--from {STORY-ID}` 옵션이 주어진 경우:
-- 해당 Story를 찾아 `status`를 `todo`로 리셋 (tdd, review도 초기화).
+- 해당 Story를 찾아 `status`를 `todo`로 리셋 (tdd, review도 초기화):
+  ```bash
+  yq -i '
+    .<SPRINT>.<EPIC>.<STORY>.status = "todo" |
+    .<SPRINT>.<EPIC>.<STORY>.tdd = "pending" |
+    .<SPRINT>.<EPIC>.<STORY>.review = "pending"
+  ' docs/sprint-status.yaml
+  ```
 - 메트릭 필드는 보존한다 (이전 시도의 기록).
 - 재개 지점을 **"해당 Story의 에픽, 4a 스토리 구현 단계"**로 설정한다.
 
@@ -48,7 +55,7 @@ description: 중단된 BF 워크플로우를 복구한다. sprint-status.yaml에
 **c) `status: in_progress`인 Story가 있는 경우:**
 - git status로 uncommitted 변경사항 확인
 - 변경사항 있음: 사용자에게 "이전 진행 중이던 {STORY-ID}의 미커밋 변경사항이 있습니다. 이어서 진행하시겠습니까?" 확인
-- 변경사항 없음: 해당 Story의 `status`를 `todo`로 리셋
+- 변경사항 없음: 해당 Story의 `status`를 `todo`로 리셋 (`yq -i` 사용)
 - 재개 지점: **해당 에픽, 4a 스토리 구현 단계**
 
 **d) 에픽 내 모든 Story가 `done`이고 `e2e: pending` 또는 `e2e: written`인 경우:**

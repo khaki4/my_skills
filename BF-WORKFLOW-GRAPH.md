@@ -387,6 +387,8 @@ story agent는 sprint-status.yaml을 만지지 않는다.
 | bf-lead-review | 쓰기 | review 상태, blocker/recommended 수 |
 | orchestrate | 읽기만 | — |
 
+쓰기 수단: `yq -i` (Bash 도구). 프로그래밍적 YAML 파싱으로 필드 단위 수정.
+
 ---
 
 ## 모델 배당
