@@ -118,7 +118,8 @@
 │   │  │  ┌──────────────────────────────────────────────┐│       │
 │   │  │  │ bf-lead-implement  (스폰)                     ││       │
 │   │  │  │ 조율 패턴: monitor (모니터링 + 에스컬레이션)   ││       │
-│   │  │  │ 초기 로딩: story 문서, conventions.md          ││       │
+│   │  │  │ 초기 로딩: story 문서, conventions.md,        ││       │
+│   │  │  │   sprint-status.yaml, review.md(수정 시)      ││       │
 │   │  │  │ 모델: 에픽 내 L/XL 있으면 Opus, 없으면 Sonnet ││       │
 │   │  │  │                                              ││       │
 │   │  │  │ ※ 모든 난이도의 Story를 agent에게 위임한다.   ││       │
@@ -479,5 +480,5 @@ Review agent 모델:
 |------|-----------|----------|------|------|
 | bf-lead-orchestrate | sequence | tech-spec, sprint-status | "done" 수신 → 분기 → 다음 Lead 트리거 | 항상 Opus |
 | bf-lead-plan | distribute | tech-spec, conventions | 에픽/스토리 구조 결정, 병렬 분배 + 취합 | 항상 Opus |
-| bf-lead-implement | monitor | story 문서, conventions, review.md(수정 시) | agent 스폰 + "done"/"stuck" 수신 + sprint-status 업데이트 | Opus/Sonnet |
+| bf-lead-implement | monitor | story 문서, conventions, sprint-status, review.md(수정 시) | agent 스폰 + "done"/"stuck" 수신 + sprint-status 업데이트 | Opus/Sonnet |
 | bf-lead-review | discourse | tech-spec, conventions, 전체 diff | 리뷰어 토론 + 사람 개입 ② + 결정 전달 | Opus/Sonnet |

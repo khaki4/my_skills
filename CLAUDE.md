@@ -66,10 +66,10 @@ The BF workflow executes in this sequence:
 
 | Pattern | Core Behavior | Used By |
 |---------|--------------|---------|
-| **Distribute** | Lead splits work → agents execute in parallel → Lead collects | bf-lead-plan |
-| **Monitor** | Lead spawns agents → monitors "done"/"stuck" → updates status | bf-lead-implement |
-| **Discourse** | Independent analysis → cross-verification → consensus/dissent separation | bf-lead-review |
-| **Sequence** | Step-by-step triggering, branching only, no analysis | bf-lead-orchestrate |
+| **Distribute** | Lead splits work → agents execute in parallel → Lead collects | bf-lead-plan, /teams |
+| **Monitor** | Lead spawns agents → monitors "done"/"stuck" → updates status | bf-lead-implement, /teams |
+| **Discourse** | Independent analysis → cross-verification → consensus/dissent separation | bf-lead-review, /teams |
+| **Sequence** | Step-by-step triggering, branching only, no analysis | bf-lead-orchestrate, /teams |
 
 These patterns are also available in the general-purpose `/teams` skill.
 
