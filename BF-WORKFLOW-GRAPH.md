@@ -285,6 +285,7 @@ orchestrate는 분석하지 않는다. 수신한 상태에 따라 분기만 한�
 | lead-implement: "done (stuck)" | 사람에게 판단 요청 (stuck.md 참조) |
 | E2E agent: "passed" | lead-review 트리거 |
 | E2E agent: "failed" | 2a로 돌아감 (regression story 포함) |
+| E2E agent: "escalation" | 사람에게 에스컬레이션 (regression 가드레일 초과: 3+ regression story 또는 parent chain depth 2+) |
 | lead-review: "승인" | 에픽 완료, 다음 에픽 |
 | lead-review: "수정 지시" | 2a로 돌아감 (review.md 참조) |
 
@@ -353,7 +354,7 @@ orchestrate
   → bf-lead-review가 review.md에 수정 지시 원문 기록 → 종료
     → orchestrate: "Story-2 수정, 참조: review.md" (경로만 전달)
       → bf-lead-implement: review.md 직접 읽음
-        → story agent: review.md 직접 읽음
+        → story agent: Lead로부터 해당 Story 수정 지시 원문 수신
 ```
 
 review.md 수정 지시 섹션 형식:
@@ -413,6 +414,13 @@ Story agent 모델:
 | M | 단독 agent 1개 | Sonnet |
 | L | Lead(Opus) + Impl teammates | Opus + Sonnet |
 | XL | Lead(Opus) + 3+ teammates | Opus + Sonnet/Opus |
+
+Review agent 모델:
+
+| 모드 | 리뷰어 모델 |
+|------|------------|
+| tech-spec | 전원 Opus |
+| epic-review | Lead와 동일 (L/XL 포함 시 Opus, S/M만이면 Sonnet) |
 
 ---
 

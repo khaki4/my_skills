@@ -25,6 +25,11 @@ description: Monitor 패턴으로 에픽 내 모든 Story의 구현을 조율한
 
 ### 1. 초기 로딩
 
+**yq 전제조건 체크** (최초 1회):
+```bash
+command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew install yq"; exit 1; }
+```
+
 - 현재 에픽에 속한 모든 Story 문서를 읽는다.
 - `docs/conventions.md`를 읽는다.
 - 수정 재구현인 경우: `review.md`의 수정 지시 섹션을 읽는다.
@@ -88,6 +93,8 @@ description: Monitor 패턴으로 에픽 내 모든 Story의 구현을 조율한
 - **파일 겹침 또는 Dependencies 명시**: 순차 실행 (의존 순서대로)
 
 ### 5. 모니터링 루프
+
+sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따른다.
 
 각 Story agent로부터 완료 신호를 수신한다:
 

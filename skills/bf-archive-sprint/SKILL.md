@@ -16,7 +16,7 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 
 ## Prerequisites
 
-- sprint-status.yaml 존재 및 모든 에픽 `e2e: passed`
+- sprint-status.yaml 존재 및 모든 에픽 `e2e: passed`, 모든 Story `review: approved`
 - `docs/stories/`, `docs/tech-specs/` 디렉토리 존재
 - CLAUDE.md 파일 존재 (changelog 기록용)
 
@@ -24,6 +24,7 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 
 1. sprint-status.yaml을 확인한다:
    - 모든 에픽의 e2e가 `passed`인지 검증
+   - 모든 Story의 review가 `approved`인지 검증
    - 미완료 에픽이 있으면 실행 중단 및 안내
 
 2. 문서를 아카이브 디렉토리로 이동한다:

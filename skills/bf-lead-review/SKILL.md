@@ -33,6 +33,11 @@ Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다
 
 ### 2. 초기 로딩
 
+**yq 전제조건 체크** (최초 1회, epic-review 모드):
+```bash
+command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew install yq"; exit 1; }
+```
+
 | 모드 | 읽는 파일 |
 |------|----------|
 | tech-spec | tech-spec.md, conventions.md |
@@ -117,7 +122,7 @@ Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다
 #### epic-review 모드:
 
 1. `docs/reviews/{EPIC-ID}-review.md`에 저장한다.
-2. sprint-status.yaml 업데이트 (`yq -i` 명령어 사용):
+2. sprint-status.yaml 업데이트 (CLAUDE.md의 **Read-yq-Verify** 프로토콜, `yq -i` 명령어 사용):
    - 에픽 내 각 Story의 `review_blockers`, `review_recommended` 건수 기록
    ```bash
    yq -i '

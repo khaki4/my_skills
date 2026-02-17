@@ -24,6 +24,11 @@ description: 중단된 BF 워크플로우를 복구한다. sprint-status.yaml에
 
 ### 1. 상태 분석
 
+**yq 전제조건 체크** (최초 1회):
+```bash
+command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew install yq"; exit 1; }
+```
+
 `docs/sprint-status.yaml`을 읽고 현재 스프린트 상태를 분석한다.
 
 ### 2. --from 옵션 처리
@@ -58,7 +63,7 @@ description: 중단된 BF 워크플로우를 복구한다. sprint-status.yaml에
 - 변경사항 없음: 해당 Story의 `status`를 `todo`로 리셋 (`yq -i` 사용)
 - 재개 지점: **해당 에픽, 4a 스토리 구현 단계**
 
-**d) 에픽 내 모든 Story가 `done`이고 `e2e: pending` 또는 `e2e: written`인 경우:**
+**d) 에픽 내 모든 Story가 `done`이고 `e2e: pending`인 경우:**
 - 재개 지점: **해당 에픽, 4b E2E 단계**
 
 **e) 에픽의 `e2e: passed`이고 `review: pending`인 Story가 있는 경우:**
