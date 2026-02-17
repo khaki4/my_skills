@@ -7,77 +7,115 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This repository contains custom Claude Code skills that implement the **BF (Brownfield) Workflow** - a structured development pipeline for brownfield projects that integrates:
 - Tech Spec creation and multi-perspective review
 - Epic/Story breakdown with difficulty-based execution strategies
-- TDD implementation with Agent Teams orchestration
-- Open Code Review (OCR) and Convention Guard
+- TDD implementation with hierarchical Lead agent orchestration
+- Epic-level integration review (OCR + Convention Guard)
 - E2E testing and sprint archiving
+
+## Design Principles
+
+1. **Upper agents don't know intermediate details** — Context isolation, pollution prevention
+2. **Upper agents maintain project direction** — Coordinate teammates, decide based on project direction
+3. **"done" + files on completion** — Context dies, only files persist
+4. **Dispute resolution**: Teammates direct talk → Lead mediation → discard (record as unresolved)
+5. **Files carry all context** — Modification instructions, review results, stuck reports are all file-based
+6. **Single writer per phase** — No concurrent sprint-status.yaml writes; each phase has one writer
 
 ## Skill Architecture
 
 All skills are located in `skills/{skill-name}/SKILL.md`. Each skill follows a consistent structure:
 - YAML frontmatter with `name` and `description`
 - Overview, When to Use, Instructions, and Output Format sections
-- Skills automatically chain together where appropriate
+- Skills chain via Lead hierarchy (not flat chain)
+
+### Lead Skill Hierarchy
+
+The BF workflow uses 4 Lead skills with distinct coordination patterns:
+
+| Lead | Coordination Pattern | Role | Model |
+|------|---------------------|------|-------|
+| **bf-lead-orchestrate** | Sequence | "done" → branch → trigger next Lead | Always Opus |
+| **bf-lead-plan** | Distribute | Epic/Story structure, parallel distribution + collection | Always Opus |
+| **bf-lead-implement** | Monitor | Spawn agents + "done"/"stuck" reception + status update | Opus/Sonnet |
+| **bf-lead-review** | Discourse | Reviewer debate + Human checkpoint ② + decision delivery | Opus/Sonnet |
+
+Model selection for bf-lead-implement and bf-lead-review: Opus if L/XL stories in epic, Sonnet if S/M only.
 
 ### Workflow Sequence
 
+> Full process graph with ASCII diagrams, branching tables, and protocol details: **[BF-WORKFLOW-GRAPH.md](./BF-WORKFLOW-GRAPH.md)**
+
 The BF workflow executes in this sequence:
 
-1. **`/bf-create-tech-spec`** → Human provides AC + Slack context
-2. **`/bf-review-tech-spec`** → Agent Teams multi-perspective review (auto)
+1. **`/bf-spec`** → Human provides AC + Slack context → Tech Spec creation
+2. **`bf-lead-review`** (auto, tech-spec mode) → Agent Teams multi-perspective review
 3. **Human approval checkpoint ①** → Approve or request revisions
-4. **`/bf-create-epics-and-stories`** → Generate Epic/Story structure with difficulty tags
-4a. **Human confirmation** → Review epic/story structure, adjust difficulty tags if needed
-5. **`/bf-create-e2e`** → Write E2E tests before implementation (auto, per epic)
-6. **`/bf-implement-story`** → TDD implementation with difficulty-based strategies (auto, per story)
-7. **`/bf-review-code`** → OCR + Convention Guard review (auto, for M+ difficulty)
-8. **Human approval checkpoint ②** → Approve or request revisions per story
-9. **`/bf-run-e2e`** → Execute E2E tests after all stories approved (auto)
-10. **`/bf-archive-sprint`** → Move docs to archive, update changelog
-11. **`/bf-metrics`** → Analyze sprint metrics and suggest optimizations (optional, manual)
-12. **`/bf-update-conventions`** → Extract patterns and update convention rules
+4. **`/bf-execute`** → Spawns `bf-lead-orchestrate` (context isolation)
+5. **`bf-lead-plan`** (auto) → Generate Epic/Story structure with difficulty tags
+5a. **Human confirmation** → Review epic/story structure, adjust difficulty tags
+6. **Epic Loop** (per epic, sequential):
+   - 6a. **`bf-lead-implement`** → TDD implementation with difficulty-based agent strategies
+   - 6b. **E2E agent** → Write + execute E2E tests
+   - 6c. **`bf-lead-review`** (epic-review mode) → Epic integration review + **Human checkpoint ②**
+7. **`/bf-archive-sprint`** → Move docs to archive, update changelog
+8. **`/bf-metrics`** → Analyze sprint metrics and suggest optimizations (optional, manual)
+9. **`/bf-update-conventions`** → Extract patterns and update convention rules
 
-- **`/bf-resume`** → 중단된 워크플로우 복구 (어느 시점에서든 수동 실행 가능)
+- **`/bf-resume`** → Resume interrupted workflow (manual, from any point)
+
+### Coordination Patterns
+
+| Pattern | Core Behavior | Used By |
+|---------|--------------|---------|
+| **Distribute** | Lead splits work → agents execute in parallel → Lead collects | bf-lead-plan |
+| **Monitor** | Lead spawns agents → monitors "done"/"stuck" → updates status | bf-lead-implement |
+| **Discourse** | Independent analysis → cross-verification → consensus/dissent separation | bf-lead-review |
+| **Sequence** | Step-by-step triggering, branching only, no analysis | bf-lead-orchestrate |
+
+These patterns are also available in the general-purpose `/temas` skill.
 
 ## Key Concepts
 
 ### Ralph Loop
 
-**Ralph Loop** is an iterative TDD cycle executed by a single agent without external coordination:
+**Ralph Loop** is an iterative TDD cycle executed by a single story agent without external coordination:
 1. Write test based on AC
 2. Run test → verify Red (failure)
 3. Implement code to pass test
-4. Run test → verify Green (success) — **최대 5회 재시도, 동일 에러 2연속 시 접근 전환**
+4. Run test → verify Green (success) — **max 5 retries, approach switch on 2 consecutive same errors**
 5. Refactor if needed
 6. Commit changes
 
-Used for S and M difficulty stories where a single agent (typically Sonnet) can complete the work independently without requiring Agent Teams coordination. 무한 루프 방지를 위한 가드레일은 `skills/bf-implement-story/SKILL.md`의 "Ralph Loop 가드레일" 섹션 참조.
+Used for all difficulty levels — the difference is agent composition (S/M: single Sonnet, L: Opus lead + Sonnet implementers, XL: Opus lead + 3+ teammates). Ralph Loop guardrails are defined inline in `skills/bf-lead-implement/SKILL.md`.
 
 ### Difficulty-Based Execution Strategies
 
-Each Story is tagged with a difficulty level that determines execution approach:
+Each Story is tagged with a difficulty level that determines agent composition:
 
 - **S (Simple)**: Single file, clear AC, no dependencies
-  - Execution: ralph-loop with Sonnet only
-  - Review: None (direct human approval)
+  - Execution: Single Sonnet agent
+  - Review: Epic-level integration review
 
 - **M (Medium)**: 2-3 files, inter-module connections
-  - Execution: ralph-loop with Sonnet
-  - Review: OCR with Opus
+  - Execution: Single Sonnet agent
+  - Review: Epic-level integration review
 
 - **L (Large)**: Multiple files, significant architectural impact
-  - Execution: Agent Teams (Opus Lead + Sonnet implementer)
-  - Review: Agent Teams discourse (multi-reviewer debate)
+  - Execution: Sub-Lead (Opus) + Sonnet implementers
+  - Review: Epic-level integration review with discourse
 
 - **XL (Complex)**: Cross-layer, security/performance considerations, design decisions
-  - Execution: Agent Teams with 3+ teammates
-  - Review: Agent Teams discourse with extended debate
+  - Execution: Sub-Lead (Opus) + 3+ teammates
+  - Review: Epic-level integration review with extended discourse
+
+**Important**: Story-level review is removed. All review happens at epic level after E2E passes.
 
 ### Agent Teams Patterns
 
-- **Main session delegates to Lead**: Main context stays clean, Lead coordinates teammates
+- **Main session delegates to orchestrate**: Main context stays minimal (only "done" + file paths)
 - **Epic execution is sequential**: Epics run one at a time in dependency order
-- **Story execution is parallel**: Stories within an Epic can run concurrently
-- **Model selection by complexity**: Simple→Sonnet, Complex→Opus
+- **Story execution is parallel**: Stories within an Epic can run concurrently (if no file overlap)
+- **Lead never touches code directly**: bf-lead-implement delegates ALL stories to agents
+- **sprint-status.yaml single writer**: Only the Lead responsible for current phase writes to it
 
 ### File Structure Conventions
 
@@ -91,7 +129,7 @@ docs/
     {TICKET}-story-{N}.md
   reviews/
     {TICKET}-tech-spec-review.md
-    {STORY-ID}-review.md
+    {EPIC-ID}-review.md
   sprint-status.yaml
   conventions.md          # Convention Guard rules
   archive/
@@ -143,57 +181,51 @@ SPRINT-XX:
       parent_story: null
       ralph_stuck: false
     e2e: pending
-  epic-2:
-    story-3:
-      status: todo
-      difficulty: L
-      tdd: pending
-      review: pending
-      model_used: null
-      ralph_retries: 0
-      ralph_approaches: 0
-      review_blockers: 0
-      review_recommended: 0
-      failure_tag: null
-      is_regression: false
-      parent_story: null
-      ralph_stuck: false
-    e2e: pending
 ```
 
 State field values:
 - **status**: `todo` → `in_progress` → `done`
 - **tdd**: `pending` → `done`
-- **review**: `pending` → `approved` (S difficulty skips to `approved` directly)
-- **e2e**: `pending` → `written` → `passed`
+- **review**: `pending` → `approved`
+- **e2e**: `pending` → `passed`
 
-Metric field values (recorded by downstream skills, initialized with defaults):
-- **model_used**: `null` → `"sonnet"` | `"opus-lead"` | `"opus-lead+3"` (bf-implement-story가 기록)
-- **ralph_retries**: `0` → Green 검증 실패 재시도 횟수 (bf-implement-story가 기록)
-- **ralph_approaches**: `0` → Stuck Detection 접근 전환 횟수 (bf-implement-story가 기록)
-- **review_blockers**: `0` → 🔴 Blocker 건수 (bf-review-code가 기록)
-- **review_recommended**: `0` → 🟡 Recommended 건수 (bf-review-code가 기록)
-- **failure_tag**: `null` → 실패 태그 (bf-run-e2e가 regression Story에만 기록)
-- **is_regression**: `false` → E2E 실패로 자동 생성된 Story 여부 (bf-run-e2e가 기록)
-- **parent_story**: `null` → regression일 때 원인 Story ID (bf-run-e2e가 기록)
-- **ralph_stuck**: `false` → Ralph Loop 한도 초과 시 `true` (bf-implement-story가 기록)
+Metric field values (recorded by downstream agents, initialized with defaults):
+- **model_used**: `null` → `"sonnet"` | `"opus-lead"` | `"opus-lead+3"` (bf-lead-implement records)
+- **ralph_retries**: `0` → Green verification failure retry count (bf-lead-implement records)
+- **ralph_approaches**: `0` → Stuck Detection approach switch count (bf-lead-implement records)
+- **review_blockers**: `0` → Blocker count (bf-lead-review records)
+- **review_recommended**: `0` → Recommended count (bf-lead-review records)
+- **failure_tag**: `null` → Failure tag (E2E agent records on regression stories only)
+- **is_regression**: `false` → Whether story was auto-generated from E2E failure (E2E agent records)
+- **parent_story**: `null` → Source story ID for regression (E2E agent records)
+- **ralph_stuck**: `false` → `true` when Ralph Loop limit exceeded (bf-lead-implement records)
 
-### sprint-status.yaml 업데이트 프로토콜
+### sprint-status.yaml Write Permissions
 
-sprint-status.yaml은 여러 스킬(bf-implement-story, bf-create-e2e, bf-review-code, bf-run-e2e)이 병렬로 수정할 수 있다. 다음 **Read-Merge-Write with Retry** 프로토콜을 반드시 따른다:
+Each phase is sequential, so no concurrent writes occur. Story agents never touch sprint-status.yaml.
 
-1. **Read**: 수정 직전에 sprint-status.yaml을 읽는다 (캐시된 내용 사용 금지).
-2. **Merge**: 자신이 변경하려는 Story/에픽 블록**만** 수정하고, 나머지 블록은 읽은 그대로 보존한다.
-3. **Write**: Edit 도구로 해당 Story 블록의 `old_string` → `new_string` 치환을 수행한다.
-4. **Verify**: Write 직후 파일을 다시 읽어서 자신의 변경이 정상 반영되었는지 확인한다.
-5. **Retry**: 검증 실패 시 (다른 Agent가 동시에 덮어쓴 경우) step 1부터 최대 **3회** 재시도한다. 3회 초과 시 사용자에게 알린다.
+| Agent | Permission | Writes |
+|-------|-----------|--------|
+| Story agent | None (code + commit only) | — |
+| bf-lead-implement | Write | Story status, metrics (retries, approaches, stuck) |
+| E2E agent | Write | E2E status, failure tag, regression story addition |
+| bf-lead-review | Write | Review status, blocker/recommended counts |
+| bf-lead-orchestrate | Read only | — |
 
-**핵심 원칙:**
-- **전체 파일 재생성 금지**: Write 도구로 전체 파일을 덮어쓰지 않는다. 반드시 Edit 도구로 해당 블록만 치환한다.
-- **최소 범위 수정**: 자신이 담당하는 Story의 필드만 변경한다. 다른 Story 필드를 절대 수정하지 않는다.
-- **Read-Write 간격 최소화**: Read와 Write 사이에 불필요한 작업을 끼우지 않는다.
+### sprint-status.yaml Update Protocol
 
-> 이 프로토콜은 진정한 Optimistic Concurrency (version-based)가 아닌 **Best-Effort Merge** 패턴이다. Claude Code의 Edit 도구가 text-based 치환이므로 동시 쓰기 시 이론적 데이터 손실 가능성이 있으나, 블록 단위 치환 + 검증 + 재시도로 실질적 위험을 최소화한다.
+When updating sprint-status.yaml, follow this **Read-Merge-Write with Retry** protocol:
+
+1. **Read**: Read sprint-status.yaml immediately before modification (no cached content).
+2. **Merge**: Modify only the Story/Epic block you own. Preserve all other blocks as-is.
+3. **Write**: Use Edit tool for `old_string` → `new_string` replacement of the target block.
+4. **Verify**: Re-read file immediately after write to confirm changes applied correctly.
+5. **Retry**: On verification failure, retry from step 1 up to **3 times**. Alert user after 3 failures.
+
+**Core rules:**
+- **Never regenerate entire file**: Always use Edit tool for block-level replacement, never Write tool for full file.
+- **Minimum scope**: Only change fields in your assigned Story. Never modify other Stories.
+- **Minimize Read-Write gap**: No unnecessary operations between Read and Write.
 
 ### TDD Cycle Implementation
 
@@ -201,30 +233,50 @@ All stories follow strict TDD:
 1. Write unit tests based on AC
 2. Verify Red (test fails)
 3. Implement code
-4. Verify Green (test passes)
+4. Verify Green (test passes) — max 5 retries with stuck detection
 5. Refactor if needed
 6. Git commit per story
 
-### OCR (Open Code Review) and Convention Guard
+### Epic Integration Review (OCR + Convention Guard)
 
-- **OCR**: Multi-perspective code review by Agent Teams
-- **Convention Guard**: Automated enforcement of `docs/conventions.md` rules
-- Reviews check: convention compliance, duplication, test coverage, security, code quality
-- Findings categorized as: 🔴 Blocker, 🟡 Recommended, 🟢 Confirmed
+Reviews happen at **epic level** (not per-story) after E2E passes:
+
+- **Convention Guard** (mandatory): `docs/conventions.md` compliance check
+- **Additional reviewers** (1-2): Architecture, Security, or Performance based on epic scope
+- **Discourse pattern**: Independent analysis → cross-verification → consensus/dissent separation
+- **Human checkpoint ②**: Human reviews with live reviewer agents, decides on modifications
+- Findings categorized as: Blocker, Recommended, Confirmed, Unresolved Disputes
+
+### Dispute Resolution Protocol
+
+Applied across all Lead skills when teammates disagree:
+1. **Teammates direct talk**: SendMessage for direct challenge/agree/supplement → consensus reported to Lead
+2. **Lead mediation on disagreement**: Lead decides based on project direction (tech-spec, conventions)
+3. **Still no consensus → discard (record)**: Include as "unresolved dispute" in final results, stop spending tokens
+
+### Escalation Protocol
+
+"stuck" is a final status, not intermediate. Each layer judges within its scope and passes files upward.
+
+```
+Story agent → "stuck" + stuck.md → terminates
+bf-lead-implement → continues other stories → reports to orchestrate with sprint-status.yaml + stuck.md
+orchestrate → presents to human for decision (AC modification / approach change / skip / redesign)
+```
 
 ### Metrics and Optimization
 
-`/bf-metrics`는 sprint-status.yaml에 기록된 메트릭 데이터를 분석하여 워크플로우 최적화를 **제안**하는 read-only 스킬이다.
+`/bf-metrics` analyzes metric data in sprint-status.yaml to **suggest** workflow optimizations (read-only).
 
-- **제안만 제공**: 모델 배당 변경이나 난이도 재태깅을 자동 적용하지 않음. 사람이 판단.
-- **실행 시점**: `/bf-archive-sprint` 후, `/bf-update-conventions` 전에 선택적으로 실행
-- **분석 범위**: 현재 + 아카이브된 모든 스프린트의 완료된 Story
-- **주요 분석**:
-  - (difficulty, model_used) 페어별 집계 (retries, stuck rate, blockers, regression rate)
-  - 모델 배당 최적화 제안 (임계값 기반)
-  - 난이도 과소/과대평가 재태깅 제안
-  - E2E 실패 태그 패턴 분석
-- **레거시 호환**: 메트릭 필드 없는 이전 스프린트 Story는 건너뜀
+- **Suggestions only**: No auto-application of model allocation changes or difficulty re-tagging. Human decides.
+- **Execution timing**: After `/bf-archive-sprint`, before `/bf-update-conventions` (optional)
+- **Analysis scope**: Current + all archived sprints' completed stories
+- **Key analyses**:
+  - (difficulty, model_used) pair aggregation (retries, stuck rate, blockers, regression rate)
+  - Model allocation optimization suggestions (threshold-based)
+  - Difficulty over/under-estimation re-tagging suggestions
+  - E2E failure tag pattern analysis
+- **Legacy compatibility**: Skips stories from older sprints that lack metric fields
 
 ## Adding New Skills
 
@@ -244,8 +296,10 @@ When creating new skills in this repository:
 
 ## Important Notes
 
-- **Human checkpoints are intentional**: The workflow requires human approval at specific points to validate direction before proceeding
-- **Context preservation**: Main session delegates to Agent Teams to keep context clean for long workflows
+- **Human checkpoints are intentional**: The workflow requires human approval at specific points (① Tech Spec review, ② Epic integration review, stuck escalation)
+- **Context isolation**: Main session → orchestrate → Leads → agents. Each layer terminates with "done" + files, context dies
+- **Files carry all context**: Modification instructions in review.md, stuck reports in stuck.md — no relay through conversation
+- **Lead never touches code**: bf-lead-implement delegates ALL difficulty levels to agents
 - **Append-only changelog**: CLAUDE.md changelog in target projects is append-only to track sprint history
 - **Convention accumulation**: `docs/conventions.md` grows over sprints as patterns are discovered and codified
 - **Agent-browser for E2E**: E2E tests use @ref-based element selection from accessibility trees, not CSS selectors
