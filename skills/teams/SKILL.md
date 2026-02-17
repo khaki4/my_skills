@@ -1,9 +1,9 @@
 ---
-name: temas
-description: 문제를 분석하여 Agent Teams를 자동 구성하고, 4가지 조율 패턴(distribute/monitor/discourse/sequence) 중 최적 패턴으로 협업한다. "/temas {문제 설명}"으로 호출한다.
+name: teams
+description: 문제를 분석하여 Agent Teams를 자동 구성하고, 4가지 조율 패턴(distribute/monitor/discourse/sequence) 중 최적 패턴으로 협업한다. "/teams {문제 설명}"으로 호출한다.
 ---
 
-# Temas — Agent Teams 자동 구성 및 실행
+# Teams — Agent Teams 자동 구성 및 실행
 
 ## Overview
 
@@ -11,8 +11,8 @@ description: 문제를 분석하여 Agent Teams를 자동 구성하고, 4가지 
 
 ## When to Use
 
-- 사용자가 `/temas {문제 설명}`을 입력했을 때
-- `/temas --pattern {패턴} {문제 설명}`으로 조율 패턴을 지정할 수도 있다
+- 사용자가 `/teams {문제 설명}`을 입력했을 때
+- `/teams --pattern {패턴} {문제 설명}`으로 조율 패턴을 지정할 수도 있다
 - 멀티 관점 분석, 대규모 구현, 설계 의사결정 등 여러 전문가의 협업이 필요한 문제에 적합
 
 ## Instructions
@@ -79,7 +79,7 @@ description: 문제를 분석하여 Agent Teams를 자동 구성하고, 4가지 
 
 ### 4단계: 팀 생성 및 작업 배분
 
-1. **TeamCreate**로 팀을 생성한다 (team_name: `temas-{timestamp}` 형식).
+1. **TeamCreate**로 팀을 생성한다 (team_name: `teams-{timestamp}` 형식).
 
 2. **Lead 에이전트를 생성**한다:
    - Task tool로 Lead 생성 (`model: opus`, `subagent_type: general-purpose`)

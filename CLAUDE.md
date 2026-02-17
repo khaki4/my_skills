@@ -71,7 +71,7 @@ The BF workflow executes in this sequence:
 | **Discourse** | Independent analysis → cross-verification → consensus/dissent separation | bf-lead-review |
 | **Sequence** | Step-by-step triggering, branching only, no analysis | bf-lead-orchestrate |
 
-These patterns are also available in the general-purpose `/temas` skill.
+These patterns are also available in the general-purpose `/teams` skill.
 
 ## Key Concepts
 
