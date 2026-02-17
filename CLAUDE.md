@@ -210,7 +210,7 @@ Each phase is sequential, so no concurrent writes occur. Story agents never touc
 | bf-lead-implement | Write | Story status, metrics (retries, approaches, stuck) |
 | E2E agent | Write | E2E status, failure tag, regression story addition |
 | bf-lead-review | Write | Review status, blocker/recommended counts |
-| bf-lead-orchestrate | Read only | — |
+| bf-lead-orchestrate | Phase transition write | Status transitions (in_progress, skipped), difficulty adjustments |
 
 ### sprint-status.yaml Update Protocol
 

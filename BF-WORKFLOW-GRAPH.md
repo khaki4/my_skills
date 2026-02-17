@@ -385,7 +385,7 @@ story agent는 sprint-status.yaml을 만지지 않는다.
 | bf-lead-implement | 쓰기 | story 상태, 메트릭 (retries, approaches, stuck) |
 | E2E agent | 쓰기 | e2e 상태, failure tag, regression story 추가 |
 | bf-lead-review | 쓰기 | review 상태, blocker/recommended 수 |
-| orchestrate | 읽기만 | — |
+| orchestrate | 페이즈 전환 쓰기 | status 전환 (in_progress, skipped), difficulty 조정 |
 
 쓰기 수단: `yq -i` (Bash 도구). 프로그래밍적 YAML 파싱으로 필드 단위 수정.
 
