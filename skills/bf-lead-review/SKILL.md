@@ -10,7 +10,7 @@ description: Discourse 패턴으로 다관점 리뷰를 수행한다. Tech Spec 
 Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다. 두 가지 모드를 지원한다:
 
 - **tech-spec 모드**: Tech Spec 문서를 리뷰하고 사람 개입 ①을 위한 결과를 생성한다.
-- **epic-review 모드**: 에픽 전체 구현을 통합 리뷰하고, 사람 개입 ②를 리뷰어 에이전트와 함께 수행한 뒤 결정을 전달한다.
+- **epic-review 모드**: 에픽 전체 구현을 통합 리뷰하고, 자기 완결적 review.md를 생성한 뒤 종료한다. 사람과 직접 소통하지 않는다.
 
 ## When to Use
 
@@ -21,7 +21,7 @@ Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다
 ## Prerequisites
 
 - **tech-spec 모드**: `docs/tech-specs/{TICKET}-tech-spec.md` 존재
-- **epic-review 모드**: 해당 에픽의 모든 Story `status: done`, E2E `passed`
+- **epic-review 모드**: 해당 에픽의 모든 Story `status: done`, E2E `passed` 또는 `escalated` 또는 `max-regression-cycles`
 
 ## Instructions
 
@@ -105,7 +105,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - 🔴 **Blocker** (반드시 수정)
 - 🟡 **Recommended** (권장 수정)
 - 🟢 **Confirmed** (확인 완료)
-- 미합의 쟁점 (쟁점 + 각 리뷰어 의견 + Lead 판단 근거)
+- 미합의 쟁점 (쟁점 + 각 리뷰어 의견 + Lead 최종 판단 + 근거)
 
 ### 8. 모드별 출력 및 후속 처리
 
@@ -131,40 +131,15 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
    ' docs/sprint-status.yaml
    ```
 3. git commit: `docs({EPIC-ID}): review epic`
-
-4. **사람 개입 ② — 리뷰어 에이전트와 함께 수행:**
-   - 리뷰 결과를 사람에게 제시한다 (리뷰어 에이전트가 살아있는 상태).
-   - 사람이 질문하면 리뷰어 에이전트가 직접 답변할 수 있다.
-   - 미합의 쟁점에 대해 사람이 최종 판단한다.
-
-5. 사람의 결정에 따라:
-
-   **승인 시:**
-   - sprint-status.yaml: 에픽 내 모든 Story `review: approved` (각 Story에 대해):
+4. Blocker 판정 및 종료:
+   - **Blocker 0건**: 에픽 내 모든 Story `review: approved`로 업데이트:
      ```bash
      yq -i '.<SPRINT>.<EPIC>.<STORY>.review = "approved"' docs/sprint-status.yaml
      ```
-   - 스폰한 상위 에이전트에 전달: `"승인"`
-   - 종료 (컨텍스트 소멸).
-
-   **수정 지시 시:**
-   - review.md에 **수정 지시 섹션**을 추가한다 (원문 그대로 기록):
-
-     ```markdown
-     ## 수정 지시 (사람 개입 ② 결과)
-
-     ### {STORY-ID}
-     - {구체적 수정 내용}
-     - 근거: {리뷰어 지적 또는 사람 판단}
-
-     ### {STORY-ID}
-     - {구체적 수정 내용}
-     - 근거: {사람 판단}
-     ```
-
-   - git commit: `docs({EPIC-ID}): record modification instructions`
-   - 스폰한 상위 에이전트에 전달: `"수정 지시"` + review.md 경로 + 대상 Story 목록
-   - 종료 (컨텍스트 소멸).
+     스폰한 상위 에이전트에 전달: `"done: approved"` + review.md 경로
+   - **Blocker 1건 이상**: review 상태를 유지 (`pending`)
+     스폰한 상위 에이전트에 전달: `"done: blockers"` + review.md 경로
+5. 종료 (컨텍스트 소멸).
 
 ## Output Format
 
@@ -188,13 +163,17 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - 확인 완료 항목 요약
 
 ## 미합의 쟁점
-| 쟁점 | 입장 A | 입장 B | 근거 |
-|------|--------|--------|------|
-| ... | ... | ... | ... |
+| 쟁점 | 입장 A | 입장 B | Lead 최종 판단 | 근거 |
+|------|--------|--------|---------------|------|
+| ... | ... | ... | ... | ... |
 
-## 수정 지시 (사람 개입 ② 결과, epic-review 모드만)
-### {STORY-ID}
-- {수정 내용} — 근거: {판단 근거}
+## 권장 조치 (epic-review 모드만)
+
+### Blocker (즉시 수정 필요)
+- {STORY-ID}: {구체적 수정 내용 + 파일:라인 위치}
+
+### Recommended (권장)
+- {항목}
 ```
 
 ### Fallback

@@ -1,13 +1,20 @@
 ---
 name: bf-lead-orchestrate
-description: Sequence 패턴으로 에픽 루프를 조율한다. lead-plan → lead-implement → E2E → lead-review를 순서대로 트리거하고, 분기만 한다. 분석하지 않는다.
+description: 모드 기반 완전 자율 실행기. plan 모드에서 Story 구조를 생성하고, epic 모드에서 에픽 1개를 자율 실행(implement → E2E → review)한다. 사람과 직접 소통하지 않는다.
 ---
 
 # Lead Orchestrate (Sequence Pattern)
 
 ## Overview
 
-BF 워크플로우의 핵심 조율자이다. Sequence 조율 패턴으로 에픽 루프를 관리한다. 각 Lead를 순서대로 트리거하고, "done" 신호에 따라 분기만 한다. **분석하지 않는다. 시퀀싱만 한다.**
+BF 워크플로우의 자율 실행기이다. 모드 기반으로 동작하며, 사람과 직접 소통하지 않는다. 각 모드에서 완전 자율 실행 후 결과 파일과 함께 종료한다.
+
+| 모드 | 입력 | 실행 | 출력 |
+|------|------|------|------|
+| `plan` | tech-spec, conventions | bf-lead-plan 스폰 → Story 구조 생성 | "done" + sprint-status.yaml + stories/ |
+| `epic` | epic-id, [modification.md] | implement → E2E → review | "done" + 결과 파일들 |
+
+**핵심 원칙: 사람과 절대 소통하지 않는다.** 모든 판단은 자동 정책에 따르고, 결과는 파일에 기록된다. 사람과의 소통은 bf-execute(메인 세션)가 담당한다.
 
 ## When to Use
 
@@ -29,110 +36,115 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 ```
 
 - `docs/tech-specs/{TICKET}-tech-spec.md` 읽기
-- `docs/sprint-status.yaml` 읽기 (있으면 — 수정 재구현인 경우)
+- `docs/sprint-status.yaml` 읽기 (있으면)
 
-### 1.5. Resume 처리 (bf-resume에서 스폰된 경우)
+### 2. 모드 감지
 
-`resume_from` 파라미터가 전달된 경우:
-- `skip_plan: true`이면 Step 2(bf-lead-plan 스폰)를 건너뛴다.
-- `resume_from`의 에픽 ID 이전 에픽들은 에픽 루프(Step 4)에서 건너뛴다.
-- `resume_from`의 단계(4a/4b/4c)부터 해당 에픽을 시작한다.
-- 수정 대상 Story 목록이 포함된 경우 해당 Story에 대해 4a를 실행한다.
+스폰 시 전달받은 파라미터로 모드를 결정한다:
+- `mode: "plan"` → Plan 단계 실행
+- `mode: "epic"` + `epic_id` + (선택) `modification_path` → Epic 단계 실행
 
-파라미터가 없으면 (최초 실행) 이 단계를 건너뛴다.
+---
 
-### 2. Plan 단계 — bf-lead-plan 스폰
+## Plan 모드
+
+### P1. bf-lead-plan 스폰
 
 - `bf-lead-plan`을 스폰한다 (`model: opus`).
 - 전달: tech-spec 경로, conventions.md 경로
 - 수신 대기: `"done"` + stories/ 경로 + sprint-status.yaml 경로
-- 종료 후: sprint-status.yaml을 읽어 에픽/스토리 구조를 확인한다.
 
-### 3. 사용자 확인
+### P2. 완료
 
-- sprint-status.yaml의 에픽/스토리 구조와 난이도 태그를 사용자에게 제시한다.
-- 사용자가 난이도 태그를 조정하면 sprint-status.yaml을 수정한다.
-- 사용자 확인 후 에픽 루프를 시작한다.
+- sprint-status.yaml을 읽어 에픽/스토리 구조를 확인한다.
+- bf-execute에 전달: `"done"` + sprint-status.yaml 경로 + stories/ 경로
+- 종료 (컨텍스트 소멸).
 
-### 4. 에픽 루프
+---
 
-sprint-status.yaml의 에픽을 순서대로 순회한다. 각 에픽에 대해 4a → 4b → 4c를 순차 실행한다.
+## Epic 모드
 
-> **Story 0개 에픽 처리**: sprint-status.yaml에 Story가 없는 에픽(인프라 준비 등)은 `e2e: passed`로 초기화되어 있으므로 자동 skip한다.
+전달받은 `epic_id`의 에픽을 자율 실행한다. 4a → 4b → 4c 순차 진행.
 
-#### 4a. 스토리 구현 — bf-lead-implement 스폰
+### E0. Modification 처리 (modification.md가 전달된 경우)
 
-- **모델 선택**: 에픽 내 L/XL Story 포함 시 `model: opus`, S/M만이면 `model: sonnet`
-- 전달 정보:
-  - 에픽 ID, Story 문서 경로 목록
-  - conventions.md 경로
-  - 수정 재구현인 경우: review.md 경로 + 대상 Story 목록
-- 수신 대기: `"done"` 또는 `"done (stuck: {STORY-ID}, ...)"` + sprint-status.yaml 경로
-
-**수신 후 분기:**
-
-| 수신 | 다음 행동 |
-|------|----------|
-| `"done"` (stuck 없음) | 4b로 진행 |
-| `"done (stuck: ...)"` | 사람에게 판단 요청 (아래 참조) |
-
-**stuck 처리 — 사람에게 판단 요청:**
-
-stuck.md를 읽어서 사람에게 제시한다:
-
-```
-Story {STORY-ID}가 stuck 상태입니다.
-- 재시도: {retry_count}/5
-- 접근 전환: {approaches_count}회
-- stuck.md: {경로}
-
-선택하세요:
-1. AC 수정 → 해당 Story 재시도
-2. 접근 변경 지시 → Story 문서 수정 후 재시도
-3. Story 스킵 → 에픽에서 제외하고 진행
-4. 에픽 재설계 → lead-plan으로 돌아감
-```
-
-사람의 선택에 따라:
-- **AC 수정 / 접근 변경**: 해당 Story의 status를 `in_progress`로 변경 후 4a 재실행:
+- modification.md를 읽어 수정 대상 Story를 파악한다.
+- 해당 Story의 status를 `in_progress`로 변경:
   ```bash
   yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml
   ```
-- **Story 스킵**: 해당 Story를 에픽에서 제외 (`status: skipped`), 4b로 진행
-- **에픽 재설계**: lead-plan을 다시 스폰 (2단계로)
+- tdd, review 필드를 초기화하고, e2e도 `pending`으로 리셋:
+  ```bash
+  yq -i '
+    .<SPRINT>.<EPIC>.<STORY>.tdd = "pending" |
+    .<SPRINT>.<EPIC>.<STORY>.review = "pending"
+  ' docs/sprint-status.yaml
+  yq -i '.<SPRINT>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
+  ```
 
-#### 4b. E2E 작성 + 실행 — E2E agent 스폰
+### E1. 스토리 구현 (4a) — bf-lead-implement 스폰
+
+- **모델 선택**: 에픽 내 L/XL Story 포함 시 `model: opus`, S/M만이면 `model: sonnet`
+- 전달 정보:
+  - 에픽 ID, Story 문서 경로 목록 (status가 `todo` 또는 `in_progress`인 Story만)
+  - conventions.md 경로
+  - modification.md 또는 review.md 경로 (있으면)
+- 수신 대기: `"done"` 또는 `"done (stuck: {STORY-ID}, ...)"` + sprint-status.yaml 경로
+
+**수신 후 자동 판단 (stuck):**
+
+| 조건 | 자동 결정 |
+|------|----------|
+| stuck 없음 | E2로 진행 |
+| stuck Story 있음 + 비stuck Story 존재 | stuck Story를 `status: skipped`로 변경, 나머지로 E2 진행 |
+| 전 Story stuck | 모두 `status: skipped`로 변경, E2 진행 (E2E는 제한적) |
+
+stuck Story를 skip 처리:
+```bash
+yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "skipped"' docs/sprint-status.yaml
+```
+
+stuck 정보는 sprint-status.yaml(`ralph_stuck: true`) + stuck.md에 이미 기록되어 있다. bf-execute가 에픽 결과로 사람에게 제시한다.
+
+### E2. E2E 작성 + 실행 (4b) — E2E agent 스폰
+
+> **Story 0개 에픽 처리**: sprint-status.yaml에 done인 Story가 없는 에픽(전체 skipped 등)은 `e2e: passed`로 기록하고 E3로 진행한다.
 
 E2E agent를 1개 스폰한다 (`model: sonnet`).
 전달 정보: 에픽 ID, Story 목록, tech-spec 경로, conventions.md 경로.
 
 E2E agent는 아래 **"E2E Agent 지침"**을 따른다.
 
-**수신 후 분기:**
+**수신 후 자동 판단 (E2E):**
 
-| 수신 | 다음 행동 |
+| 조건 | 자동 결정 |
 |------|----------|
-| `"passed"` + tests/e2e/ | 4c로 진행 |
-| `"failed"` + regression story 목록 | 4a로 돌아감 (regression story 포함) |
-| `"escalation"` + 사유 | 사람에게 에스컬레이션 |
+| `"passed"` | E3로 진행 |
+| `"failed"` + regression story (E2E 사이클 2회 미만) | regression story로 E1 재실행 |
+| `"failed"` + regression story (E2E 사이클 2회 도달) | `e2e: max-regression-cycles` 기록, E3 진행 |
+| `"escalation"` (가드레일 초과 또는 인프라 오류) | `e2e: escalated` 기록, E3 진행 |
 
-#### 4c. 에픽 통합 리뷰 — bf-lead-review 스폰
+E2E 사이클 카운트: epic 모드 진입 시 0으로 시작, `"failed"` 수신마다 +1.
+
+### E3. 에픽 통합 리뷰 (4c) — bf-lead-review 스폰
 
 - **모델 선택**: 에픽 내 L/XL Story 포함 시 `model: opus`, S/M만이면 `model: sonnet`
 - `mode: "epic-review"` + epic ID + tech-spec 경로
-- 수신 대기: `"승인"` 또는 `"수정 지시"` + review.md 경로 + 대상 Story 목록
+- 수신 대기: `"done: approved"` 또는 `"done: blockers"` + review.md 경로
 
-**수신 후 분기:**
+**수신 후 자동 판단 (리뷰):**
 
-| 수신 | 다음 행동 |
+| 조건 | 자동 결정 |
 |------|----------|
-| `"승인"` | 에픽 완료, 다음 에픽으로 |
-| `"수정 지시"` + review.md + Story 목록 | 해당 Story만 `in_progress`로 변경 (`yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml`), 4a로 돌아감 |
+| `"done: approved"` (Blocker 0건) | 에픽 완료 |
+| `"done: blockers"` (Blocker 1건+) | sprint-status.yaml + review.md에 기록된 상태 유지, **자동 수정 안 함** |
 
-### 5. 전체 완료 — Done 신호
+Blocker가 있어도 자동 수정하지 않는다. 사람이 bf-execute의 에픽 결과에서 판단한다.
 
-모든 에픽 완료 후:
-- `"done"` + sprint-status.yaml 경로를 bf-execute에 전달한다.
+### E4. 완료 — Done 신호
+
+bf-execute에 전달:
+- `"done"` + sprint-status.yaml 경로 + review.md 경로
 - 종료 (컨텍스트 소멸).
 
 ---
@@ -180,7 +192,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 작성 즉시 전체 E2E 실행:
 
 **인프라 오류 vs 테스트 실패 구분:**
-- **인프라 오류** (regression Story 생성 안함, 사람에게 안내):
+- **인프라 오류** (regression Story 생성 안함, `"escalation"` + 인프라 오류 사유를 Lead에 보고):
   - exit code 127 (`command not found`)
   - `ECONNREFUSED` (서버 미시작)
   - `browser not started`, `browser crashed`
@@ -238,5 +250,6 @@ E2E agent는 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따른다:
 
 ## Output Format
 
-- `"done"` + sprint-status.yaml 경로 (전체 에픽 완료)
-- 중간 과정은 파일에만 기록, orchestrate 컨텍스트에 남기지 않음
+- `"done"` + sprint-status.yaml 경로 + review.md 경로 (에픽 실행 완료)
+- `"done"` + sprint-status.yaml 경로 + stories/ 경로 (plan 모드 완료)
+- 중간 과정은 파일에만 기록, bf-execute 컨텍스트에 남기지 않음

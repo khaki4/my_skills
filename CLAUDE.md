@@ -19,6 +19,7 @@ This repository contains custom Claude Code skills that implement the **BF (Brow
 4. **Dispute resolution**: Teammates direct talk → Lead mediation → discard (record as unresolved)
 5. **Files carry all context** — Modification instructions, review results, stuck reports are all file-based
 6. **Single writer per phase** — No concurrent sprint-status.yaml writes; each phase has one writer
+7. **Human = slow agent at the outer boundary** — Human interacts with the system only through bf-execute (main session), never with internal agents. Only 2 judgment points: Spec approval + Epic result review.
 
 ## Skill Architecture
 
@@ -33,10 +34,10 @@ The BF workflow uses 4 Lead skills with distinct coordination patterns:
 
 | Lead | Coordination Pattern | Role | Model |
 |------|---------------------|------|-------|
-| **bf-lead-orchestrate** | Sequence | "done" → branch → trigger next Lead | Always Opus |
+| **bf-lead-orchestrate** | Sequence | Mode-based autonomous executor (plan/epic). No human interaction | Always Opus |
 | **bf-lead-plan** | Distribute | Epic/Story structure, parallel distribution + collection | Always Opus |
 | **bf-lead-implement** | Monitor | Spawn agents + "done"/"stuck" reception + status update | Opus/Sonnet |
-| **bf-lead-review** | Discourse | Reviewer debate + Human checkpoint ② + decision delivery | Opus/Sonnet |
+| **bf-lead-review** | Discourse | Self-contained review.md generation. No human interaction | Opus/Sonnet |
 
 Model selection for bf-lead-implement and bf-lead-review: Opus if L/XL stories in epic, Sonnet if S/M only.
 
@@ -48,19 +49,17 @@ The BF workflow executes in this sequence:
 
 1. **`/bf-spec`** → Human provides AC + Slack context → Tech Spec creation
 2. **`bf-lead-review`** (auto, tech-spec mode) → Agent Teams multi-perspective review
-3. **Human approval checkpoint ①** → Approve or request revisions
-4. **`/bf-execute`** → Spawns `bf-lead-orchestrate` (context isolation)
-5. **`bf-lead-plan`** (auto) → Generate Epic/Story structure with difficulty tags
-5a. **Human confirmation** → Review epic/story structure, adjust difficulty tags
-6. **Epic Loop** (per epic, sequential):
-   - 6a. **`bf-lead-implement`** → TDD implementation with difficulty-based agent strategies
-   - 6b. **E2E agent** → Write + execute E2E tests
-   - 6c. **`bf-lead-review`** (epic-review mode) → Epic integration review + **Human checkpoint ②**
-7. **`/bf-archive-sprint`** → Move docs to archive, update changelog
-8. **`/bf-metrics`** → Analyze sprint metrics and suggest optimizations (optional, manual)
-9. **`/bf-update-conventions`** → Extract patterns and update convention rules
+3. **Human judgment ①: Spec approval** → Approve or request revisions
+4. **`/bf-execute`** → Human-system boundary hub, epic-level loop:
+   - 4a. **`bf-lead-orchestrate`** (plan mode) → Generate Epic/Story structure
+   - 4b. **Epic Loop** (per epic, sequential):
+     - **`bf-lead-orchestrate`** (epic mode) → Autonomous: implement → E2E → review
+     - **Human judgment: Epic result review** → Proceed / Modify (via modification.md) / Stop
+5. **`/bf-archive-sprint`** → Move docs to archive, update changelog
+6. **`/bf-metrics`** → Analyze sprint metrics and suggest optimizations (optional, manual)
+7. **`/bf-update-conventions`** → Extract patterns and update convention rules
 
-- **`/bf-resume`** → Resume interrupted workflow (manual, from any point)
+- **`/bf-resume`** → Resume interrupted workflow (manual, from any point, same epic loop as bf-execute)
 
 ### Coordination Patterns
 
@@ -111,11 +110,12 @@ Each Story is tagged with a difficulty level that determines agent composition:
 
 ### Agent Teams Patterns
 
-- **Main session delegates to orchestrate**: Main context stays minimal (only "done" + file paths)
+- **bf-execute is the human boundary**: Only bf-execute communicates with humans. Internal agents never interact with humans directly.
 - **Epic execution is sequential**: Epics run one at a time in dependency order
 - **Story execution is parallel**: Stories within an Epic can run concurrently (if no file overlap)
 - **Lead never touches code directly**: bf-lead-implement delegates ALL stories to agents
 - **sprint-status.yaml single writer**: Only the Lead responsible for current phase writes to it
+- **orchestrate is per-epic**: Spawned once per epic in epic mode, terminates with result files
 
 ### File Structure Conventions
 
@@ -130,6 +130,7 @@ docs/
   reviews/
     {TICKET}-tech-spec-review.md
     {EPIC-ID}-review.md
+    {EPIC-ID}-modification.md    # Human modification instructions (when re-executing)
   sprint-status.yaml
   conventions.md          # Convention Guard rules
   archive/
@@ -184,10 +185,10 @@ SPRINT-XX:
 ```
 
 State field values:
-- **status**: `todo` → `in_progress` → `done`
+- **status**: `todo` → `in_progress` → `done` (also `skipped` for stuck stories auto-skipped by orchestrate)
 - **tdd**: `pending` → `done`
 - **review**: `pending` → `approved`
-- **e2e**: `pending` → `passed`
+- **e2e**: `pending` → `passed` | `escalated` | `max-regression-cycles`
 
 Metric field values (recorded by downstream agents, initialized with defaults):
 - **model_used**: `null` → `"sonnet"` | `"opus-lead"` | `"opus-lead+3"` (bf-lead-implement records)
@@ -210,7 +211,7 @@ Each phase is sequential, so no concurrent writes occur. Story agents never touc
 | bf-lead-implement | Write | Story status, metrics (retries, approaches, stuck) |
 | E2E agent | Write | E2E status, failure tag, regression story addition |
 | bf-lead-review | Write | Review status, blocker/recommended counts |
-| bf-lead-orchestrate | Phase transition write | Status transitions (in_progress, skipped), difficulty adjustments |
+| bf-lead-orchestrate | Phase transition write | Status transitions (in_progress, skipped), e2e status (escalated, max-regression-cycles) |
 
 ### sprint-status.yaml Update Protocol
 
@@ -257,24 +258,25 @@ Reviews happen at **epic level** (not per-story) after E2E passes:
 - **Convention Guard** (mandatory): `docs/conventions.md` compliance check
 - **Additional reviewers** (1-2): Architecture, Security, or Performance based on epic scope
 - **Discourse pattern**: Independent analysis → cross-verification → consensus/dissent separation
-- **Human checkpoint ②**: Human reviews with live reviewer agents, decides on modifications
-- Findings categorized as: Blocker, Recommended, Confirmed, Unresolved Disputes
+- **Self-contained review.md**: Review generates a complete review.md with recommended actions and Lead's final judgment on unresolved disputes. No live human Q&A.
+- Findings categorized as: Blocker, Recommended, Confirmed, Unresolved Disputes (with Lead's final judgment)
 
 ### Dispute Resolution Protocol
 
 Applied across all Lead skills when teammates disagree:
 1. **Teammates direct talk**: SendMessage for direct challenge/agree/supplement → consensus reported to Lead
 2. **Lead mediation on disagreement**: Lead decides based on project direction (tech-spec, conventions)
-3. **Still no consensus → discard (record)**: Include as "unresolved dispute" in final results, stop spending tokens
+3. **Still no consensus → discard (record)**: Include as "unresolved dispute" with Lead's final judgment + reasoning in results, stop spending tokens
 
 ### Escalation Protocol
 
-"stuck" is a final status, not intermediate. Each layer judges within its scope and passes files upward.
+"stuck" is a final status, not intermediate. Each layer judges within its scope. orchestrate auto-skips stuck stories. Human reviews at epic result checkpoint.
 
 ```
 Story agent → "stuck" + stuck.md → terminates
 bf-lead-implement → continues other stories → reports to orchestrate with sprint-status.yaml + stuck.md
-orchestrate → presents to human for decision (AC modification / approach change / skip / redesign)
+orchestrate → auto-skip stuck stories (status: skipped) → continues E2E → review
+bf-execute → shows skipped stories in epic result → human decides (modify via modification.md / proceed / stop)
 ```
 
 ### Metrics and Optimization
@@ -303,17 +305,18 @@ When creating new skills in this repository:
    description: Brief description for skill discovery
    ---
    ```
-3. Include these sections: Overview, When to Use, Instructions, Output Format
+3. Include these sections: Overview, When to Use, Instructions, and Output Format
 4. Update the workflow sequence in this CLAUDE.md if the skill integrates into the pipeline
 5. Test the skill with `npx skills add {username}/my-skills --skill {skill-name} -a claude-code`
 
 ## Important Notes
 
-- **Human checkpoints are intentional**: The workflow requires human approval at specific points (① Tech Spec review, ② Epic integration review, stuck escalation)
+- **Human judgment points are exactly 2**: ① Spec approval (main session, after /bf-spec) and Epic result review (bf-execute, after each epic). No other human interaction exists inside the system.
 - **Context isolation**: Main session → orchestrate → Leads → agents. Each layer terminates with "done" + files, context dies
-- **Files carry all context**: Modification instructions in review.md, stuck reports in stuck.md — no relay through conversation
+- **Files carry all context**: Modification instructions in modification.md, review results in review.md, stuck reports in stuck.md — no relay through conversation
 - **Lead never touches code**: bf-lead-implement delegates ALL difficulty levels to agents
+- **bf-execute is the only human boundary**: Internal agents (orchestrate, review, implement) never communicate with humans directly
 - **Append-only changelog**: CLAUDE.md changelog in target projects is append-only to track sprint history
 - **Convention accumulation**: `docs/conventions.md` grows over sprints as patterns are discovered and codified
 - **Agent-browser for E2E**: E2E tests use @ref-based element selection from accessibility trees, not CSS selectors
-- **Language convention**: This CLAUDE.md uses English for international readability. Individual skill files (`SKILL.md`) use Korean as the primary language, with technical terms in English (e.g., Agent Teams, Ralph Loop, sprint-status.yaml). Mapping: "Human approval checkpoint ①②" (CLAUDE.md) = "사람 개입 ①②" (SKILL.md)
+- **Language convention**: This CLAUDE.md uses English for international readability. Individual skill files (`SKILL.md`) use Korean as the primary language, with technical terms in English (e.g., Agent Teams, Ralph Loop, sprint-status.yaml). Mapping: "Human judgment ①" (CLAUDE.md) = "사람 판단 ①" (SKILL.md)

@@ -1,13 +1,13 @@
 ---
 name: bf-execute
-description: BF 워크플로우 실행 진입점. bf-lead-orchestrate를 스폰하여 에픽/스토리 생성부터 구현, E2E, 리뷰까지 전체 파이프라인을 실행한다.
+description: BF 워크플로우의 사람-시스템 경계 허브. orchestrate를 모드별로 스폰하고, 에픽 단위 루프를 돌며 사람과 소통하는 유일한 경계이다.
 ---
 
 # BF Execute (Entry Point)
 
 ## Overview
 
-BF 워크플로우의 실행 진입점이다. `bf-lead-orchestrate`를 스폰하여 에픽/스토리 생성 → TDD 구현 → E2E 검증 → 통합 리뷰 → 아카이빙까지 전체 파이프라인을 조율한다. 메인 세션은 위임만 하고 컨텍스트를 최소로 유지한다.
+BF 워크플로우의 실행 진입점이자 **사람-시스템 경계 허브**이다. `bf-lead-orchestrate`를 모드별로 스폰하여 에픽 단위 루프를 돌며, 각 에픽 완료 후 사람에게 결과를 제시한다. 시스템 내부 에이전트는 사람과 직접 소통하지 않으며, bf-execute가 유일한 소통 경계이다.
 
 ## When to Use
 
@@ -26,16 +26,80 @@ BF 워크플로우의 실행 진입점이다. `bf-lead-orchestrate`를 스폰하
 - `docs/tech-specs/{TICKET}-tech-spec.md` 존재 확인
 - 사용자에게 Jira 티켓 번호를 확인한다 (미제공 시 요청).
 
-### 2. bf-lead-orchestrate 스폰
+### 2. Plan 단계 — orchestrate (plan 모드) 스폰
 
 - Task tool 사용, `model: opus`
-- 전달: tech-spec 경로, conventions.md 경로 (있으면)
-- 메인 세션은 `"done"` + sprint-status.yaml 경로만 수신 대기한다.
-- 중간 과정은 메인 세션 컨텍스트에 들어오지 않는다 (컨텍스트 격리).
+- 전달: `mode: "plan"`, tech-spec 경로, conventions.md 경로 (있으면)
+- 수신 대기: `"done"` + sprint-status.yaml 경로 + stories/ 경로
+- 수신 후: sprint-status.yaml을 읽어 에픽/스토리 구조를 사람에게 제시한다.
 
-### 3. 완료 수신 후 안내
+### 3. 에픽 루프
 
-orchestrate로부터 `"done"` 수신 시:
+sprint-status.yaml의 에픽을 순서대로 순회한다. 각 에픽에 대해:
+
+#### 3a. orchestrate (epic 모드) 스폰
+
+- Task tool 사용, `model: opus`
+- 전달: `mode: "epic"`, `epic_id`, tech-spec 경로, conventions.md 경로
+  - 수정 재실행인 경우: `modification_path` 추가 전달
+- 수신 대기: `"done"` + sprint-status.yaml 경로 + review.md 경로
+
+#### 3b. 에픽 결과 제시
+
+orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 제시한다:
+
+```
+## Epic {EPIC-ID} 완료
+
+### Story 결과
+| Story | Status | Difficulty | Retries | Stuck |
+|-------|--------|------------|---------|-------|
+| story-1 | done | S | 0 | - |
+| story-2 | done | M | 2 | - |
+| story-3 | skipped (stuck) | L | 5 | stuck.md 참조 |
+
+### E2E: {passed | escalated | max-regression-cycles}
+### Integration Review: Blockers {N}건, Recommended {N}건
+### 상세: docs/reviews/{EPIC-ID}-review.md
+
+진행하시겠습니까?
+1. 다음 에픽으로 진행
+2. 수정 후 재실행 (수정 내용 입력)
+3. 워크플로우 중단
+```
+
+#### 3c. 사람 판단 처리
+
+사람의 선택에 따라:
+
+**1. 다음 에픽으로 진행:**
+- 다음 에픽의 3a로 이동한다.
+
+**2. 수정 후 재실행:**
+- 사람이 수정 내용을 텍스트로 입력한다.
+- `docs/reviews/{EPIC-ID}-modification.md`에 기록한다:
+
+  ```markdown
+  # {EPIC-ID} Modification
+
+  ## 수정 지시
+  {사람이 입력한 수정 내용 원문}
+
+  ## 대상 Story
+  - {수정 대상 Story ID 목록}
+  ```
+
+- git commit: `docs({EPIC-ID}): record modification instructions`
+- 같은 에픽에 대해 orchestrate를 epic 모드로 다시 스폰한다 (`modification_path` 전달).
+- 3b로 돌아가 결과를 다시 제시한다.
+
+**3. 워크플로우 중단:**
+- 현재 상태를 안내하고 종료한다.
+- `/bf-resume`으로 재개 가능함을 안내한다.
+
+### 4. 전체 완료
+
+모든 에픽 완료 후:
 
 ```
 워크플로우가 완료되었습니다.
@@ -48,5 +112,6 @@ orchestrate로부터 `"done"` 수신 시:
 
 ## Output Format
 
-- 사용자에게 완료 안내 + 다음 단계 안내
-- 모든 산출물은 orchestrate 이하 Lead들이 생성 (메인 세션은 파일을 직접 생성하지 않음)
+- 사용자에게 에픽별 결과 제시 + 판단 요청
+- 완료 시 다음 단계 안내
+- 모든 산출물은 orchestrate 이하 Lead들이 생성 (메인 세션은 modification.md만 직접 생성)
