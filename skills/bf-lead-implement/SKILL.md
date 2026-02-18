@@ -37,12 +37,11 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   - `status: done`인 Story는 건너뛴다.
   - `status: todo` 또는 `in_progress`인 Story만 대상으로 한다.
 
-### 2. 모델 선택 (Lead 자신)
+### 2. 모델 (orchestrate가 결정)
 
-- 에픽 내 L/XL Story가 있으면: Opus
-- S/M만이면: Sonnet
-
-> 이 결정은 `bf-lead-orchestrate`가 스폰 시 모델을 지정한다.
+이 Lead의 모델은 `bf-lead-orchestrate`가 스폰 시 지정한다:
+- 에픽 내 L/XL Story 포함 시 Opus
+- S/M만이면 Sonnet
 
 ### 3. Story Agent 스폰
 
@@ -57,7 +56,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   - 수정 지시가 있는 경우: review.md의 해당 Story 수정 지시 원문
   - Ralph Loop 지침 (아래 "Story Agent용 Ralph Loop 지침" 참조)
   - **"sprint-status.yaml을 수정하지 말 것"**
-  - **"`"done"` + commit hash 또는 `"stuck"` + stuck.md로 보고할 것"**
+  - **"`"done"` + commit hash + retry_count + approaches_count 또는 `"stuck"` + stuck.md + retry_count + approaches_count로 보고할 것"**
 
 <HARD-GATE>
 Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. 모든 상태 업데이트는 Lead가 "done"/"stuck" 신호를 수신한 후 수행한다. "상태만 빨리 기록하겠다"는 단일 쓰기 지점 원칙을 파괴하는 합리화이다.
@@ -74,7 +73,7 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
   - "쟁점 해소 프로토콜에 따라 조율하라" (아래 참조)
   - Ralph Loop 지침
   - **"sprint-status.yaml을 수정하지 말 것"**
-  - **"`"done"` + commit hash 또는 `"stuck"` + stuck.md로 보고할 것"**
+  - **"`"done"` + commit hash + retry_count + approaches_count 또는 `"stuck"` + stuck.md + retry_count + approaches_count로 보고할 것"**
 
 #### XL Story → Sub-Lead (Opus) + 3+ Teammates
 
@@ -88,7 +87,7 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
   - "쟁점 해소 프로토콜에 따라 조율하라"
   - Ralph Loop 지침
   - **"sprint-status.yaml을 수정하지 말 것"**
-  - **"`"done"` + commit hash 또는 `"stuck"` + stuck.md로 보고할 것"**
+  - **"`"done"` + commit hash + retry_count + approaches_count 또는 `"stuck"` + stuck.md + retry_count + approaches_count로 보고할 것"**
 
 ### 4. 병렬 실행 규칙
 
@@ -166,6 +165,7 @@ Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 �
 6. **git commit**: `feat({STORY-ID}): {brief description}`
    - Bug fix인 경우: `fix({STORY-ID}): {brief description}`
    - **sprint-status.yaml은 커밋에 포함하지 않는다**
+7. **Lead에 done 보고**: `"done"` + commit hash + `retry_count` + `approaches_count`
 
 ### Ralph Loop 가드레일
 

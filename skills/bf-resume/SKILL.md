@@ -59,7 +59,12 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 **b) `status: in_progress`인 Story가 있는 경우:**
 - git status로 uncommitted 변경사항 확인
 - 변경사항 있음: 사용자에게 "이전 진행 중이던 {STORY-ID}의 미커밋 변경사항이 있습니다. 이어서 진행하시겠습니까?" 확인
-- 변경사항 없음: 해당 Story의 `status`를 `todo`로 리셋 (`yq -i` 사용)
+- 변경사항 없음: git log에서 해당 Story ID 커밋 존재 여부 확인
+  ```bash
+  git log --oneline --grep="{STORY-ID}" | head -1
+  ```
+  - **커밋 존재**: agent가 커밋 후 보고 전에 중단된 것. `status: done`, `tdd: done`으로 설정
+  - **커밋 미존재**: 구현이 시작되지 않았거나 중간에 중단된 것. `status: todo`, `tdd: pending`, `review: pending`으로 리셋
 - 재개 지점: **해당 에픽**
 
 **c) 미완료 에픽이 있는 경우 (일부 Story가 `todo`이거나 e2e/review가 미완):**
@@ -141,7 +146,8 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 
 **2. 수정 후 재실행:**
 - 사람이 수정 내용을 텍스트로 입력한다.
-- `docs/reviews/{EPIC-ID}-modification.md`에 기록한다.
+- bf-resume이 수정 내용을 분석하여 대상 Story를 추론하고, 사람에게 확인한다.
+- `docs/reviews/{EPIC-ID}-modification.md`에 기록한다 (bf-execute의 modification.md 형식과 동일).
 - git commit: `docs({EPIC-ID}): record modification instructions`
 - 같은 에픽에 대해 orchestrate를 epic 모드로 다시 스폰한다 (`modification_path` 전달).
 - 6b로 돌아가 결과를 다시 제시한다.

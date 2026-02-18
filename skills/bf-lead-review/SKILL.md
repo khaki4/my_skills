@@ -131,8 +131,10 @@ Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. con
 #### epic-review 모드:
 
 1. `docs/reviews/{EPIC-ID}-review.md`에 저장한다.
+   - 수정 재실행(modification)으로 재리뷰하는 경우: 기존 파일을 **덮어쓴다** (이전 리뷰는 git 이력에 보존됨).
 2. sprint-status.yaml 업데이트 (CLAUDE.md의 **Read-yq-Verify** 프로토콜, `yq -i` 명령어 사용):
    - 에픽 내 각 Story의 `review_blockers`, `review_recommended` 건수 기록
+   - **cross-story 귀속 규칙**: 여러 Story에 걸친 발견 사항(네이밍 불일치, 중복 유틸 등)은 가장 관련 높은 Story에 귀속한다. 특정 Story에 귀속할 수 없는 경우 에픽의 첫 번째 done Story에 귀속한다.
    ```bash
    yq -i '
      .<SPRINT>.<EPIC>.<STORY>.review_blockers = 2 |

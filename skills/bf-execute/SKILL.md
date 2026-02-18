@@ -81,6 +81,9 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 
 **2. 수정 후 재실행:**
 - 사람이 수정 내용을 텍스트로 입력한다.
+- bf-execute가 수정 내용을 분석하여 대상 Story를 추론하고, 사람에게 확인한다:
+  - "수정 대상 Story: story-1, story-3으로 판단됩니다. 맞습니까?"
+  - 사람이 수정하면 그에 따른다.
 - `docs/reviews/{EPIC-ID}-modification.md`에 기록한다:
 
   ```markdown
@@ -90,7 +93,7 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
   {사람이 입력한 수정 내용 원문}
 
   ## 대상 Story
-  - {수정 대상 Story ID 목록}
+  - {확인된 수정 대상 Story ID 목록}
   ```
 
 - git commit: `docs({EPIC-ID}): record modification instructions`

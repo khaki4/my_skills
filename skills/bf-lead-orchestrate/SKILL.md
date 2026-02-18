@@ -64,11 +64,15 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 ## Epic 모드
 
-전달받은 `epic_id`의 에픽을 자율 실행한다. 4a → 4b → 4c 순차 진행.
+전달받은 `epic_id`의 에픽을 자율 실행한다. E1 → E2 → E3 순차 진행.
 
 ### E0. Modification 처리 (modification.md가 전달된 경우)
 
 - modification.md를 읽어 수정 대상 Story를 파악한다.
+- **이전 실행의 regression story 정리**: 에픽 내 `is_regression: true`이고 `status: todo`인 Story를 `status: skipped`로 변경한다. 이전 regression의 원인이 modification으로 해소되었을 수 있으므로 불필요한 재실행을 방지한다.
+  ```bash
+  yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-status.yaml
+  ```
 - 해당 Story의 status를 `in_progress`로 변경:
   ```bash
   yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml
@@ -82,7 +86,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   yq -i '.<SPRINT>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
   ```
 
-### E1. 스토리 구현 (4a) — bf-lead-implement 스폰
+### E1. 스토리 구현 — bf-lead-implement 스폰
 
 - **모델 선택**: 에픽 내 L/XL Story 포함 시 `model: opus`, S/M만이면 `model: sonnet`
 - 전달 정보:
@@ -106,13 +110,15 @@ yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "skipped"' docs/sprint-status.yaml
 
 stuck 정보는 sprint-status.yaml(`ralph_stuck: true`) + stuck.md에 이미 기록되어 있다. bf-execute가 에픽 결과로 사람에게 제시한다.
 
-### E2. E2E 작성 + 실행 (4b) — E2E agent 스폰
+### E2. E2E 작성 + 실행 — E2E agent 스폰
 
 <HARD-GATE>
 E2E 단계는 절대 건너뛰지 않는다. 모든 Story가 skipped여도, Story 수가 적어도, 변경이 사소해 보여도 E2E를 실행한다. "E2E 없이도 충분하다"는 이 게이트를 우회하는 전형적인 합리화이다.
 </HARD-GATE>
 
-> **Story 0개 에픽 처리**: sprint-status.yaml에 done인 Story가 없는 에픽(전체 skipped 등)은 `e2e: passed`로 기록하고 E3로 진행한다.
+> **done Story가 없는 에픽 처리**: sprint-status.yaml에 done인 Story가 없는 에픽은 E2E agent를 스폰하지 않고 E3로 진행한다.
+> - **Story 0개 에픽** (인프라 에픽 등): `e2e: passed`로 기록
+> - **전 Story skipped** (전체 stuck): `e2e: skipped`로 기록
 
 E2E agent를 1개 스폰한다 (`model: sonnet`).
 전달 정보: 에픽 ID, Story 목록, tech-spec 경로, conventions.md 경로.
@@ -130,7 +136,14 @@ E2E agent는 아래 **"E2E Agent 지침"**을 따른다.
 
 E2E 사이클 카운트: epic 모드 진입 시 0으로 시작, `"failed"` 수신마다 +1.
 
-### E3. 에픽 통합 리뷰 (4c) — bf-lead-review 스폰
+**max-regression-cycles 판정 시 orphan regression story 정리:**
+E2E 사이클 2회 도달로 `max-regression-cycles`를 기록할 때, 해당 사이클에서 E2E agent가 추가한 regression story가 `status: todo`인 채 남아있다. 이 Story들을 `status: skipped`로 변경하여 orphan을 방지한다:
+```bash
+# 대상: E2E agent가 "failed" 보고와 함께 전달한 regression story 목록
+yq -i '.<SPRINT>.<EPIC>.<ORPHAN-STORY>.status = "skipped"' docs/sprint-status.yaml
+```
+
+### E3. 에픽 통합 리뷰 — bf-lead-review 스폰
 
 <HARD-GATE>
 리뷰 단계는 절대 건너뛰지 않는다. E2E가 escalated/max-regression-cycles여도, Story가 모두 skipped여도 리뷰를 실행한다. 리뷰 결과가 사람 판단 ②의 핵심 입력이다.

@@ -200,7 +200,7 @@ SPRINT-XX:
 - **status**: `todo` → `in_progress` → `done` (stuck Story를 orchestrate가 자동 skip 시 `skipped`)
 - **tdd**: `pending` → `done`
 - **review**: `pending` → `approved`
-- **e2e**: `pending` → `passed` | `escalated` | `max-regression-cycles`
+- **e2e**: `pending` → `passed` | `skipped` | `escalated` | `max-regression-cycles`
 
 메트릭 필드 값 (하위 agent가 기록, 기본값으로 초기화):
 - **model_used**: `null` → `"sonnet"` | `"opus-lead"` | `"opus-lead+3"` (bf-lead-implement 기록)
@@ -221,9 +221,9 @@ SPRINT-XX:
 |----------|------|----------|
 | Story agent | 없음 (코드+커밋만) | — |
 | bf-lead-implement | 쓰기 | Story 상태, 메트릭 (retries, approaches, stuck) |
-| E2E agent | 쓰기 | E2E 상태, failure tag, regression story 추가 |
+| E2E agent | 쓰기 | `e2e: passed`, failure tag, regression story 추가 |
 | bf-lead-review | 쓰기 | review 상태, blocker/recommended 수 |
-| bf-lead-orchestrate | 페이즈 전환 쓰기 | status 전환 (in_progress, skipped), e2e 상태 (escalated, max-regression-cycles) |
+| bf-lead-orchestrate | 페이즈 전환 쓰기 | status 전환 (in_progress, skipped), `e2e: escalated`/`max-regression-cycles`, orphan regression story skip |
 
 ### sprint-status.yaml 업데이트 프로토콜
 
@@ -232,6 +232,7 @@ sprint-status.yaml 업데이트 시 **Read-yq-Verify** 프로토콜을 따른다
 1. **Read**: 수정 전 sprint-status.yaml을 읽어 현재 상태 확인
 2. **Update**: `yq -i` 명령으로 프로그래밍적 YAML 필드 업데이트
 3. **Verify**: 업데이트 후 파일을 다시 읽어 변경 확인
+4. **Recover** (Verify 실패 시): `git checkout docs/sprint-status.yaml`로 마지막 커밋 상태로 복원 → 1회 재시도. 재시도도 실패하면 stuck 보고
 
 **핵심 규칙:**
 - **최소 범위**: 자신에게 할당된 Story/Epic 필드만 변경. 다른 Story는 절대 수정하지 않음

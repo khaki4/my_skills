@@ -17,7 +17,7 @@ AC 문서 → [Phase 1. Spec] → [Phase 2. Plan] → [Phase 3. Epic Loop] → [
 |-------|------|------|------|
 | **1. Spec** | AC 문서 | tech-spec.md, review.md | `/bf-spec` |
 | **2. Plan** | tech-spec.md | sprint-status.yaml, stories/ | `/bf-execute` (자동) |
-| **3. Epic Loop** | stories/, sprint-status.yaml | 코드 커밋, review.md | `/bf-execute` (자동) |
+| **3. Epic Loop** | stories/, sprint-status.yaml, conventions.md, tech-spec.md | 코드 커밋, review.md | `/bf-execute` (자동) |
 | **4. Archive** | sprint-status.yaml, 산출물 전체 | archive/, conventions.md | `/bf-archive-sprint` |
 
 Phase 3은 에픽 단위로 3개 Sub-Phase를 자율 실행한다:
@@ -39,7 +39,16 @@ Phase 3은 에픽 단위로 3개 Sub-Phase를 자율 실행한다:
 | `/bf-resume` | 중단된 워크플로우 복구 |
 | `/bf-archive-sprint` | 스프린트 아카이빙 |
 | `/bf-metrics` | 메트릭 분석 및 최적화 제안 (선택) |
-| `/bf-rules` | 규칙 축적 현황 조회 및 강화 제안 |
+| `/bf-update-conventions` | 컨벤션 규칙 업데이트 |
+
+## Prerequisites
+
+- **yq v4+** (Mike Farah's Go-based): sprint-status.yaml 프로그래밍적 업데이트에 사용
+  ```bash
+  # macOS
+  brew install yq
+  # Linux: https://github.com/mikefarah/yq#install
+  ```
 
 ## 설치
 

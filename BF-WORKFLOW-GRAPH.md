@@ -2,13 +2,7 @@
 
 ## 설계 원칙
 
-1. **상위 에이전트는 중간 과정을 모른다** — 컨텍스트 격리, 오염 방지
-2. **상위 에이전트는 방향성을 지킨다** — 팀메이트 대화 정리, 프로젝트 방향 기준으로 조율/결정
-3. **책임 단위 종료 시 "done" + 파일만 전달** — 컨텍스트는 소멸, 파일만 남는다
-4. **쟁점 해소**: 팀메이트 직접 대화 → Lead 중재 → 미합의 시 버림(기록)
-5. **파일이 모든 맥락을 운반한다** — 수정 지시, 리뷰 결과, stuck 보고 등 모든 전달은 파일 기반
-6. **각 단계는 단일 쓰기 지점** — sprint-status.yaml 동시 쓰기 방지, Lead가 통합 업데이트
-7. **사람 = 외부 경계의 느린 에이전트** — 사람도 파일을 통해서만 시스템과 소통. bf-execute가 유일한 경계.
+> Canonical source: [CLAUDE.md — 설계 원칙](./CLAUDE.md#설계-원칙)
 
 ---
 
@@ -75,7 +69,7 @@ Phase 간 계약은 **입력 파일 → Phase 실행 → 출력 파일**이며, 
 |-------|------|------|----------|
 | **1. Spec** | AC 문서 | tech-spec.md, review.md | ① 승인/수정 |
 | **2. Plan** | tech-spec.md | sprint-status.yaml, stories/ | — |
-| **3. Epic Loop** | stories/, sprint-status.yaml | 코드 커밋, review.md, sprint-status.yaml | ② 진행/수정/중단 |
+| **3. Epic Loop** | stories/, sprint-status.yaml, conventions.md, tech-spec.md | 코드 커밋, review.md, sprint-status.yaml | ② 진행/수정/중단 |
 | **4. Archive** | sprint-status.yaml, 산출물 전체 | archive/, conventions.md, metrics | — |
 
 ### Phase 3 Sub-Phase 계약
@@ -421,18 +415,7 @@ modification.md 형식:
 
 ## sprint-status.yaml 쓰기 권한
 
-각 단계가 순차적이므로 동시 쓰기가 발생하지 않는다.
-story agent는 sprint-status.yaml을 만지지 않는다.
-
-| 에이전트 | sprint-status.yaml 권한 | 쓰기 내용 |
-|----------|------------------------|----------|
-| story agent | 없음 (코드+커밋만) | — |
-| bf-lead-implement | 쓰기 | story 상태, 메트릭 (retries, approaches, stuck) |
-| E2E agent | 쓰기 | e2e 상태, failure tag, regression story 추가 |
-| bf-lead-review | 쓰기 | review 상태, blocker/recommended 수 |
-| orchestrate | 페이즈 전환 쓰기 | status 전환 (in_progress, skipped), e2e 상태 (escalated, max-regression-cycles) |
-
-쓰기 수단: `yq -i` (Bash 도구). 프로그래밍적 YAML 파싱으로 필드 단위 수정.
+> Canonical source: [CLAUDE.md — sprint-status.yaml 쓰기 권한](./CLAUDE.md#sprint-statusyaml-쓰기-권한)
 
 ---
 
