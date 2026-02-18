@@ -78,7 +78,18 @@ Phase 간 계약은 **입력 파일 → Phase 실행 → 출력 파일**이며, 
 | **3. Epic Loop** | stories/, sprint-status.yaml | 코드 커밋, review.md, sprint-status.yaml | ② 진행/수정/중단 |
 | **4. Archive** | sprint-status.yaml, 산출물 전체 | archive/, conventions.md, metrics | — |
 
-> 각 Phase 내부의 에이전트 구성, 조율 패턴, 모델 배당은 아래 상세 흐름에서 다룬다.
+### Phase 3 Sub-Phase 계약
+
+Epic Loop 내부의 각 step은 독립된 입력-출력 계약을 가진다.
+교체 시 해당 Sub-Phase만 변경하면 되고, 복구 시 상태 필드로 재진입 지점을 판단한다.
+
+| Sub-Phase | 입력 | 출력 | 상태 필드 (복구 기준) |
+|-----------|------|------|--------------------|
+| **3a. Implement** | stories/, conventions.md | 코드 커밋, sprint-status.yaml (story 상태) | `story.status`, `story.tdd` |
+| **3b. E2E Verify** | 코드 커밋, story AC | E2E 스크립트, 실행 결과 | `epic.e2e` |
+| **3c. Review** | 전체 diff, conventions.md, tech-spec.md | review.md | `story.review` |
+
+> 각 Sub-Phase 내부의 에이전트 구성, 조율 패턴, 모델 배당은 아래 상세 흐름에서 다룬다.
 
 ---
 
