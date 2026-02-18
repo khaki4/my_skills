@@ -43,14 +43,15 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 `--from {EPIC-ID}` 옵션이 주어진 경우 **해당 에픽 전체를 처음부터 재실행**한다:
 - 해당 에픽 내 **모든** Story (done 포함)의 `status`를 `todo`로, `tdd`를 `pending`으로, `review`를 `pending`으로 리셋:
   ```bash
-  # 에픽 내 모든 Story를 리셋 (done 포함)
-  yq -i '.<SPRINT>.<EPIC>.[] | select(has("status")) | .status = "todo" | .tdd = "pending" | .review = "pending"' docs/sprint-status.yaml
+  # 에픽 내 각 Story별로 개별 yq 명령 실행 (select+할당 조합의 in-place 동작 불안정 방지)
+  yq -i '.<SPRINT>.<EPIC>.<STORY-1>.status = "todo" | .<SPRINT>.<EPIC>.<STORY-1>.tdd = "pending" | .<SPRINT>.<EPIC>.<STORY-1>.review = "pending"' docs/sprint-status.yaml
+  # 각 Story에 대해 반복 실행
   ```
 - 에픽의 e2e 상태도 `pending`으로 리셋:
   ```bash
   yq -i '.<SPRINT>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
   ```
-- `.ralph-progress/{EPIC-ID}/` 디렉토리가 있으면 삭제 (이전 Ralph Loop 진행 파일 정리).
+- `.ralph-progress/` 디렉토리 내 해당 에픽 Story의 진행 파일(`{STORY-ID}.json`)이 있으면 삭제 (이전 Ralph Loop 진행 파일 정리).
 - 메트릭 필드는 보존한다 (이전 시도의 기록).
 - 재개 지점을 **해당 에픽**으로 설정한다.
 
@@ -74,13 +75,14 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
     ```
     사용자에게 "`bf-stash/{STORY-ID}` 브랜치에 백업했습니다. 필요 시 `git cherry-pick`으로 복원 가능합니다." 안내
   - **"변경사항 폐기"**: `git checkout -- .`으로 미커밋 변경 제거
-  - 어느 경우든 `status: todo`, `tdd: pending`으로 리셋 → 에픽 재개 시 새 agent가 처음부터 구현
+  - 어느 경우든 `status: todo`, `tdd: pending`, `review: pending`으로 리셋 → 에픽 재개 시 새 agent가 처음부터 구현
   - 복수 Story가 동시에 in_progress인 경우: 각 Story별로 변경 파일을 식별하여 개별 브랜치에 보관. 파일 귀속이 불분명하면 `bf-stash/mixed-{EPIC-ID}`에 전체 보관
-- 변경사항 없음: git log에서 해당 Story ID 커밋 존재 여부 확인
+- `ralph_stuck: true`인 경우: bf-lead-implement 크래시로 orchestrate에 보고되지 못한 상태. `status: skipped`로 설정하여 orchestrate가 재처리하지 않도록 한다.
+- 변경사항 없음 (`ralph_stuck: false`): git log에서 해당 Story ID 커밋 존재 여부 확인
   ```bash
   git log --oneline --grep="{STORY-ID}" | head -1
   ```
-  - **커밋 존재**: agent가 커밋 후 보고 전에 중단된 것 (Lead 크래시 포함). `status: done`, `tdd: done`으로 설정. `.ralph-progress/{STORY-ID}.json`이 있으면 해당 메트릭을 sprint-status.yaml에 반영
+  - **커밋 존재**: agent가 커밋 후 보고 전에 중단된 것 (Lead 크래시 포함). `status: done`, `tdd: done`으로 설정. `.ralph-progress/{STORY-ID}.json`이 있으면 `ralph_retries`와 `ralph_approaches`를 sprint-status.yaml에 반영 (`model_used`는 bf-lead-implement가 결정하므로 이 경우 `null`로 유지)
   - **커밋 미존재**: 구현이 시작되지 않았거나 중간에 중단된 것. `status: todo`, `tdd: pending`, `review: pending`으로 리셋
 - `.ralph-progress/` 디렉토리에 해당 Story 진행 파일이 있으면 삭제 (리셋 Story만)
 - 재개 지점: **해당 에픽**
@@ -88,7 +90,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 **c) 미완료 에픽이 있는 경우 (일부 Story가 `todo`이거나 e2e/review가 미완):**
 - 재개 지점: **해당 에픽** (orchestrate epic 모드가 sprint-status.yaml을 읽고 이미 done인 Story를 건너뜀)
 
-**d) 모든 에픽의 모든 Story가 `review: approved`이고 `e2e: passed`인 경우:**
+**d) 모든 에픽의 e2e가 terminal state (`passed` | `skipped` | `escalated` | `max-regression-cycles`)이고 모든 Story `review: approved`인 경우:**
 - "모든 에픽이 완료되었습니다. `/bf-archive-sprint`를 실행하세요." 안내
 - 종료.
 
@@ -145,9 +147,12 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 | story-2 | done | M | 2 | - |
 | story-3 | skipped (stuck) | L | 5 | stuck.md 참조 |
 
-### E2E: {passed | escalated | max-regression-cycles}
+### E2E: {passed | skipped | escalated | max-regression-cycles}
 ### Integration Review: Blockers {N}건, Recommended {N}건
 ### 상세: docs/reviews/{EPIC-ID}-review.md
+
+> ⚠️ (모든 Story가 skipped인 경우에만 표시)
+> 이 에픽의 모든 Story가 skipped(stuck) 상태입니다. 진행 시 해당 기능이 구현되지 않은 상태로 넘어갑니다.
 
 진행하시겠습니까?
 1. 다음 에픽으로 진행

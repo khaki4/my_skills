@@ -421,7 +421,7 @@ modification.md 형식:
 
 ## 모델 배당
 
-orchestrate와 lead-plan은 전체 구조를 결정하므로 항상 Opus.
+lead-plan은 전체 구조를 결정하므로 항상 Opus. orchestrate는 모드에 따라 다르다 (plan: Sonnet, epic: Opus).
 lead-implement와 lead-review는 에픽 구성에 따라 모델이 달라진다.
 
 | Lead | Opus 조건 | Sonnet 조건 |

@@ -37,7 +37,7 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 - 기능 단위 또는 도메인 단위로 에픽을 분리한다.
 - 에픽 간 의존성을 명시한다.
 - 에픽은 순차적으로 실행됨을 기준으로 순서를 결정한다.
-- **Story 0개 에픽 처리**: 인프라 준비, 설정 변경 등 Story로 분해할 수 없는 에픽은 sprint-status.yaml에 Story 없이 에픽만 등록하고, `e2e: passed`로 초기화하여 자동 skip 처리한다.
+- **Story 0개 에픽 처리**: 인프라 준비, 설정 변경 등 Story로 분해할 수 없는 에픽은 sprint-status.yaml에 Story 없이 에픽만 등록하고, `e2e: passed`로 초기화한다 (기본 템플릿의 `pending`이 아닌 `passed`로 직접 설정).
 
 ### 3. Story 구조 결정
 
@@ -76,10 +76,10 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 
 ### 6. Sprint 번호 결정
 
+Sprint 번호는 항상 `SPRINT-XX` 형식을 사용한다 (Jira 티켓 번호와는 별개):
 - `docs/archive/` 디렉토리가 존재하면 기존 스프린트 확인
 - 마지막 스프린트 번호 + 1 (예: SPRINT-03 → SPRINT-04)
 - 아카이브가 없으면 SPRINT-01로 시작
-- 사용자가 Jira 티켓 번호를 제공했으면 해당 번호 사용
 
 ### 7. sprint-status.yaml 생성
 

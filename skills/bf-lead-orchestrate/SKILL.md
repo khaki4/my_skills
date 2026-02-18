@@ -26,6 +26,14 @@ BF 워크플로우의 자율 실행기이다. 모드 기반으로 동작하며, 
 - 승인된 Tech Spec: `docs/tech-specs/{TICKET}-tech-spec.md`
 - `docs/conventions.md` (있으면)
 
+## Error Handling
+
+- bf-lead-plan 스폰 실패 (plan 모드): `"error: lead-plan spawn failed"` 신호를 bf-execute에 전달 후 종료
+- bf-lead-implement 스폰 실패 (epic 모드): `"error: lead-implement spawn failed"` 신호를 bf-execute에 전달 후 종료
+- E2E agent 스폰 실패: `e2e: escalated` 기록, E3 리뷰로 진행
+- bf-lead-review 스폰 실패: 에픽 결과에 "review 미수행" 명시, bf-execute에 `"done"` + sprint-status.yaml 경로 전달
+- sprint-status.yaml 읽기/쓰기 실패: CLAUDE.md의 Read-yq-Verify Recover 절차를 따른다 (git checkout → 1회 재시도 → 실패 시 `"error: sprint-status update failed"` 보고)
+
 ## Instructions
 
 ### 1. 초기 로딩
@@ -51,7 +59,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 ### P1. bf-lead-plan 스폰
 
 - `bf-lead-plan`을 스폰한다 (`model: opus`).
-- 전달: tech-spec 경로, conventions.md 경로
+- 전달: tech-spec 경로, conventions.md 경로 (bf-execute로부터 전달받은 경로를 그대로 전달, orchestrate 자체는 읽지 않음)
 - 수신 대기: `"done"` + stories/ 경로 + sprint-status.yaml 경로
 
 ### P2. 완료
@@ -68,7 +76,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 ### E0. 초기 정리 및 Modification 처리
 
-**a) Orphan regression story 정리 (항상 실행):**
+**a) Orphan regression story 정리 (항상 실행, 첫 실행 시에는 대상이 없으므로 no-op):**
 에픽 내 `is_regression: true`이고 `status: todo`인 Story를 `status: skipped`로 변경한다. 이전 E2E 실행 중 중단으로 생성된 orphan regression story를 정리하여 불필요한 재실행을 방지한다.
 ```bash
 yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-status.yaml
@@ -80,7 +88,7 @@ yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-statu
   ```bash
   yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml
   ```
-- tdd, review 필드를 초기화하고, e2e도 `pending`으로 리셋:
+- tdd, review 필드를 초기화하고, e2e도 `pending`으로 리셋한다. **보존하는 메트릭 필드: `ralph_retries`, `ralph_approaches`, `ralph_stuck`, `model_used`** (이전 시도의 기록 유지). `review_blockers`/`review_recommended`는 bf-lead-review가 재리뷰 시 새 값으로 덮어쓰므로 별도 리셋 불필요. 수정 대상이 아닌 Story의 리뷰 메트릭은 보존된다:
   ```bash
   yq -i '
     .<SPRINT>.<EPIC>.<STORY>.tdd = "pending" |
@@ -90,6 +98,8 @@ yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-statu
   ```
 
 ### E1. 스토리 구현 — bf-lead-implement 스폰
+
+**Story 0개 에픽 또는 `todo`/`in_progress` Story가 없는 에픽은 E1을 건너뛰고 E2로 진행한다.** (e2e가 이미 `passed`인 Story 0개 에픽은 E2도 건너뛰고 E3로 직행)
 
 - **모델 선택**: 에픽 내 L/XL Story 포함 시 `model: opus`, S/M만이면 `model: sonnet`
 - 전달 정보:
@@ -115,13 +125,13 @@ stuck 정보는 sprint-status.yaml(`ralph_stuck: true`) + stuck.md에 이미 기
 
 ### E2. E2E 작성 + 실행 — E2E agent 스폰
 
-<HARD-GATE>
-E2E 단계는 절대 건너뛰지 않는다. 모든 Story가 skipped여도, Story 수가 적어도, 변경이 사소해 보여도 E2E를 실행한다. "E2E 없이도 충분하다"는 이 게이트를 우회하는 전형적인 합리화이다.
-</HARD-GATE>
+**done Story가 없는 에픽은 E2E agent를 스폰하지 않고 E3로 직행한다:**
+- **Story 0개 에픽** (인프라 에픽 등): `e2e: passed`로 기록
+- **전 Story skipped** (전체 stuck 포함): `e2e: skipped`로 기록. 구현이 없는 상태에서 E2E를 실행하면 무의미한 실패가 발생하므로 skip 처리
 
-> **done Story가 없는 에픽 처리**: sprint-status.yaml에 done인 Story가 없는 에픽은 E2E agent를 스폰하지 않고 E3로 진행한다.
-> - **Story 0개 에픽** (인프라 에픽 등): `e2e: passed`로 기록
-> - **전 Story skipped** (전체 stuck 포함): `e2e: skipped`로 기록. 구현이 없는 상태에서 E2E를 실행하면 무의미한 실패가 발생하므로 skip 처리
+<HARD-GATE>
+done Story가 1개 이상인 에픽에서 E2E 단계는 절대 건너뛰지 않는다. Story 수가 적어도, 변경이 사소해 보여도 E2E를 실행한다. "E2E 없이도 충분하다"는 이 게이트를 우회하는 전형적인 합리화이다.
+</HARD-GATE>
 
 E2E agent를 1개 스폰한다.
 
@@ -129,7 +139,7 @@ E2E agent를 1개 스폰한다.
 - 기본: `model: sonnet`
 - 브라우저 UI 프로젝트 (React/Vue/Angular/Next.js 등): `model: opus` — agent-browser 기반 E2E는 복잡한 DOM 상호작용과 시나리오 판단이 필요
 - API-only / CLI 프로젝트: `model: sonnet` — curl/shell 기반 E2E는 상대적으로 단순
-전달 정보: 에픽 ID, Story 목록, tech-spec 경로, conventions.md 경로.
+전달 정보: 에픽 ID, Story 목록, tech-spec 경로, conventions.md 경로, sprint-status.yaml 경로.
 
 E2E agent는 아래 **"E2E Agent 지침"**을 따른다.
 
@@ -200,7 +210,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - **CLI 도구 프로젝트**: `package.json`의 `bin` 필드 존재, CLI 엔트리포인트
   → shell script 기반 CLI E2E 작성
 - **E2E 불가 프로젝트**: 라이브러리, 유틸리티 패키지, 순수 SDK
-  → E2E skip, `"passed"` 즉시 보고
+  → E2E skip, `"passed"` 즉시 보고 (E2E 스크립트 작성/실행 없이 `e2e: passed` 기록)
 
 ### 2. E2E 시나리오 도출
 
@@ -243,7 +253,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 **실패:**
 - **Regression 가드레일** 확인:
-  - 에픽 내 `is_regression: true`인 Story **3개 이상** → `"escalation"` 보고
+  - 에픽 내 `is_regression: true AND (status: todo OR status: done)`인 Story **3개 이상** → `"escalation"` 보고 (`status: skipped`인 이전 orphan은 제외)
   - `parent_story` 체인 depth **2 이상** → `"escalation"` 보고
 - 가드레일 통과 시:
   - 실패 원인 분석 + failure tag 분류:
@@ -268,7 +278,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
     - `is_regression: true`
     - `parent_story`: 원인 Story ID
     - 나머지 필드: 기본값
-  - 난이도 태깅: `impl-bug`/`test-design`/`convention-violation` → S~M, `spec-gap`/`integration` → 원본 참고 M~L
+  - 난이도 태깅: `impl-bug`/`test-design`/`convention-violation` → S~M, `spec-gap`/`integration` → sprint-status.yaml에서 원본 Story 난이도를 확인하여 M~L
   - git commit: `test({epic-name}): add regression story for {failure-tag}`
   - `"failed"` + regression story 목록을 Lead에 보고
 

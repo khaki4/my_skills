@@ -156,6 +156,10 @@ docs/
 .ralph-progress/          # Ralph Loop 크래시 복구용 (임시, .gitignore 권장)
   {STORY-ID}.json
 
+docs/
+  reviews/
+    {STORY-ID}-stuck.md     # Ralph Loop stuck 보고서 (bf-lead-implement가 저장)
+
 tests/
   e2e/
     {epic-name}/
@@ -201,7 +205,7 @@ SPRINT-XX:
 ```
 
 상태 필드 값:
-- **status**: `todo` → `in_progress` → `done` (stuck Story를 orchestrate가 자동 skip 시 `skipped`)
+- **status**: `todo` → `in_progress` → `done` (stuck Story를 orchestrate가 자동 skip 시 `skipped`). 수정 재실행(modification) 시 `done` → `in_progress` 역전이 허용
 - **tdd**: `pending` → `done`
 - **review**: `pending` → `approved`
 - **e2e**: `pending` → `passed` | `skipped` | `escalated` | `max-regression-cycles` (terminal states: passed/skipped/escalated/max-regression-cycles)
@@ -324,4 +328,4 @@ yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 - **bf-execute가 유일한 사람 경계**: 내부 agent(orchestrate, review, implement)는 사람과 직접 소통 없음
 - **Append-only changelog**: 대상 프로젝트의 CLAUDE.md changelog는 스프린트 이력 추적을 위해 추가 전용
 - **Convention 축적**: `docs/conventions.md`는 스프린트를 거듭하며 패턴이 발견·체계화되면서 성장
-- **E2E용 Agent-browser**: E2E 테스트는 CSS 셀렉터가 아닌 accessibility tree의 @ref 기반 요소 선택 사용
+- **E2E용 Agent-browser**: 브라우저 UI 기반 E2E 테스트는 CSS 셀렉터가 아닌 accessibility tree의 @ref 기반 요소 선택 사용 (API-only/CLI 프로젝트에는 해당 없음)

@@ -21,7 +21,7 @@ Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다
 ## Prerequisites
 
 - **tech-spec 모드**: `docs/tech-specs/{TICKET}-tech-spec.md` 존재
-- **epic-review 모드**: 해당 에픽의 모든 Story `status: done`, E2E `passed` 또는 `escalated` 또는 `max-regression-cycles`
+- **epic-review 모드**: 해당 에픽의 모든 Story `status: done` 또는 `skipped`, E2E `passed` 또는 `skipped` 또는 `escalated` 또는 `max-regression-cycles`
 
 ## Error Handling
 
@@ -47,7 +47,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 | 모드 | 읽는 파일 |
 |------|----------|
 | tech-spec | tech-spec.md, conventions.md |
-| epic-review | tech-spec.md, conventions.md, 에픽 전체 git diff (`git diff` 기준: 에픽 첫 Story 커밋 이전 ~ 마지막 커밋) |
+| epic-review | tech-spec.md, conventions.md, 에픽 전체 git diff (`git log --oneline --grep="({STORY-ID-1}\|{STORY-ID-2}...)" --reverse`로 에픽 첫 Story 커밋을 찾고, 그 부모 커밋 ~ HEAD를 diff 범위로 사용) |
 
 ### 3. 모델 선택
 
@@ -137,10 +137,10 @@ Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. con
 #### epic-review 모드:
 
 1. `docs/reviews/{EPIC-ID}-review.md`에 저장한다.
-   - 수정 재실행(modification)으로 재리뷰하는 경우: 기존 파일을 **덮어쓴다** (이전 리뷰는 git 이력에 보존됨).
+   - 수정 재실행(modification)으로 재리뷰하는 경우: 기존 파일을 **덮어쓴다** (이전 리뷰는 git 이력에 보존됨). sprint-status.yaml의 모든 done Story의 `review_blockers`/`review_recommended`도 새로 계산하여 덮어쓴다.
 2. sprint-status.yaml 업데이트 (CLAUDE.md의 **Read-yq-Verify** 프로토콜, `yq -i` 명령어 사용):
    - 에픽 내 각 Story의 `review_blockers`, `review_recommended` 건수 기록
-   - **cross-story 귀속 규칙**: 여러 Story에 걸친 발견 사항(네이밍 불일치, 중복 유틸 등)은 가장 관련 높은 Story에 귀속한다. 특정 Story에 귀속할 수 없는 경우 에픽의 첫 번째 done Story에 귀속한다.
+   - **cross-story 귀속 규칙**: 여러 Story에 걸친 발견 사항(네이밍 불일치, 중복 유틸 등)은 가장 관련 높은 Story에 귀속한다. 특정 Story에 귀속할 수 없는 경우 에픽의 첫 번째 done Story에 귀속한다. **모든 Story가 skipped인 에픽에서는 review_blockers/review_recommended를 sprint-status.yaml에 기록하지 않는다** (귀속 대상 없음, review.md에만 기록).
    ```bash
    yq -i '
      .<SPRINT>.<EPIC>.<STORY>.review_blockers = 2 |
@@ -149,7 +149,7 @@ Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. con
    ```
 3. git commit: `docs({EPIC-ID}): review epic`
 4. Blocker 판정 및 종료:
-   - **Blocker 0건**: 에픽 내 모든 Story `review: approved`로 업데이트:
+   - **Blocker 0건**: 에픽 내 모든 `status: done` Story의 `review: approved`로 업데이트 (`status: skipped` Story는 bf-execute/bf-resume이 사람 "진행" 선택 시 처리):
      ```bash
      yq -i '.<SPRINT>.<EPIC>.<STORY>.review = "approved"' docs/sprint-status.yaml
      ```

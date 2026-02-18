@@ -21,6 +21,12 @@ description: Monitor 패턴으로 에픽 내 모든 Story의 구현을 조율한
 - `docs/conventions.md` (있으면)
 - 수정 재실행인 경우: `docs/reviews/{EPIC-ID}-modification.md` (사람의 수정 지시)
 
+## Error Handling
+
+- S/M Story agent 스폰 실패: 1회 재시도 후에도 실패 시 해당 Story를 stuck으로 처리 (`status: in_progress` 설정 후 stuck.md에 "agent spawn failed" 기록, `ralph_stuck: true` 설정). Done 신호에서 `"done (stuck: {STORY-ID})"` 목록에 포함하여 orchestrate가 `skipped`로 처리
+- L/XL Story Sub-Lead 스폰 실패: 단독 Sonnet agent로 fallback (S/M과 동일 방식)
+- sprint-status.yaml 쓰기 실패: CLAUDE.md의 Read-yq-Verify Recover 절차를 따른다 (git checkout → 1회 재시도 → 실패 시 orchestrate에 `"error: sprint-status update failed"` 보고)
+
 ## Instructions
 
 ### 1. 초기 로딩
@@ -135,8 +141,10 @@ sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따
     .<SPRINT>.<EPIC>.<STORY>.ralph_approaches = 2
   ' docs/sprint-status.yaml
   ```
-- stuck.md를 저장한다.
+- stuck.md를 `docs/reviews/{STORY-ID}-stuck.md`에 저장한다.
+- git commit: `docs({STORY-ID}): record stuck report`
 - **다른 Story들은 계속 진행한다** (stuck Story가 있어도 나머지를 중단하지 않음).
+- **stuck Story의 `status`는 변경하지 않는다** — orchestrate가 자동 판단 시 `skipped`로 변경한다.
 
 모든 Story가 완료(done 또는 stuck)될 때까지 대기한다.
 

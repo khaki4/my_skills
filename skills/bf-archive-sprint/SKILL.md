@@ -23,13 +23,13 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 ## Error Handling
 
 - sprint-status.yaml 미존재: "sprint-status.yaml이 없습니다. `/bf-execute`로 워크플로우를 먼저 실행하세요." 안내
-- 미완료 에픽 존재 (e2e가 `pending` 또는 `failed`): "미완료 에픽이 있습니다: {에픽 목록}. `/bf-execute` 또는 `/bf-resume`으로 먼저 완료하세요." 안내
+- 미완료 에픽 존재 (e2e가 `pending`): "미완료 에픽이 있습니다: {에픽 목록}. `/bf-execute` 또는 `/bf-resume`으로 먼저 완료하세요." 안내
 - Story review가 `approved`가 아닌 경우: "{Story} 리뷰가 미승인입니다. `/bf-execute`에서 에픽 결과를 확인하고 '진행'을 선택하세요." 안내
 
 ## Instructions
 
 1. sprint-status.yaml을 확인한다:
-   - 모든 에픽의 e2e가 terminal state인지 검증 (`passed` | `escalated` | `max-regression-cycles` | `skipped`). `pending` 또는 `failed`이면 실행 중단
+   - 모든 에픽의 e2e가 terminal state인지 검증 (`passed` | `escalated` | `max-regression-cycles` | `skipped`). `pending`이면 실행 중단
    - 모든 Story의 review가 `approved`인지 검증
    - 미완료 에픽이 있으면 실행 중단 및 안내
 
@@ -38,6 +38,7 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - `docs/tech-specs/` → `docs/archive/{SPRINT-XX}/tech-specs/`
    - `docs/reviews/` → `docs/archive/{SPRINT-XX}/reviews/` (존재하는 경우)
    - `docs/sprint-status.yaml` → `docs/archive/{SPRINT-XX}/sprint-status.yaml`
+   - `docs/conventions.md` → `docs/archive/{SPRINT-XX}/conventions.md` (복사, 이동 아님 — 시점 스냅샷 보존용)
 
 3. CLAUDE.md의 `## Changelog` 섹션에 append-only로 기록한다 (섹션이 없으면 파일 끝에 생성):
    - 아래 포맷을 따른다:

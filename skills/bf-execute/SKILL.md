@@ -68,9 +68,12 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 | story-2 | done | M | 2 | - |
 | story-3 | skipped (stuck) | L | 5 | stuck.md 참조 |
 
-### E2E: {passed | escalated | max-regression-cycles}
+### E2E: {passed | skipped | escalated | max-regression-cycles}
 ### Integration Review: Blockers {N}건, Recommended {N}건
 ### 상세: docs/reviews/{EPIC-ID}-review.md
+
+> ⚠️ (모든 Story가 skipped인 경우에만 표시)
+> 이 에픽의 모든 Story가 skipped(stuck) 상태입니다. 진행 시 해당 기능이 구현되지 않은 상태로 넘어갑니다.
 
 진행하시겠습니까?
 1. 다음 에픽으로 진행
