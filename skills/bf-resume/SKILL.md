@@ -58,7 +58,9 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 **b) `status: in_progress`인 Story가 있는 경우:**
 - git status로 uncommitted 변경사항 확인
-- 변경사항 있음: 사용자에게 "이전 진행 중이던 {STORY-ID}의 미커밋 변경사항이 있습니다. 이어서 진행하시겠습니까?" 확인
+- 변경사항 있음: 사용자에게 "이전 진행 중이던 {STORY-ID}의 미커밋 변경사항이 있습니다." 확인 후 처리:
+  - **"변경사항 유지"** (기본): `git stash`로 보관 → `status: todo`, `tdd: pending`으로 리셋 → 에픽 재개 시 새 agent가 처음부터 구현 (stash는 사람이 필요 시 수동 복원)
+  - **"변경사항 폐기"**: `git checkout -- .`으로 미커밋 변경 제거 → `status: todo`, `tdd: pending`으로 리셋
 - 변경사항 없음: git log에서 해당 Story ID 커밋 존재 여부 확인
   ```bash
   git log --oneline --grep="{STORY-ID}" | head -1
@@ -142,6 +144,13 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 사람의 선택에 따라:
 
 **1. 다음 에픽으로 진행:**
+- 해당 에픽의 사람 수용 상태를 sprint-status.yaml에 반영한다 (`yq -i` 사용):
+  - `status: skipped`인 Story의 `review`를 `"approved"`로 설정 (사람이 skip을 수용)
+  - `review: pending`인 `status: done` Story의 `review`를 `"approved"`로 설정 (사람이 Blocker를 수용)
+  ```bash
+  yq -i '.<SPRINT>.<EPIC>.<SKIPPED-STORY>.review = "approved"' docs/sprint-status.yaml
+  yq -i '.<SPRINT>.<EPIC>.<DONE-STORY>.review = "approved"' docs/sprint-status.yaml
+  ```
 - 다음 에픽의 6a로 이동한다.
 
 **2. 수정 후 재실행:**

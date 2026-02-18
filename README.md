@@ -63,6 +63,27 @@ npx skills add khaki4/my-skills --skill bf-spec -a claude-code
 npx skills add khaki4/my-skills -a claude-code -g
 ```
 
+## Quick Start
+
+```bash
+# 1. 스킬 설치
+npx skills add khaki4/my-skills -a claude-code
+
+# 2. 프로젝트 디렉토리에서 Claude Code 실행
+cd your-project
+
+# 3. AC 문서로 Tech Spec 작성 + 자동 리뷰
+/bf-spec
+
+# 4. Tech Spec 승인 후 구현 시작 (Plan → Epic Loop 자동 진행)
+/bf-execute
+
+# 5. 완료 후 아카이빙
+/bf-archive-sprint
+```
+
+사람 판단은 2회만 요구된다: **Spec 승인** (`/bf-spec` 후)과 **Epic 결과 확인** (`/bf-execute` 중 각 에픽 완료 시).
+
 ## 설계 원칙
 
 1. **상위 에이전트는 중간 과정을 모른다** — 컨텍스트 격리

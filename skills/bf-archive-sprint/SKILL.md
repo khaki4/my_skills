@@ -16,14 +16,14 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 
 ## Prerequisites
 
-- sprint-status.yaml 존재 및 모든 에픽 `e2e: passed`, 모든 Story `review: approved`
+- sprint-status.yaml 존재 및 모든 에픽의 e2e가 terminal state (`passed` | `escalated` | `max-regression-cycles` | `skipped`), 모든 Story `review: approved` (skipped Story 포함 — bf-execute/bf-resume가 사람 "진행" 선택 시 자동 설정)
 - `docs/stories/`, `docs/tech-specs/` 디렉토리 존재
 - CLAUDE.md 파일 존재 (changelog 기록용)
 
 ## Instructions
 
 1. sprint-status.yaml을 확인한다:
-   - 모든 에픽의 e2e가 `passed`인지 검증
+   - 모든 에픽의 e2e가 terminal state인지 검증 (`passed` | `escalated` | `max-regression-cycles` | `skipped`). `pending` 또는 `failed`이면 실행 중단
    - 모든 Story의 review가 `approved`인지 검증
    - 미완료 에픽이 있으면 실행 중단 및 안내
 

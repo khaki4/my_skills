@@ -77,6 +77,15 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 사람의 선택에 따라:
 
 **1. 다음 에픽으로 진행:**
+- 해당 에픽의 사람 수용 상태를 sprint-status.yaml에 반영한다 (`yq -i` 사용):
+  - `status: skipped`인 Story의 `review`를 `"approved"`로 설정 (사람이 skip을 수용)
+  - `review: pending`인 `status: done` Story의 `review`를 `"approved"`로 설정 (사람이 Blocker를 수용)
+  ```bash
+  # skipped Story review 정리
+  yq -i '.<SPRINT>.<EPIC>.<SKIPPED-STORY>.review = "approved"' docs/sprint-status.yaml
+  # Blocker 수용 — done Story의 pending review를 approved로 전환
+  yq -i '.<SPRINT>.<EPIC>.<DONE-STORY>.review = "approved"' docs/sprint-status.yaml
+  ```
 - 다음 에픽의 3a로 이동한다.
 
 **2. 수정 후 재실행:**

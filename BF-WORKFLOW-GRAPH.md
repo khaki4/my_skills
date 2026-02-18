@@ -502,6 +502,8 @@ Review agent 모델:
 
 **사람 판단은 2종류만 존재한다.** 시스템 내부 에이전트는 사람과 절대 직접 소통하지 않는다.
 
+**"진행" 선택 시 상태 정리:** 사람이 "다음 에픽으로 진행"을 선택하면, bf-execute/bf-resume가 해당 에픽의 sprint-status.yaml을 정리한다: skipped Story의 `review: approved`, Blocker 수용 시 done Story의 `review: approved`. 이는 archive 전제조건 충족을 보장한다.
+
 전체 워크플로우 사람 판단 횟수: **① + 에픽 수**
 
 ---
@@ -512,5 +514,5 @@ Review agent 모델:
 |------|-----------|----------|------|------|
 | bf-lead-orchestrate | sequence | tech-spec, sprint-status | 모드 기반 자율 실행 (plan/epic). 사람 소통 없음 | 항상 Opus |
 | bf-lead-plan | distribute | tech-spec, conventions | 에픽/스토리 구조 결정, 병렬 분배 + 취합 | 항상 Opus |
-| bf-lead-implement | monitor | story 문서, conventions, sprint-status, review.md(수정 시) | agent 스폰 + "done"/"stuck" 수신 + sprint-status 업데이트 | Opus/Sonnet |
+| bf-lead-implement | monitor | story 문서, conventions, sprint-status, modification.md(수정 시) | agent 스폰 + "done"/"stuck" 수신 + sprint-status 업데이트 | Opus/Sonnet |
 | bf-lead-review | discourse | tech-spec, conventions, 전체 diff | 자기 완결적 review.md 생성. 사람 소통 없음 | Opus/Sonnet |

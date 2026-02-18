@@ -66,13 +66,16 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 전달받은 `epic_id`의 에픽을 자율 실행한다. E1 → E2 → E3 순차 진행.
 
-### E0. Modification 처리 (modification.md가 전달된 경우)
+### E0. 초기 정리 및 Modification 처리
 
+**a) Orphan regression story 정리 (항상 실행):**
+에픽 내 `is_regression: true`이고 `status: todo`인 Story를 `status: skipped`로 변경한다. 이전 E2E 실행 중 중단으로 생성된 orphan regression story를 정리하여 불필요한 재실행을 방지한다.
+```bash
+yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-status.yaml
+```
+
+**b) Modification 처리 (modification.md가 전달된 경우에만):**
 - modification.md를 읽어 수정 대상 Story를 파악한다.
-- **이전 실행의 regression story 정리**: 에픽 내 `is_regression: true`이고 `status: todo`인 Story를 `status: skipped`로 변경한다. 이전 regression의 원인이 modification으로 해소되었을 수 있으므로 불필요한 재실행을 방지한다.
-  ```bash
-  yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-status.yaml
-  ```
 - 해당 Story의 status를 `in_progress`로 변경:
   ```bash
   yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml
@@ -92,7 +95,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - 전달 정보:
   - 에픽 ID, Story 문서 경로 목록 (status가 `todo` 또는 `in_progress`인 Story만)
   - conventions.md 경로
-  - modification.md 또는 review.md 경로 (있으면)
+  - modification.md 경로 (수정 재실행인 경우)
 - 수신 대기: `"done"` 또는 `"done (stuck: {STORY-ID}, ...)"` + sprint-status.yaml 경로
 
 **수신 후 자동 판단 (stuck):**

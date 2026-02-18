@@ -24,7 +24,7 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 ### 1. 초기 로딩
 
 - `docs/tech-specs/{TICKET}-tech-spec.md` 읽기
-- `docs/conventions.md` 읽기 (있으면)
+- `docs/conventions.md` 읽기 (있으면) — 기존 도메인/아키텍처 규칙을 난이도 판정과 Story 분리 기준에 반영
 
 ### 2. Epic 도출
 
@@ -54,6 +54,8 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 | M (Medium) | 2~3 파일, 모듈 간 연결 있음 |
 | L (Large) | 다수 파일, 아키텍처 영향 큼 |
 | XL (Complex) | 크로스 레이어, 보안/성능 고려, 설계 판단 포함 |
+
+- `docs/conventions.md`에 아키텍처 규칙이 정의되어 있으면, 해당 규칙의 영향을 받는 Story의 난이도를 상향 조정한다 (예: 컨벤션에 엄격한 보안 규칙이 있으면 관련 Story를 M→L로).
 
 ### 5. Story 문서 작성 (Distribute Pattern)
 

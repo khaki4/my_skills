@@ -19,7 +19,7 @@ description: Monitor 패턴으로 에픽 내 모든 Story의 구현을 조율한
 - Story 파일: `docs/stories/{TICKET}-story-*.md` (현재 에픽 소속)
 - `docs/sprint-status.yaml`
 - `docs/conventions.md` (있으면)
-- 수정 지시가 있는 경우: `docs/reviews/{EPIC-ID}-review.md`의 수정 지시 섹션
+- 수정 재실행인 경우: `docs/reviews/{EPIC-ID}-modification.md` (사람의 수정 지시)
 
 ## Instructions
 
@@ -32,7 +32,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 - 현재 에픽에 속한 모든 Story 문서를 읽는다.
 - `docs/conventions.md`를 읽는다.
-- 수정 재구현인 경우: `review.md`의 수정 지시 섹션을 읽는다.
+- 수정 재실행인 경우: `modification.md`를 읽어 수정 지시와 대상 Story를 확인한다.
 - `docs/sprint-status.yaml`을 읽어서 각 Story의 난이도와 상태를 확인한다.
   - `status: done`인 Story는 건너뛴다.
   - `status: todo` 또는 `in_progress`인 Story만 대상으로 한다.
@@ -53,7 +53,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - Agent에게 전달하는 정보:
   - Story 문서 내용 (AC, Technical Notes)
   - `docs/conventions.md` 경로
-  - 수정 지시가 있는 경우: review.md의 해당 Story 수정 지시 원문
+  - 수정 재실행인 경우: modification.md의 해당 Story 수정 지시 원문
   - Ralph Loop 지침 (아래 "Story Agent용 Ralph Loop 지침" 참조)
   - **"sprint-status.yaml을 수정하지 말 것"**
   - **"`"done"` + commit hash + retry_count + approaches_count 또는 `"stuck"` + stuck.md + retry_count + approaches_count로 보고할 것"**

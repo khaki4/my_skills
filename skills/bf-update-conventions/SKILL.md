@@ -1,13 +1,13 @@
 ---
 name: bf-update-conventions
-description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 conventions.md와 OCR 룰에 반영한다. 자기 강화 루프의 축적 단계로, 다음 스프린트의 리뷰 품질을 높인다.
+description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 conventions.md에 반영한다. Convention Guard의 규칙 소스를 축적하여 다음 스프린트의 리뷰 품질을 높인다.
 ---
 
 # Update Conventions
 
 ## Overview
 
-스프린트 완료 후, 코드 리뷰에서 발견된 패턴과 교훈을 docs/conventions.md와 OCR 룰에 축적한다.
+스프린트 완료 후, 코드 리뷰에서 발견된 패턴과 교훈을 docs/conventions.md에 축적한다. conventions.md는 Convention Guard (Open Code Review 기반 리뷰)의 단일 규칙 소스이다.
 
 ## When to Use
 

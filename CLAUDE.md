@@ -200,7 +200,7 @@ SPRINT-XX:
 - **status**: `todo` → `in_progress` → `done` (stuck Story를 orchestrate가 자동 skip 시 `skipped`)
 - **tdd**: `pending` → `done`
 - **review**: `pending` → `approved`
-- **e2e**: `pending` → `passed` | `skipped` | `escalated` | `max-regression-cycles`
+- **e2e**: `pending` → `passed` | `skipped` | `escalated` | `max-regression-cycles` (terminal states: passed/skipped/escalated/max-regression-cycles)
 
 메트릭 필드 값 (하위 agent가 기록, 기본값으로 초기화):
 - **model_used**: `null` → `"sonnet"` | `"opus-lead"` | `"opus-lead+3"` (bf-lead-implement 기록)
@@ -224,6 +224,7 @@ SPRINT-XX:
 | E2E agent | 쓰기 | `e2e: passed`, failure tag, regression story 추가 |
 | bf-lead-review | 쓰기 | review 상태, blocker/recommended 수 |
 | bf-lead-orchestrate | 페이즈 전환 쓰기 | status 전환 (in_progress, skipped), `e2e: escalated`/`max-regression-cycles`, orphan regression story skip |
+| bf-execute / bf-resume | 사람 판단 결과 쓰기 | 사람이 "진행" 선택 시: skipped Story `review: approved`, Blocker 수용 시 done Story `review: approved` |
 
 ### sprint-status.yaml 업데이트 프로토콜
 
