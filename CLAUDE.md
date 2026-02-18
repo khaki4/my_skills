@@ -47,7 +47,7 @@ Model selection for bf-lead-implement and bf-lead-review: Opus if L/XL stories i
 
 The BF workflow executes in this sequence:
 
-1. **`/bf-spec`** → Human provides AC + Slack context → Tech Spec creation
+1. **`/bf-spec`** → Human provides AC document → Tech Spec creation
 2. **`bf-lead-review`** (auto, tech-spec mode) → Agent Teams multi-perspective review
 3. **Human judgment ①: Spec approval** → Approve or request revisions
 4. **`/bf-execute`** → Human-system boundary hub, epic-level loop:

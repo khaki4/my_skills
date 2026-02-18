@@ -1,13 +1,13 @@
 ---
 name: bf-spec
-description: AC와 Slack 논의를 입력받아 Tech Spec을 작성하고, 자동으로 bf-lead-review를 통해 다관점 리뷰를 수행한다. BF 워크플로우 진입점.
+description: AC 문서를 입력받아 Tech Spec을 작성하고, 자동으로 bf-lead-review를 통해 다관점 리뷰를 수행한다. BF 워크플로우 진입점.
 ---
 
 # BF Spec (Entry Point)
 
 ## Overview
 
-BF 워크플로우의 진입점이다. 기획자가 제공한 AC와 Slack 논의를 기반으로 Tech Spec을 작성하고, 자동으로 `bf-lead-review`를 스폰하여 다관점 리뷰를 수행한다. 리뷰 결과를 사람에게 제시하여 승인 여부를 판단하게 한다 (사람 개입 ①).
+BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기반으로 Tech Spec을 작성하고, 자동으로 `bf-lead-review`를 스폰하여 다관점 리뷰를 수행한다. 리뷰 결과를 사람에게 제시하여 승인 여부를 판단하게 한다 (사람 개입 ①).
 
 ## When to Use
 
@@ -17,15 +17,14 @@ BF 워크플로우의 진입점이다. 기획자가 제공한 AC와 Slack 논의
 ## Prerequisites
 
 - 워크플로우 진입점이므로 별도 전제조건 없음
-- 사용자가 기획자 AC 또는 변경 요청 내용을 준비한 상태여야 함
+- 사용자가 AC 문서 또는 변경 요청 내용을 준비한 상태여야 함
 
 ## Instructions
 
 ### 1. 입력 수집
 
 사용자에게 다음 입력을 요청한다:
-- 기획자 AC 문서 또는 내용
-- Slack 논의 요약 (있으면)
+- AC 문서 또는 내용
 - 관련 Jira 티켓 번호
 
 ### 2. 코드베이스 분석
