@@ -50,11 +50,13 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 #### S/M Story → 단독 Agent (Sonnet)
 
 - Story당 1개의 Sonnet agent를 스폰한다.
+- `.ralph-progress/{STORY-ID}.json`이 존재하면 초기 retry_count/approaches_count를 해당 파일에서 읽어 전달한다 (이전 중단 복구 시).
 - Agent에게 전달하는 정보:
   - Story 문서 내용 (AC, Technical Notes)
   - `docs/conventions.md` 경로
   - 수정 재실행인 경우: modification.md의 해당 Story 수정 지시 원문
   - Ralph Loop 지침 (아래 "Story Agent용 Ralph Loop 지침" 참조)
+  - 기존 retry_count/approaches_count (있으면 — 이전 중단에서 복구된 값)
   - **"sprint-status.yaml을 수정하지 말 것"**
   - **"`"done"` + commit hash + retry_count + approaches_count 또는 `"stuck"` + stuck.md + retry_count + approaches_count로 보고할 것"**
 
@@ -94,6 +96,13 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 - Story 문서의 Technical Notes에서 변경 대상 파일을 확인한다.
 - **파일 겹침 없음 + 의존성 없음**: 병렬 실행
 - **파일 겹침 또는 Dependencies 명시**: 순차 실행 (의존 순서대로)
+
+**공유 파일 충돌 방지:**
+- 다음 파일은 "겹침"으로 간주한다 (병렬 실행 시 반드시 순차 처리):
+  - Lock 파일: `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Gemfile.lock`, `poetry.lock`, `go.sum`
+  - 공유 설정: `tsconfig.json`, `webpack.config.*`, `vite.config.*`, `.env.*`
+  - 자동 생성 파일: `schema.prisma` → `@prisma/client`, DB migration 파일
+- Story agent가 lock 파일을 변경해야 하는 경우 (새 의존성 설치 등): 해당 Story를 병렬 그룹에서 분리하여 단독 또는 순차 실행
 
 ### 5. 모니터링 루프
 
@@ -181,7 +190,21 @@ Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 �
   3. 구현 전략을 근본적으로 변경 (다른 알고리즘/패턴 적용)
 - `approaches_count`를 0부터 시작하여 전환 시마다 1 증가.
 
-**c) 한도 초과 시 → "stuck" 보고**
+**c) 진행 상태 파일 기록 (크래시 복구용)**
+- 매 재시도 후 `.ralph-progress/{STORY-ID}.json`에 현재 상태를 기록한다:
+  ```json
+  {
+    "retry_count": 2,
+    "approaches_count": 1,
+    "last_error_type": "TypeError",
+    "last_error_file": "src/auth/login.ts"
+  }
+  ```
+- 이 파일은 에이전트 크래시 후 bf-resume이 재개할 때 Ralph Loop 카운트를 복원하는 데 사용된다.
+- Story 완료("done") 또는 stuck 보고 후 해당 파일을 삭제한다.
+- **sprint-status.yaml은 여전히 수정하지 않는다** — 이 파일은 ralph-progress 전용이다.
+
+**d) 한도 초과 시 → "stuck" 보고**
 - `retry_count >= 5`에 도달하면 루프를 즉시 중단한다.
 - **stuck.md를 작성한다:**
 
@@ -202,6 +225,7 @@ Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 �
 {변경 파일 목록}
 ```
 
+- `.ralph-progress/{STORY-ID}.json` 삭제
 - Lead에 보고: `"stuck"` + stuck.md 경로
 - `retry_count`, `approaches_count`를 함께 보고한다.
 

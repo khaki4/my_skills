@@ -23,6 +23,12 @@ Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다
 - **tech-spec 모드**: `docs/tech-specs/{TICKET}-tech-spec.md` 존재
 - **epic-review 모드**: 해당 에픽의 모든 Story `status: done`, E2E `passed` 또는 `escalated` 또는 `max-regression-cycles`
 
+## Error Handling
+
+- tech-spec 파일 미존재: `"error: tech-spec not found"` 신호를 스폰한 상위 에이전트에 전달 후 종료
+- conventions.md 미존재 (epic-review 모드): Convention Guard를 "conventions.md가 없으므로 일반 코드 품질 기준으로 검사" 모드로 실행. 결과에 "conventions.md 미존재로 기본 규칙 적용" 명시
+- git diff 추출 실패: 에픽 첫 Story 커밋을 찾을 수 없으면 `HEAD~{story_count}..HEAD` 범위로 fallback. 그래도 실패 시 `"error: diff extraction failed"` 보고
+
 ## Instructions
 
 ### 1. 모드 감지

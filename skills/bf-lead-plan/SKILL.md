@@ -19,6 +19,12 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 - 승인된 Tech Spec: `docs/tech-specs/{TICKET}-tech-spec.md`
 - Tech Spec 리뷰 통과 (사람 개입 ① 완료)
 
+## Error Handling
+
+- Tech Spec 파일 미존재: `"error: tech-spec not found at {경로}"` 신호를 orchestrate에 전달 후 종료
+- Story Creator 스폰 실패: Lead가 직접 Story 문서를 작성 (4개 이하일 때와 동일하게 순차 처리)
+- conventions.md 미존재: 경고만 표시하고 난이도 태깅은 기본 기준으로 진행 (컨벤션 영향도 반영 불가)
+
 ## Instructions
 
 ### 1. 초기 로딩

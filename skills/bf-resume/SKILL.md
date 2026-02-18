@@ -17,8 +17,15 @@ description: 중단된 BF 워크플로우를 복구한다. sprint-status.yaml에
 
 ## Prerequisites
 
-- `docs/sprint-status.yaml` 존재 — 미존재 시 "진행 중인 스프린트가 없습니다. `/bf-spec`으로 새 워크플로우를 시작하세요." 안내
+- `docs/sprint-status.yaml` 존재
 - `docs/tech-specs/{TICKET}-tech-spec.md` 존재
+
+## Error Handling
+
+- sprint-status.yaml 미존재: "진행 중인 스프린트가 없습니다. `/bf-spec`으로 새 워크플로우를 시작하세요." 안내
+- tech-spec 미존재: "Tech Spec 파일이 없습니다. `/bf-spec`으로 먼저 Tech Spec을 작성하세요." 안내
+- `--from`에 존재하지 않는 EPIC-ID 지정: "에픽 '{EPIC-ID}'이(가) sprint-status.yaml에 없습니다. 사용 가능한 에픽: {에픽 목록}" 안내
+- yq 미설치: "yq가 설치되지 않았습니다. `brew install yq` (macOS) 또는 https://github.com/mikefarah/yq#install (Linux)로 설치하세요." 안내
 
 ## Instructions
 
@@ -33,21 +40,21 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 ### 2. --from 옵션 처리
 
-`--from {EPIC-ID}` 옵션이 주어진 경우:
-- 해당 에픽 내 `done`이 아닌 Story를 찾아 `status`를 `todo`로 리셋 (tdd, review도 초기화):
+`--from {EPIC-ID}` 옵션이 주어진 경우 **해당 에픽 전체를 처음부터 재실행**한다:
+- 해당 에픽 내 **모든** Story (done 포함)의 `status`를 `todo`로, `tdd`를 `pending`으로, `review`를 `pending`으로 리셋:
   ```bash
-  yq -i '
-    .<SPRINT>.<EPIC>.<STORY>.status = "todo" |
-    .<SPRINT>.<EPIC>.<STORY>.tdd = "pending" |
-    .<SPRINT>.<EPIC>.<STORY>.review = "pending"
-  ' docs/sprint-status.yaml
+  # 에픽 내 모든 Story를 리셋 (done 포함)
+  yq -i '.<SPRINT>.<EPIC>.[] | select(has("status")) | .status = "todo" | .tdd = "pending" | .review = "pending"' docs/sprint-status.yaml
   ```
 - 에픽의 e2e 상태도 `pending`으로 리셋:
   ```bash
   yq -i '.<SPRINT>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
   ```
+- `.ralph-progress/{EPIC-ID}/` 디렉토리가 있으면 삭제 (이전 Ralph Loop 진행 파일 정리).
 - 메트릭 필드는 보존한다 (이전 시도의 기록).
 - 재개 지점을 **해당 에픽**으로 설정한다.
+
+> **참고**: `--from`은 에픽 전체 재실행이다. 미완료 Story만 재실행하려면 `--from` 없이 실행하면 자동 판별된다.
 
 ### 3. 자동 재개 지점 판별
 
@@ -59,14 +66,23 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 **b) `status: in_progress`인 Story가 있는 경우:**
 - git status로 uncommitted 변경사항 확인
 - 변경사항 있음: 사용자에게 "이전 진행 중이던 {STORY-ID}의 미커밋 변경사항이 있습니다." 확인 후 처리:
-  - **"변경사항 유지"** (기본): `git stash`로 보관 → `status: todo`, `tdd: pending`으로 리셋 → 에픽 재개 시 새 agent가 처음부터 구현 (stash는 사람이 필요 시 수동 복원)
-  - **"변경사항 폐기"**: `git checkout -- .`으로 미커밋 변경 제거 → `status: todo`, `tdd: pending`으로 리셋
+  - **"변경사항 유지"** (기본): Story별 브랜치에 보관한다:
+    ```bash
+    git checkout -b bf-stash/{STORY-ID}
+    git add -A && git commit -m "wip({STORY-ID}): interrupted work backup"
+    git checkout {원래-브랜치}
+    ```
+    사용자에게 "`bf-stash/{STORY-ID}` 브랜치에 백업했습니다. 필요 시 `git cherry-pick`으로 복원 가능합니다." 안내
+  - **"변경사항 폐기"**: `git checkout -- .`으로 미커밋 변경 제거
+  - 어느 경우든 `status: todo`, `tdd: pending`으로 리셋 → 에픽 재개 시 새 agent가 처음부터 구현
+  - 복수 Story가 동시에 in_progress인 경우: 각 Story별로 변경 파일을 식별하여 개별 브랜치에 보관. 파일 귀속이 불분명하면 `bf-stash/mixed-{EPIC-ID}`에 전체 보관
 - 변경사항 없음: git log에서 해당 Story ID 커밋 존재 여부 확인
   ```bash
   git log --oneline --grep="{STORY-ID}" | head -1
   ```
-  - **커밋 존재**: agent가 커밋 후 보고 전에 중단된 것. `status: done`, `tdd: done`으로 설정
+  - **커밋 존재**: agent가 커밋 후 보고 전에 중단된 것 (Lead 크래시 포함). `status: done`, `tdd: done`으로 설정. `.ralph-progress/{STORY-ID}.json`이 있으면 해당 메트릭을 sprint-status.yaml에 반영
   - **커밋 미존재**: 구현이 시작되지 않았거나 중간에 중단된 것. `status: todo`, `tdd: pending`, `review: pending`으로 리셋
+- `.ralph-progress/` 디렉토리에 해당 Story 진행 파일이 있으면 삭제 (리셋 Story만)
 - 재개 지점: **해당 에픽**
 
 **c) 미완료 에픽이 있는 경우 (일부 Story가 `todo`이거나 e2e/review가 미완):**
@@ -96,7 +112,7 @@ skipped(stuck) Story가 있으면 함께 표시한다. 이전 실행에서 이�
 사용자 확인 후, 재개 지점에 따라:
 
 **Plan 미완:**
-- orchestrate (plan 모드) 스폰 (`model: opus`)
+- orchestrate (plan 모드) 스폰 (`model: sonnet` — plan 모드는 단순 라우터 역할)
 - 전달: tech-spec 경로, conventions.md 경로
 - 수신 후: sprint-status.yaml의 에픽/스토리 구조를 사람에게 제시
 - 이후 에픽 루프 진입 (Step 6)

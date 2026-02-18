@@ -41,12 +41,14 @@ description: 문제를 분석하여 Agent Teams를 자동 구성하고, 4가지 
 
 #### 4가지 조율 패턴
 
-| 패턴 | 핵심 동작 | 적합한 문제 유형 |
-|------|----------|-----------------|
-| **distribute** | Lead가 작업을 분배 → 각 agent가 독립 수행 → Lead가 취합 | 병렬 구현, 대규모 리서치, 문서 생성 |
-| **monitor** | Lead가 agent를 스폰하고 진행 상황 모니터링 + 에스컬레이션 처리 | TDD 구현, 장시간 작업, 단계적 빌드 |
-| **discourse** | 독립 분석 → 교차 검증 → 합의/미합의 분리 | 코드 리뷰, 설계 의사결정, 아키텍처 분석 |
-| **sequence** | Lead가 단계별로 순차 트리거, 분기만 수행 | 멀티 페이즈 파이프라인, 의존성 체인 |
+> 이 패턴은 BF Workflow의 Lead 스킬들과 공유한다. Canonical definition: [CLAUDE.md — 조율 패턴](../../CLAUDE.md#조율-패턴)
+
+| 패턴 | 핵심 동작 | 적합한 문제 유형 | BF Lead |
+|------|----------|-----------------|---------|
+| **distribute** | Lead가 작업을 분배 → 각 agent가 독립 수행 → Lead가 취합 | 병렬 구현, 대규모 리서치, 문서 생성 | bf-lead-plan |
+| **monitor** | Lead가 agent를 스폰하고 진행 상황 모니터링 + 에스컬레이션 처리 | TDD 구현, 장시간 작업, 단계적 빌드 | bf-lead-implement |
+| **discourse** | 독립 분석 → 교차 검증 → 합의/미합의 분리 | 코드 리뷰, 설계 의사결정, 아키텍처 분석 | bf-lead-review |
+| **sequence** | Lead가 단계별로 순차 트리거, 분기만 수행 | 멀티 페이즈 파이프라인, 의존성 체인 | bf-lead-orchestrate |
 
 **자동 추론 규칙:**
 

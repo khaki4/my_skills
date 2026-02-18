@@ -19,6 +19,13 @@ description: sprint-status.yaml의 메트릭 데이터를 분석하여 모델 �
 
 - `docs/sprint-status.yaml` 또는 `docs/archive/SPRINT-*/sprint-status.yaml` 중 하나 이상 존재
 - 분석 대상 Story에 메트릭 필드가 기록되어 있어야 함 (레거시 Story는 건너뜀)
+- **권장 실행 순서**: `/bf-archive-sprint` → `/bf-metrics` → `/bf-update-conventions`. 아카이빙 전에 실행해도 동작하지만, 아카이빙 후 실행하면 현재 + 아카이브 전체 데이터를 분석하여 더 정확한 결과를 제공
+
+## Error Handling
+
+- sprint-status.yaml도 archive도 없으면: "분석 가능한 스프린트 데이터가 없습니다. `/bf-execute`로 워크플로우를 먼저 실행하세요." 안내
+- 모든 Story가 레거시이면: "메트릭 필드가 기록된 Story가 없습니다. 현행 워크플로우(v2+)로 실행한 스프린트만 분석할 수 있습니다." 안내
+- 완료된 Story가 없으면: "완료(done) 상태의 Story가 없습니다. 진행 중인 스프린트의 분석은 완료 후 수행하세요." 안내
 
 ## Instructions
 

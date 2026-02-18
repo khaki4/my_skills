@@ -19,6 +19,12 @@ BF 워크플로우의 실행 진입점이자 **사람-시스템 경계 허브**�
 - 승인된 Tech Spec: `docs/tech-specs/{TICKET}-tech-spec.md`
 - Tech Spec 리뷰 통과 (사람 개입 ① 완료)
 
+## Error Handling
+
+- Tech Spec 미존재: "Tech Spec 파일이 없습니다. `/bf-spec`으로 먼저 Tech Spec을 작성하고 리뷰를 받으세요." 안내
+- Tech Spec 리뷰 미존재 (`docs/reviews/{TICKET}-tech-spec-review.md` 없음): "Tech Spec 리뷰가 수행되지 않았습니다. `/bf-spec`에서 리뷰를 포함한 전체 흐름을 실행하세요." 안내
+- orchestrate 스폰 실패: "에이전트 생성에 실패했습니다. 잠시 후 다시 시도하거나, Claude Code를 재시작하세요." 안내
+
 ## Instructions
 
 ### 1. 사전 확인
@@ -28,7 +34,7 @@ BF 워크플로우의 실행 진입점이자 **사람-시스템 경계 허브**�
 
 ### 2. Plan 단계 — orchestrate (plan 모드) 스폰
 
-- Task tool 사용, `model: opus`
+- Task tool 사용, `model: sonnet` (plan 모드는 단순 라우터 역할이므로 Sonnet으로 충분)
 - 전달: `mode: "plan"`, tech-spec 경로, conventions.md 경로 (있으면)
 - 수신 대기: `"done"` + sprint-status.yaml 경로 + stories/ 경로
 - 수신 후: sprint-status.yaml을 읽어 에픽/스토리 구조를 사람에게 제시한다.

@@ -309,7 +309,7 @@ orchestrate는 분석하지 않는다. 자동 정책에 따라 분기한다.
 |------|----------|
 | stuck 없음 | E2E로 진행 |
 | stuck Story + 비stuck Story 존재 | stuck Story skip, 나머지로 E2E |
-| 전 Story stuck | 모두 skip, E2E 진행 |
+| 전 Story stuck | 모두 skip, `e2e: skipped` 기록, review로 진행 (구현 없이 E2E 실행은 무의미) |
 
 ### E2E 자동 판단
 
@@ -426,12 +426,12 @@ lead-implement와 lead-review는 에픽 구성에 따라 모델이 달라진다.
 
 | Lead | Opus 조건 | Sonnet 조건 |
 |------|-----------|------------|
-| bf-lead-orchestrate | 항상 | — |
+| bf-lead-orchestrate | epic 모드 (자동 판단 정책 실행) | plan 모드 (단순 라우터) |
 | bf-lead-plan | 항상 | — |
 | bf-lead-implement | 에픽에 L/XL Story 포함 | S/M만 |
 | bf-lead-review | 에픽에 L/XL Story 포함 | S/M만 |
 
-orchestrate가 sprint-status.yaml의 난이도 태그를 읽고 모델을 결정한다.
+orchestrate가 sprint-status.yaml의 난이도 태그를 읽고 모델을 결정한다. bf-execute/bf-resume가 orchestrate 스폰 시 모드에 따라 모델을 지정한다.
 
 Story agent 모델:
 
@@ -441,6 +441,13 @@ Story agent 모델:
 | M | 단독 agent 1개 | Sonnet |
 | L | Lead(Opus) + Impl teammates | Opus + Sonnet |
 | XL | Lead(Opus) + 3+ teammates | Opus + Sonnet/Opus |
+
+E2E agent 모델:
+
+| 프로젝트 타입 | 모델 | 근거 |
+|-------------|------|------|
+| 브라우저 UI (React/Vue/Angular 등) | Opus | agent-browser 기반 복잡한 DOM 상호작용 |
+| API-only / CLI | Sonnet | curl/shell 기반 상대적 단순 |
 
 Review agent 모델:
 
@@ -512,7 +519,7 @@ Review agent 모델:
 
 | Lead | 조율 패턴 | 초기 로딩 | 역할 | 모델 |
 |------|-----------|----------|------|------|
-| bf-lead-orchestrate | sequence | tech-spec, sprint-status | 모드 기반 자율 실행 (plan/epic). 사람 소통 없음 | 항상 Opus |
+| bf-lead-orchestrate | sequence | tech-spec, sprint-status | 모드 기반 자율 실행 (plan/epic). 사람 소통 없음 | plan: Sonnet, epic: Opus |
 | bf-lead-plan | distribute | tech-spec, conventions | 에픽/스토리 구조 결정, 병렬 분배 + 취합 | 항상 Opus |
 | bf-lead-implement | monitor | story 문서, conventions, sprint-status, modification.md(수정 시) | agent 스폰 + "done"/"stuck" 수신 + sprint-status 업데이트 | Opus/Sonnet |
 | bf-lead-review | discourse | tech-spec, conventions, 전체 diff | 자기 완결적 review.md 생성. 사람 소통 없음 | Opus/Sonnet |

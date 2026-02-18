@@ -20,6 +20,12 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 - `docs/stories/`, `docs/tech-specs/` 디렉토리 존재
 - CLAUDE.md 파일 존재 (changelog 기록용)
 
+## Error Handling
+
+- sprint-status.yaml 미존재: "sprint-status.yaml이 없습니다. `/bf-execute`로 워크플로우를 먼저 실행하세요." 안내
+- 미완료 에픽 존재 (e2e가 `pending` 또는 `failed`): "미완료 에픽이 있습니다: {에픽 목록}. `/bf-execute` 또는 `/bf-resume`으로 먼저 완료하세요." 안내
+- Story review가 `approved`가 아닌 경우: "{Story} 리뷰가 미승인입니다. `/bf-execute`에서 에픽 결과를 확인하고 '진행'을 선택하세요." 안내
+
 ## Instructions
 
 1. sprint-status.yaml을 확인한다:

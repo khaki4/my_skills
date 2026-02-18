@@ -19,7 +19,13 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
 - 아카이브된 스프린트 존재: `docs/archive/{SPRINT-XX}/`
 - 아카이브 내 stories, tech-specs 디렉토리 존재
 - `docs/archive/{SPRINT-XX}/reviews/` 디렉토리 존재 (리뷰 결과 파일) — 미존재 시 git log에서 리뷰 관련 커밋 히스토리를 대안으로 분석
-- docs/conventions.md (없으면 신규 생성)
+- docs/conventions.md (없으면 신규 생성 — `/bf-spec`이 초기 seed를 생성했어야 하나, 미생성 시 이 스킬이 빈 템플릿으로 생성)
+- **권장 실행 순서**: `/bf-archive-sprint` → `/bf-metrics` (선택) → `/bf-update-conventions`. 아카이빙 후 실행해야 리뷰 결과에 접근 가능
+
+## Error Handling
+
+- 아카이브 디렉토리 미존재: "`docs/archive/`가 없습니다. `/bf-archive-sprint`를 먼저 실행하세요." 안내
+- 리뷰 파일도 git log도 분석할 데이터가 없으면: "분석할 리뷰 데이터가 없습니다. 스프린트 리뷰 이력이 없으면 건너뛰어도 됩니다." 안내
 
 ## Instructions
 

@@ -104,7 +104,7 @@ yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-statu
 |------|----------|
 | stuck 없음 | E2로 진행 |
 | stuck Story 있음 + 비stuck Story 존재 | stuck Story를 `status: skipped`로 변경, 나머지로 E2 진행 |
-| 전 Story stuck | 모두 `status: skipped`로 변경, E2 진행 (E2E는 제한적) |
+| 전 Story stuck | 모두 `status: skipped`로 변경, `e2e: skipped` 기록, E3 review로 직행 (done Story 0개이므로 E2E 무의미) |
 
 stuck Story를 skip 처리:
 ```bash
@@ -121,9 +121,14 @@ E2E 단계는 절대 건너뛰지 않는다. 모든 Story가 skipped여도, Stor
 
 > **done Story가 없는 에픽 처리**: sprint-status.yaml에 done인 Story가 없는 에픽은 E2E agent를 스폰하지 않고 E3로 진행한다.
 > - **Story 0개 에픽** (인프라 에픽 등): `e2e: passed`로 기록
-> - **전 Story skipped** (전체 stuck): `e2e: skipped`로 기록
+> - **전 Story skipped** (전체 stuck 포함): `e2e: skipped`로 기록. 구현이 없는 상태에서 E2E를 실행하면 무의미한 실패가 발생하므로 skip 처리
 
-E2E agent를 1개 스폰한다 (`model: sonnet`).
+E2E agent를 1개 스폰한다.
+
+**E2E agent 모델 선택:**
+- 기본: `model: sonnet`
+- 브라우저 UI 프로젝트 (React/Vue/Angular/Next.js 등): `model: opus` — agent-browser 기반 E2E는 복잡한 DOM 상호작용과 시나리오 판단이 필요
+- API-only / CLI 프로젝트: `model: sonnet` — curl/shell 기반 E2E는 상대적으로 단순
 전달 정보: 에픽 ID, Story 목록, tech-spec 경로, conventions.md 경로.
 
 E2E agent는 아래 **"E2E Agent 지침"**을 따른다.

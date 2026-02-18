@@ -38,12 +38,13 @@ BF workflow는 4개 Lead 스킬을 사용하며, 각각 고유한 조율 패턴�
 
 | Lead | 조율 패턴 | 역할 | 모델 |
 |------|----------|------|------|
-| **bf-lead-orchestrate** | Sequence | 모드 기반 자율 실행 (plan/epic). 사람 소통 없음 | 항상 Opus |
+| **bf-lead-orchestrate** | Sequence | 모드 기반 자율 실행 (plan/epic). 사람 소통 없음 | plan: Sonnet, epic: Opus |
 | **bf-lead-plan** | Distribute | Epic/Story 구조, 병렬 분배 + 취합 | 항상 Opus |
 | **bf-lead-implement** | Monitor | agent 스폰 + "done"/"stuck" 수신 + 상태 업데이트 | Opus/Sonnet |
 | **bf-lead-review** | Discourse | 자기 완결적 review.md 생성. 사람 소통 없음 | Opus/Sonnet |
 
-bf-lead-implement와 bf-lead-review 모델 선택: 에픽에 L/XL Story가 포함되면 Opus, S/M만이면 Sonnet.
+- **bf-lead-orchestrate**: plan 모드는 bf-lead-plan 스폰 후 결과를 전달하는 단순 라우터 역할이므로 Sonnet. epic 모드는 자동 판단 정책(stuck/E2E/review)을 실행하므로 Opus
+- **bf-lead-implement/bf-lead-review**: 에픽에 L/XL Story가 포함되면 Opus, S/M만이면 Sonnet
 
 ### 워크플로우 시퀀스
 
@@ -73,16 +74,16 @@ BF workflow는 다음 순서로 실행된다:
 
 - **`/bf-resume`** → 중단된 워크플로우 복구 (수동, bf-execute와 동일한 에픽 루프)
 
-### 조율 패턴
+### 조율 패턴 (Canonical Definition)
 
-| 패턴 | 핵심 동작 | 사용처 |
-|------|----------|--------|
-| **Distribute** | Lead가 작업 분할 → agent 병렬 실행 → Lead 취합 | bf-lead-plan, /teams |
-| **Monitor** | Lead가 agent 스폰 → "done"/"stuck" 모니터링 → 상태 업데이트 | bf-lead-implement, /teams |
-| **Discourse** | 독립 분석 → 교차 검증 → 합의/미합의 분리 | bf-lead-review, /teams |
-| **Sequence** | 단계별 트리거, 분기만, 분석 없음 | bf-lead-orchestrate, /teams |
+BF Lead 스킬과 범용 `/teams` 스킬이 공유하는 4가지 조율 패턴이다. `/teams` 스킬은 이 정의를 참조한다.
 
-이 패턴들은 범용 `/teams` 스킬에서도 사용 가능하다.
+| 패턴 | 핵심 동작 | BF 사용처 | /teams 사용 |
+|------|----------|----------|------------|
+| **Distribute** | Lead가 작업 분할 → agent 병렬 실행 → Lead 취합 | bf-lead-plan | 병렬 구현, 리서치 |
+| **Monitor** | Lead가 agent 스폰 → "done"/"stuck" 모니터링 → 상태 업데이트 | bf-lead-implement | TDD 구현, 장시간 작업 |
+| **Discourse** | 독립 분석 → 교차 검증 → 합의/미합의 분리 | bf-lead-review | 코드 리뷰, 설계 의사결정 |
+| **Sequence** | 단계별 트리거, 분기만, 분석 없음 | bf-lead-orchestrate | 멀티 페이즈 파이프라인 |
 
 ## 핵심 개념
 
@@ -123,8 +124,8 @@ BF workflow는 다음 순서로 실행된다:
 ### Agent Teams 패턴
 
 - **bf-execute가 사람 경계**: bf-execute만 사람과 소통. 내부 agent는 사람과 직접 소통 없음
-- **Epic 실행은 순차**: 에픽은 의존성 순서대로 하나씩
-- **Story 실행은 병렬**: 에픽 내 Story는 파일 겹침이 없으면 동시 실행 가능
+- **Epic 실행은 순차**: 에픽은 의존성 순서대로 하나씩. 향후 에픽 간 의존성이 없는 경우 병렬 실행 가능성을 검토할 수 있으나, 현재는 sprint-status.yaml 단일 쓰기 원칙과 복잡도 관리를 위해 순차 실행
+- **Story 실행은 병렬**: 에픽 내 Story는 파일 겹침이 없으면 동시 실행 가능. **단, lock 파일(package-lock.json 등), 공유 설정 파일, 자동 생성 파일은 "겹침"으로 간주**하여 관련 Story를 순차 실행 (상세: `bf-lead-implement/SKILL.md` 병렬 실행 규칙)
 - **Lead는 코드를 직접 만지지 않음**: bf-lead-implement는 모든 Story를 agent에게 위임
 - **sprint-status.yaml 단일 쓰기**: 현재 단계 담당 Lead만 쓰기
 - **orchestrate는 에픽 단위**: 에픽 당 1회 스폰, 결과 파일과 함께 종료
@@ -144,13 +145,16 @@ docs/
     {EPIC-ID}-review.md
     {EPIC-ID}-modification.md    # 사람 수정 지시 (재실행 시)
   sprint-status.yaml
-  conventions.md          # Convention Guard 규칙
+  conventions.md          # Convention Guard 규칙 (/bf-spec이 초기 seed 생성)
   archive/
     {SPRINT-XX}/
       tech-specs/
       stories/
       reviews/
       sprint-status.yaml
+
+.ralph-progress/          # Ralph Loop 크래시 복구용 (임시, .gitignore 권장)
+  {STORY-ID}.json
 
 tests/
   e2e/
@@ -243,6 +247,11 @@ sprint-status.yaml 업데이트 시 **Read-yq-Verify** 프로토콜을 따른다
 command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install and retry:"; echo "  macOS: brew install yq"; echo "  Linux: https://github.com/mikefarah/yq#install"; exit 1; }
 ```
 
+**yq Fallback 전략**: yq를 설치할 수 없는 환경에서는 다음 대안을 순서대로 시도:
+1. **Python fallback**: `python3 -c "import yaml; ..."` 로 YAML 업데이트 (PyYAML 필요)
+2. **Edit tool fallback**: Claude Code의 Edit tool로 sprint-status.yaml을 직접 편집. 이 경우 Verify 단계에서 Read tool로 변경을 확인
+3. Fallback 사용 시 결과에 "yq unavailable, used {fallback method}" 명시
+
 **yq 사용 예시:**
 ```bash
 # Story 상태 업데이트
@@ -257,55 +266,36 @@ yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 
 ### TDD 사이클 구현
 
-모든 Story는 엄격한 TDD를 따른다:
-1. AC 기반 단위 테스트 작성
-2. Red 확인 (테스트 실패)
-3. 코드 구현
-4. Green 확인 (테스트 통과) — 최대 5회 재시도, stuck detection 포함
-5. 필요 시 리팩토링
-6. Story 단위 git commit
+모든 Story는 엄격한 TDD (Red-Green-Refactor)를 따른다. 최대 5회 재시도, 동일 에러 2회 연속 시 접근 전환 (stuck detection). 크래시 복구를 위해 `.ralph-progress/{STORY-ID}.json`에 진행 상태를 기록한다.
+
+> 상세 Ralph Loop 지침 및 가드레일: `skills/bf-lead-implement/SKILL.md` — "Story Agent용 Ralph Loop 지침"
 
 ### Epic 통합 리뷰 (Open Code Review + Convention Guard)
 
-리뷰는 E2E 통과 후 **Epic 단위**로 수행된다 (Story 단위 아님):
+리뷰는 E2E 통과 후 **Epic 단위**로 수행된다 (Story 단위 아님). Convention Guard (필수) + 추가 리뷰어 (1-2명)가 Discourse 패턴으로 독립 분석 → 교차 검증 → 합의/미합의 분리. 자기 완결적 review.md를 생성하며 사람과의 실시간 Q&A 없음.
 
-- **Convention Guard** (필수): `docs/conventions.md` 준수 검사
-- **추가 리뷰어** (1-2명): 에픽 범위에 따라 Architecture, Security, Performance 선택
-- **Discourse 패턴**: 독립 분석 → 교차 검증 → 합의/미합의 분리
-- **자기 완결적 review.md**: 리뷰가 권장 사항과 미합의 쟁점에 대한 Lead 최종 판단을 포함한 review.md를 생성. 사람과의 실시간 Q&A 없음
-- 발견 사항 분류: Blocker, Recommended, Confirmed, 미합의 쟁점 (Lead 최종 판단 포함)
+> 상세 리뷰 프로세스 및 모드별 동작: `skills/bf-lead-review/SKILL.md`
 
 ### 쟁점 해소 프로토콜
 
-모든 Lead 스킬에서 팀메이트 간 의견 충돌 시 적용:
+모든 Lead 스킬과 `/teams` 스킬에서 팀메이트 간 의견 충돌 시 적용:
 1. **팀메이트 직접 대화**: SendMessage로 직접 반론/동의/보충 → 합의 결과를 Lead에 보고
 2. **미합의 시 Lead 중재**: Lead가 프로젝트 방향(tech-spec, conventions) 기준으로 결정
 3. **그래도 미합의 → 버림(기록)**: "미합의 쟁점"으로 결과에 포함, Lead 최종 판단 + 근거 기재, 토큰 소비 중단
 
+> 프로토콜 적용 상세: [BF-WORKFLOW-GRAPH.md — 쟁점 해소 프로토콜](./BF-WORKFLOW-GRAPH.md#쟁점-해소-프로토콜-모든-lead에-공통-적용)
+
 ### 에스컬레이션 프로토콜
 
-"stuck"은 중간 과정이 아니라 최종 상태이다. 각 층은 자기 범위에서 판단. orchestrate가 stuck Story를 자동 skip. 사람은 Epic 결과에서 확인.
+"stuck"은 중간 과정이 아니라 최종 상태이다. `Story agent → stuck.md → 종료 → bf-lead-implement가 나머지 계속 → orchestrate가 auto-skip → bf-execute가 사람에게 제시`. 전 Story stuck 시 `e2e: skipped` 처리.
 
-```
-Story agent → "stuck" + stuck.md → 종료
-bf-lead-implement → 나머지 Story 계속 진행 → orchestrate에 sprint-status.yaml + stuck.md와 함께 보고
-orchestrate → stuck Story auto-skip (status: skipped) → E2E → review 진행
-bf-execute → Epic 결과에 skipped Story 표시 → 사람이 수정 재실행(modification.md) / 진행 / 중단 결정
-```
+> 상세 에스컬레이션 체인: [BF-WORKFLOW-GRAPH.md — 에스컬레이션 프로토콜](./BF-WORKFLOW-GRAPH.md#에스컬레이션-프로토콜)
 
 ### 메트릭 및 최적화
 
-`/bf-metrics`는 sprint-status.yaml의 메트릭 데이터를 분석하여 워크플로우 최적화를 **제안**한다 (읽기 전용).
+`/bf-metrics`는 sprint-status.yaml의 메트릭 데이터를 분석하여 모델 배당 최적화 및 난이도 재태깅을 **제안**한다 (읽기 전용, 사람이 결정). 실행 순서: `/bf-archive-sprint` → `/bf-metrics` (선택) → `/bf-update-conventions`.
 
-- **제안만**: 모델 배당 변경이나 난이도 재태깅을 자동 적용하지 않음. 사람이 결정
-- **실행 시점**: `/bf-archive-sprint` 이후, `/bf-update-conventions` 이전 (선택)
-- **분석 범위**: 현재 + 아카이빙된 모든 스프린트의 완료 Story
-- **주요 분석**:
-  - (난이도, model_used) 쌍 집계 (retries, stuck rate, blockers, regression rate)
-  - 모델 배당 최적화 제안 (임계값 기반)
-  - 난이도 과대/과소 추정 재태깅 제안
-  - E2E failure tag 패턴 분석
-- **레거시 호환**: 메트릭 필드가 없는 이전 스프린트 Story는 건너뜀
+> 상세 분석 기준 및 임계값: `skills/bf-metrics/SKILL.md`
 
 > 참고 기술 및 방법론: **[REFERENCES.md](./REFERENCES.md)**
 
