@@ -108,6 +108,10 @@ stuck 정보는 sprint-status.yaml(`ralph_stuck: true`) + stuck.md에 이미 기
 
 ### E2. E2E 작성 + 실행 (4b) — E2E agent 스폰
 
+<HARD-GATE>
+E2E 단계는 절대 건너뛰지 않는다. 모든 Story가 skipped여도, Story 수가 적어도, 변경이 사소해 보여도 E2E를 실행한다. "E2E 없이도 충분하다"는 이 게이트를 우회하는 전형적인 합리화이다.
+</HARD-GATE>
+
 > **Story 0개 에픽 처리**: sprint-status.yaml에 done인 Story가 없는 에픽(전체 skipped 등)은 `e2e: passed`로 기록하고 E3로 진행한다.
 
 E2E agent를 1개 스폰한다 (`model: sonnet`).
@@ -128,6 +132,10 @@ E2E 사이클 카운트: epic 모드 진입 시 0으로 시작, `"failed"` 수�
 
 ### E3. 에픽 통합 리뷰 (4c) — bf-lead-review 스폰
 
+<HARD-GATE>
+리뷰 단계는 절대 건너뛰지 않는다. E2E가 escalated/max-regression-cycles여도, Story가 모두 skipped여도 리뷰를 실행한다. 리뷰 결과가 사람 판단 ②의 핵심 입력이다.
+</HARD-GATE>
+
 - **모델 선택**: 에픽 내 L/XL Story 포함 시 `model: opus`, S/M만이면 `model: sonnet`
 - `mode: "epic-review"` + epic ID + tech-spec 경로
 - 수신 대기: `"done: approved"` 또는 `"done: blockers"` + review.md 경로
@@ -139,7 +147,9 @@ E2E 사이클 카운트: epic 모드 진입 시 0으로 시작, `"failed"` 수�
 | `"done: approved"` (Blocker 0건) | 에픽 완료 |
 | `"done: blockers"` (Blocker 1건+) | sprint-status.yaml + review.md에 기록된 상태 유지, **자동 수정 안 함** |
 
-Blocker가 있어도 자동 수정하지 않는다. 사람이 bf-execute의 에픽 결과에서 판단한다.
+<HARD-GATE>
+Blocker가 있어도 자동 수정하지 않는다. 코드를 고치거나, Story를 재실행하거나, 수정 지시를 생성하는 행위 모두 금지된다. Blocker 처리는 사람이 bf-execute의 에픽 결과에서 판단한다.
+</HARD-GATE>
 
 ### E4. 완료 — Done 신호
 

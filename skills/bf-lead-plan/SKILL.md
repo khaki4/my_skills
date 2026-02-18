@@ -42,6 +42,10 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 
 ### 4. 난이도 태깅
 
+<HARD-GATE>
+모든 Story에 반드시 난이도(S/M/L/XL)를 태깅해야 한다. 난이도 태그 없이 Story 문서를 완성하지 않는다. 난이도는 agent 구성(모델 선택, 팀 규모)을 결정하는 핵심 입력이다.
+</HARD-GATE>
+
 각 Story에 난이도를 태깅한다:
 
 | 난이도 | 기준 |
@@ -70,6 +74,10 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 - 사용자가 Jira 티켓 번호를 제공했으면 해당 번호 사용
 
 ### 7. sprint-status.yaml 생성
+
+<HARD-GATE>
+sprint-status.yaml의 모든 메트릭 필드(model_used, ralph_retries, ralph_approaches, review_blockers, review_recommended, failure_tag, is_regression, parent_story, ralph_stuck)를 기본값(0/null/false)으로 초기화해야 한다. 필드 누락은 이후 bf-metrics 분석을 오염시킨다.
+</HARD-GATE>
 
 ```yaml
 SPRINT-XX:

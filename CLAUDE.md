@@ -263,7 +263,7 @@ yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 5. 필요 시 리팩토링
 6. Story 단위 git commit
 
-### Epic 통합 리뷰 (OCR + Convention Guard)
+### Epic 통합 리뷰 (Open Code Review + Convention Guard)
 
 리뷰는 E2E 통과 후 **Epic 단위**로 수행된다 (Story 단위 아님):
 
@@ -304,6 +304,8 @@ bf-execute → Epic 결과에 skipped Story 표시 → 사람이 수정 재실�
   - 난이도 과대/과소 추정 재태깅 제안
   - E2E failure tag 패턴 분석
 - **레거시 호환**: 메트릭 필드가 없는 이전 스프린트 Story는 건너뜀
+
+> 참고 기술 및 방법론: **[REFERENCES.md](./REFERENCES.md)**
 
 ## 새 스킬 추가
 

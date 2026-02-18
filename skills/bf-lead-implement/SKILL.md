@@ -59,6 +59,10 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   - **"sprint-status.yaml을 수정하지 말 것"**
   - **"`"done"` + commit hash 또는 `"stuck"` + stuck.md로 보고할 것"**
 
+<HARD-GATE>
+Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. 모든 상태 업데이트는 Lead가 "done"/"stuck" 신호를 수신한 후 수행한다. "상태만 빨리 기록하겠다"는 단일 쓰기 지점 원칙을 파괴하는 합리화이다.
+</HARD-GATE>
+
 #### L Story → Sub-Lead (Opus) + Implementers (Sonnet)
 
 - Story당 1개의 Opus sub-lead를 스폰한다.
@@ -147,6 +151,10 @@ sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따
 Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 따른다.
 
 ### TDD 사이클
+
+<HARD-GATE>
+구현 코드를 작성하기 전에 반드시 테스트를 먼저 작성하고 Red(실패)를 확인해야 한다. 테스트와 구현을 동시에 작성하는 것은 TDD 위반이다. "간단하니까 같이 작성해도 된다"는 이 게이트를 우회하는 전형적인 합리화이다.
+</HARD-GATE>
 
 1. **단위 테스트 작성** (AC 기반)
 2. **Red 확인**: 테스트 실행 → 실패 확인

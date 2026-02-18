@@ -53,12 +53,20 @@ Tech Spec 문서를 작성한다:
 
 ### 5. bf-lead-review 자동 스폰 (Tech-Spec 모드)
 
+<HARD-GATE>
+Tech Spec 작성 후 반드시 bf-lead-review를 스폰하여 다관점 리뷰를 수행한다. 리뷰 없이 사람에게 직접 Tech Spec을 제시하지 않는다. "간단한 변경이라 리뷰가 필요 없다"는 이 게이트를 우회하는 전형적인 합리화이다.
+</HARD-GATE>
+
 - `bf-lead-review`를 스폰한다:
   - Task tool 사용, `model: opus`
   - 파라미터: `mode: "tech-spec"`, tech-spec 경로 전달
 - 메인 세션은 `"done"` + review.md 경로만 수신한다 (컨텍스트 격리).
 
 ### 6. 리뷰 결과 제시 및 사람 개입 ①
+
+<HARD-GATE>
+리뷰 결과를 사람에게 반드시 제시하고 승인/수정 판단을 받아야 한다. Blocker가 0이어도 자동 승인하지 않는다. 이것이 사람 판단 ①이며, BF 워크플로우에서 사람이 개입하는 정확히 2개 지점 중 하나이다.
+</HARD-GATE>
 
 - review.md를 읽어서 사람에게 제시한다.
 - 사람의 결정:

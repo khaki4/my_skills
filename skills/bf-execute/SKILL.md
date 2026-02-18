@@ -46,6 +46,10 @@ sprint-status.yaml의 에픽을 순서대로 순회한다. 각 에픽에 대해:
 
 #### 3b. 에픽 결과 제시
 
+<HARD-GATE>
+에픽 결과를 사람에게 반드시 제시하고 판단을 받아야 한다. 결과가 깨끗해 보여도(Blocker 0, E2E passed) 자동으로 다음 에픽으로 진행하지 않는다. 이것이 사람 판단 ②이며, BF 워크플로우에서 사람이 개입하는 정확히 2개 지점 중 하나이다.
+</HARD-GATE>
+
 orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 제시한다:
 
 ```

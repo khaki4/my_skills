@@ -59,12 +59,21 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - 추천된 페르소나 3명을 teammate로 생성한다 (`model: opus`).
 
 **epic-review 모드:**
+
+<HARD-GATE>
+Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. conventions.md가 비어있거나 짧아도 Convention Guard를 포함해야 한다. "컨벤션이 아직 없으니 생략해도 된다"는 이 게이트를 우회하는 전형적인 합리화이다.
+</HARD-GATE>
+
 - Lead가 에픽 변경 범위를 분석하여 **2~3명의 리뷰어를 구성**한다:
   - Convention Guard (필수): `docs/conventions.md` 기준 컨벤션 준수 여부
   - 추가 1~2명: 프로젝트 특성에 따라 Architecture, Security, Performance 중 선택
 - 모델은 3단계에서 결정한 모델과 동일하게 적용한다.
 
 ### 5. 독립 분석
+
+<HARD-GATE>
+모든 리뷰어의 독립 분석이 완료될 때까지 discourse(교차 검증)를 시작하지 않는다. 독립 분석 없이 바로 토론에 들어가면 첫 번째 의견에 앵커링되어 다관점 리뷰의 가치가 사라진다.
+</HARD-GATE>
 
 각 리뷰어가 독립적으로 분석을 수행한다:
 
