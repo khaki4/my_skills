@@ -37,6 +37,7 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 - 기능 단위 또는 도메인 단위로 에픽을 분리한다.
 - 에픽 간 의존성을 명시한다.
 - 에픽은 순차적으로 실행됨을 기준으로 순서를 결정한다.
+- **Epic 최소 규모**: Epic당 Story 3개 이상을 권장한다. Story 2개 이하인 Epic이 나오면 인접 Epic과 병합을 검토한다. 단, 도메인 경계가 명확하여 병합이 부자연스러운 경우(예: 인증 vs 결제)는 2개도 허용한다. Epic마다 E2E 검증·통합 리뷰·사람 확인 등 고정 오버헤드가 발생하므로, 불필요하게 작은 Epic은 피한다.
 - **Story 0개 에픽 처리**: 인프라 준비, 설정 변경 등 Story로 분해할 수 없는 에픽은 sprint-status.yaml에 Story 없이 에픽만 등록하고, `e2e: passed`로 초기화한다 (기본 템플릿의 `pending`이 아닌 `passed`로 직접 설정).
 
 ### 3. Story 구조 결정
