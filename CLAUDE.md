@@ -149,6 +149,7 @@ docs/
   #   섹션: Core (항상 전달) = Architecture, Naming, Testing, Code Style
   #         Concern-area (기술 스택별) = UI/API/Database/Security/Infrastructure Patterns
   #   bf-lead-implement가 Story 파일 경로 기반으로 관련 섹션만 필터링하여 agent에 인라인 전달
+  #   bf-lead-implement가 Story의 "주요 라이브러리"를 context7로 조회하여 library reference도 함께 인라인 전달 (optional)
   archive/
     {SPRINT-XX}/
       tech-specs/

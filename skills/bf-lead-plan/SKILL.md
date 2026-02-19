@@ -156,6 +156,7 @@ SPRINT-XX:
 
 ## Technical Notes
 - 변경 대상 파일/모듈
+- 주요 라이브러리 (구현에 핵심적인 외부 라이브러리 — 예: zod, react-hook-form, @tanstack/react-query)
 - 의존성 (다른 Story와의 관계)
 - 주의사항
 

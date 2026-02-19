@@ -68,10 +68,44 @@ Architecture, Naming, Testing, Code Style
 
 **인라인 전달 형식:**
 ```
+[Project Conventions]
 아래는 이 Story에 관련된 프로젝트 컨벤션이다. 전체 컨벤션은 Epic 리뷰 시 Convention Guard가 검사한다.
 
 {추출된 섹션 내용}
+
+[Library Reference]
+아래는 이 Story 구현에 참고할 라이브러리 API 레퍼런스이다. 프로젝트 컨벤션과 충돌 시 컨벤션을 우선한다.
+
+### {라이브러리명}
+{context7에서 조회한 관련 API 문서 발췌}
+
+### {라이브러리명2}
+{context7에서 조회한 관련 API 문서 발췌}
+
+(Library Reference는 1c에서 조회. 조회 결과가 없으면 [Library Reference] 섹션 전체를 생략한다)
 ```
+
+### 1c. Library Reference 조회
+
+conventions.md 필터링 후, 각 Story에 전달할 라이브러리 레퍼런스를 준비한다.
+
+**라이브러리 추출:**
+1. Story의 Technical Notes에서 "주요 라이브러리" 항목을 확인한다.
+2. 라이브러리가 명시되어 있으면, Story당 **최대 3개**까지 context7로 조회한다.
+3. 라이브러리가 명시되어 있지 않으면 이 단계를 건너뛴다.
+
+**context7 조회 절차 (라이브러리당):**
+1. `resolve-library-id`로 library ID를 확인한다.
+2. `query-docs`로 Story의 AC에 관련된 API 문서를 조회한다.
+   - query는 Story의 AC를 기반으로 구성한다 (예: "form validation with zod schema", "server actions with next.js app router")
+   - 범용적인 query보다 Story AC에 특화된 query가 효과적이다.
+3. 조회 결과에서 **해당 Story AC에 직접 관련된 API/패턴만** 추출한다 (전체 문서 전달 금지).
+
+**Fallback:**
+- `resolve-library-id` 실패 (라이브러리 미발견): 해당 라이브러리는 건너뛴다.
+- `query-docs` 실패 또는 빈 결과: 해당 라이브러리는 건너뛴다.
+- context7 MCP 서버 연결 불가: 전체 단계를 건너뛰고 conventions만 전달한다.
+- 모든 fallback은 정상 동작이다. Library Reference는 보충 자료이지 필수 전제조건이 아니다.
 
 ### 2. 모델 (orchestrate가 결정)
 
@@ -90,6 +124,7 @@ Architecture, Naming, Testing, Code Style
 - Agent에게 전달하는 정보:
   - Story 문서 내용 (AC, Technical Notes)
   - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
+  - library reference (1c에서 조회한 인라인 텍스트, 있으면)
   - 수정 재실행인 경우: modification.md의 해당 Story 수정 지시 원문
   - Ralph Loop 지침 (아래 "Story Agent용 Ralph Loop 지침" 참조)
   - 기존 retry_count/approaches_count (있으면 — 이전 중단에서 복구된 값)
@@ -106,6 +141,7 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 - Sub-lead에게 전달하는 정보:
   - Story 문서 내용
   - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
+  - library reference (1c에서 조회한 인라인 텍스트, 있으면)
   - 수정 지시 (있으면)
   - "Sonnet implementer를 스폰하여 구현을 진행하라"
   - "쟁점 해소 프로토콜에 따라 조율하라" (아래 참조)
@@ -119,6 +155,7 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 - Sub-lead에게 전달하는 정보:
   - Story 문서 내용
   - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
+  - library reference (1c에서 조회한 인라인 텍스트, 있으면)
   - 수정 지시 (있으면)
   - "3+ teammates를 스폰하여 구현, 통합, 리뷰 역할을 분담하라"
   - "discourse로 설계 검증 후 구현을 진행하라"
