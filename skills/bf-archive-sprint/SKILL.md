@@ -34,27 +34,27 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - 미완료 에픽이 있으면 실행 중단 및 안내
 
 2. 문서를 아카이브 디렉토리로 이동한다:
-   - `docs/stories/` → `docs/archive/{SPRINT-XX}/stories/`
-   - `docs/tech-specs/` → `docs/archive/{SPRINT-XX}/tech-specs/`
-   - `docs/reviews/` → `docs/archive/{SPRINT-XX}/reviews/` (존재하는 경우)
-   - `docs/sprint-status.yaml` → `docs/archive/{SPRINT-XX}/sprint-status.yaml`
-   - `docs/conventions.md` → `docs/archive/{SPRINT-XX}/conventions.md` (복사, 이동 아님 — 시점 스냅샷 보존용)
+   - `docs/stories/` → `docs/archive/{TICKET}/stories/`
+   - `docs/tech-specs/` → `docs/archive/{TICKET}/tech-specs/`
+   - `docs/reviews/` → `docs/archive/{TICKET}/reviews/` (존재하는 경우)
+   - `docs/sprint-status.yaml` → `docs/archive/{TICKET}/sprint-status.yaml`
+   - `docs/conventions.md` → `docs/archive/{TICKET}/conventions.md` (복사, 이동 아님 — 시점 스냅샷 보존용)
 
 3. CLAUDE.md의 `## Changelog` 섹션에 append-only로 기록한다 (섹션이 없으면 파일 끝에 생성):
    - 아래 포맷을 따른다:
      ```markdown
      ## Changelog
 
-     ### {SPRINT-XX} ({YYYY-MM-DD})
+     ### {TICKET} ({YYYY-MM-DD})
      - **Epic 1** ({epic-name}): Story N개 완료 ({난이도 분포 요약})
      - **Epic 2** ({epic-name}): Story N개 완료
-     - Archive: `docs/archive/{SPRINT-XX}/`
+     - Archive: `docs/archive/{TICKET}/`
      ```
    - 기존 Changelog 항목 아래에 새 스프린트를 append한다 (기존 항목 수정 금지)
 
 4. git commit을 수행한다:
-   - 메시지: `chore({SPRINT-XX}): 스프린트 아카이빙`
-   - 포함 대상: `docs/archive/{SPRINT-XX}/` + `docs/conventions.md` + CLAUDE.md changelog 변경
+   - 메시지: `[{TICKET}] 스프린트 아카이빙`
+   - 포함 대상: `docs/archive/{TICKET}/` + `docs/conventions.md` + CLAUDE.md changelog 변경
    - **이 커밋이 docs/ 산출물의 최초 git 커밋이다** — Phase 1-3에서는 docs/ 파일을 git에 커밋하지 않으며, 아카이브 시점에 일괄 커밋한다.
 
 5. 완료 후 다음 순서로 후속 스킬 실행을 안내한다:
@@ -64,6 +64,6 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 
 ## Output Format
 
-- `docs/archive/{SPRINT-XX}/` — 아카이브 디렉토리
+- `docs/archive/{TICKET}/` — 아카이브 디렉토리
 - CLAUDE.md changelog 업데이트
 - git commit

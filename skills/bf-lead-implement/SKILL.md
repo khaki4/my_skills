@@ -187,12 +187,12 @@ sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따
 - sprint-status.yaml 업데이트 (Lead가 직접, `yq -i` 명령어 사용):
   ```bash
   yq -i '
-    .<SPRINT>.<EPIC>.<STORY>.status = "done" |
-    .<SPRINT>.<EPIC>.<STORY>.tdd = "done" |
-    .<SPRINT>.<EPIC>.<STORY>.model_used = "sonnet" |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_retries = 1 |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_approaches = 0 |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_stuck = false
+    .<TICKET>.<EPIC>.<STORY>.status = "done" |
+    .<TICKET>.<EPIC>.<STORY>.tdd = "done" |
+    .<TICKET>.<EPIC>.<STORY>.model_used = "sonnet" |
+    .<TICKET>.<EPIC>.<STORY>.ralph_retries = 1 |
+    .<TICKET>.<EPIC>.<STORY>.ralph_approaches = 0 |
+    .<TICKET>.<EPIC>.<STORY>.ralph_stuck = false
   ' docs/sprint-status.yaml
   ```
   - `model_used`: 실제 사용된 모델 전략 (`"sonnet"` / `"opus-lead"` / `"opus-lead+3"`)
@@ -203,9 +203,9 @@ sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따
 - sprint-status.yaml 업데이트:
   ```bash
   yq -i '
-    .<SPRINT>.<EPIC>.<STORY>.ralph_stuck = true |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_retries = 3 |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_approaches = 2
+    .<TICKET>.<EPIC>.<STORY>.ralph_stuck = true |
+    .<TICKET>.<EPIC>.<STORY>.ralph_retries = 3 |
+    .<TICKET>.<EPIC>.<STORY>.ralph_approaches = 2
   ' docs/sprint-status.yaml
   ```
 - stuck.md를 `docs/reviews/{STORY-ID}-stuck.md`에 저장한다.
@@ -246,8 +246,7 @@ Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 �
 4. **Green 확인**: 테스트 재실행 → 통과 확인
    - 실패하면 아래 가드레일에 따라 재시도
 5. **리팩토링** (필요 시, Green 유지 확인)
-6. **git commit**: `feat({STORY-ID}): {간단한 설명}`
-   - Bug fix인 경우: `fix({STORY-ID}): {간단한 설명}`
+6. **git commit**: `[{TICKET}] {간단한 설명}`
    - **`docs/` 하위 파일은 커밋에 포함하지 않는다** (sprint-status.yaml, story 문서 등 모두 제외)
 7. **Lead에 done 보고**: `"done"` + commit hash + `retry_count` + `approaches_count`
 

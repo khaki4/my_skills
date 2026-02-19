@@ -143,15 +143,15 @@ Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. con
    - **cross-story 귀속 규칙**: 여러 Story에 걸친 발견 사항(네이밍 불일치, 중복 유틸 등)은 가장 관련 높은 Story에 귀속한다. 특정 Story에 귀속할 수 없는 경우 에픽의 첫 번째 done Story에 귀속한다. **모든 Story가 skipped인 에픽에서는 review_blockers/review_recommended를 sprint-status.yaml에 기록하지 않는다** (귀속 대상 없음, review.md에만 기록).
    ```bash
    yq -i '
-     .<SPRINT>.<EPIC>.<STORY>.review_blockers = 2 |
-     .<SPRINT>.<EPIC>.<STORY>.review_recommended = 5
+     .<TICKET>.<EPIC>.<STORY>.review_blockers = 2 |
+     .<TICKET>.<EPIC>.<STORY>.review_recommended = 5
    ' docs/sprint-status.yaml
    ```
 3. **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 4. Blocker 판정 및 종료:
    - **Blocker 0건**: 에픽 내 모든 `status: done` Story의 `review: approved`로 업데이트 (`status: skipped` Story는 bf-execute/bf-resume이 사람 "진행" 선택 시 처리):
      ```bash
-     yq -i '.<SPRINT>.<EPIC>.<STORY>.review = "approved"' docs/sprint-status.yaml
+     yq -i '.<TICKET>.<EPIC>.<STORY>.review = "approved"' docs/sprint-status.yaml
      ```
      스폰한 상위 에이전트에 전달: `"done: approved"` + review.md 경로
    - **Blocker 1건 이상**: review 상태를 유지 (`pending`)

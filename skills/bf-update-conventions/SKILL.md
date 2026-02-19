@@ -16,9 +16,9 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
 
 ## Prerequisites
 
-- 아카이브된 스프린트 존재: `docs/archive/{SPRINT-XX}/`
+- 아카이브된 스프린트 존재: `docs/archive/{TICKET}/`
 - 아카이브 내 stories, tech-specs 디렉토리 존재
-- `docs/archive/{SPRINT-XX}/reviews/` 디렉토리 존재 (리뷰 결과 파일) — 미존재 시 git log에서 리뷰 관련 커밋 히스토리를 대안으로 분석
+- `docs/archive/{TICKET}/reviews/` 디렉토리 존재 (리뷰 결과 파일) — 미존재 시 git log에서 리뷰 관련 커밋 히스토리를 대안으로 분석
 - docs/conventions.md (없으면 신규 생성 — `/bf-spec`이 초기 seed를 생성했어야 하나, 미생성 시 이 스킬이 빈 템플릿으로 생성)
 - **권장 실행 순서**: `/bf-archive-sprint` → `/bf-metrics` (선택) → `/bf-update-conventions`. 아카이빙 후 실행해야 리뷰 결과에 접근 가능
 
@@ -30,8 +30,8 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
 ## Instructions
 
 1. 아카이브된 스프린트의 리뷰 이력을 분석한다:
-   - **1차 소스**: `docs/archive/{SPRINT-XX}/reviews/*.md` 파일들을 읽는다
-   - **2차 소스** (리뷰 파일 미존재 시): `git log`에서 `fix:` 커밋 메시지와 변경 패턴을 분석하여 반복 지적 패턴을 추론한다
+   - **1차 소스**: `docs/archive/{TICKET}/reviews/*.md` 파일들을 읽는다
+   - **2차 소스** (리뷰 파일 미존재 시): `git log`에서 커밋 메시지와 변경 패턴을 분석하여 반복 지적 패턴을 추론한다
    - 반복적으로 지적된 패턴 추출
    - 블로커로 분류된 이슈 유형 정리
    - Convention Guard가 놓친 패턴 식별
@@ -51,7 +51,7 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
    - **CLAUDE.md**: Changelog 섹션에 컨벤션 업데이트 이력을 기록한다. 본문(설계 원칙, 핵심 개념 등)은 수정하지 않는다
 
 4. git commit을 수행한다:
-   - 메시지: `docs({SPRINT-XX}): 컨벤션 업데이트`
+   - 메시지: `[{TICKET}] 컨벤션 업데이트`
 
 ## Output Format
 

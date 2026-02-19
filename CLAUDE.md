@@ -151,7 +151,7 @@ docs/
   #   bf-lead-implement가 Story 파일 경로 기반으로 관련 섹션만 필터링하여 agent에 인라인 전달
   #   bf-lead-implement가 Story의 "주요 라이브러리"를 context7로 조회하여 library reference도 함께 인라인 전달 (optional)
   archive/
-    {SPRINT-XX}/
+    {TICKET}/
       tech-specs/
       stories/
       reviews/
@@ -175,7 +175,7 @@ tests/
 모든 Epic/Story 진행 상황을 추적한다:
 
 ```yaml
-SPRINT-XX:
+{TICKET}:
   epic-1:
     story-1:
       status: todo
@@ -263,13 +263,13 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install and retry
 **yq 사용 예시:**
 ```bash
 # Story 상태 업데이트
-yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "done"' docs/sprint-status.yaml
+yq -i '.<TICKET>.<EPIC>.<STORY>.status = "done"' docs/sprint-status.yaml
 
 # 여러 필드 동시 업데이트
-yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "done" | .<SPRINT>.<EPIC>.<STORY>.tdd = "done"' docs/sprint-status.yaml
+yq -i '.<TICKET>.<EPIC>.<STORY>.status = "done" | .<TICKET>.<EPIC>.<STORY>.tdd = "done"' docs/sprint-status.yaml
 
 # regression story 추가
-yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"pending","review":"pending","model_used":null,"ralph_retries":0,"ralph_approaches":0,"review_blockers":0,"review_recommended":0,"failure_tag":"impl-bug","is_regression":true,"parent_story":"story-1","ralph_stuck":false}' docs/sprint-status.yaml
+yq -i '.<TICKET>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"pending","review":"pending","model_used":null,"ralph_retries":0,"ralph_approaches":0,"review_blockers":0,"review_recommended":0,"failure_tag":"impl-bug","is_regression":true,"parent_story":"story-1","ralph_stuck":false}' docs/sprint-status.yaml
 ```
 
 ### TDD 사이클 구현
@@ -333,4 +333,6 @@ yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 - **Append-only changelog**: 대상 프로젝트의 CLAUDE.md changelog는 스프린트 이력 추적을 위해 추가 전용
 - **Convention 축적**: `docs/conventions.md`는 스프린트를 거듭하며 패턴이 발견·체계화되면서 성장
 - **E2E용 Agent-browser**: 브라우저 UI 기반 E2E 테스트는 CSS 셀렉터가 아닌 accessibility tree의 @ref 기반 요소 선택 사용 (API-only/CLI 프로젝트에는 해당 없음)
+- **커밋 메시지 형식**: `[{TICKET}] 메시지` — 예: `[HACKLE-13554] 로그인 폼 유효성 검사 추가`. 모든 커밋(Story 구현, E2E 테스트, 아카이브, 컨벤션 업데이트 등)에 동일 형식 적용
+- **스프린트 식별자 = Jira 티켓 번호**: `SPRINT-01` 같은 순번 대신 Jira 티켓 번호를 그대로 사용한다 (예: `HACKLE-13554`). sprint-status.yaml 최상위 키, archive 디렉토리명 모두 티켓 번호
 - **문서는 아카이브 전까지 git 미관리**: `docs/` 하위 산출물(tech-specs, stories, reviews, sprint-status.yaml, conventions.md)은 Phase 1-3 동안 git에 커밋하지 않는다. Phase 4 Archive(`/bf-archive-sprint`) 시점에 비로소 git 관리 대상이 된다. Story agent의 커밋은 코드 변경만 포함해야 한다

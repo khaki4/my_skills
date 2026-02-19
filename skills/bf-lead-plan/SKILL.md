@@ -74,12 +74,11 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 **Story 4개 이하:**
 - Lead가 직접 순차적으로 Story 문서를 작성한다.
 
-### 6. Sprint 번호 결정
+### 6. Sprint 식별자 결정
 
-Sprint 번호는 항상 `SPRINT-XX` 형식을 사용한다 (Jira 티켓 번호와는 별개):
-- `docs/archive/` 디렉토리가 존재하면 기존 스프린트 확인
-- 마지막 스프린트 번호 + 1 (예: SPRINT-03 → SPRINT-04)
-- 아카이브가 없으면 SPRINT-01로 시작
+Sprint 식별자는 **Jira 티켓 번호**를 그대로 사용한다 (예: `HACKLE-13554`):
+- 스폰 시 전달받은 `{TICKET}` 번호를 sprint-status.yaml의 최상위 키로 사용
+- `docs/archive/` 디렉토리에 이미 같은 티켓의 아카이브가 있으면 에러 보고
 
 ### 7. sprint-status.yaml 생성
 
@@ -88,7 +87,7 @@ sprint-status.yaml의 모든 메트릭 필드(model_used, ralph_retries, ralph_a
 </HARD-GATE>
 
 ```yaml
-SPRINT-XX:
+{TICKET}:
   epic-1:
     story-1:
       status: todo

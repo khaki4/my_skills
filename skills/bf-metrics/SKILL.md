@@ -17,7 +17,7 @@ description: sprint-status.yaml의 메트릭 데이터를 분석하여 모델 �
 
 ## Prerequisites
 
-- `docs/sprint-status.yaml` 또는 `docs/archive/SPRINT-*/sprint-status.yaml` 중 하나 이상 존재
+- `docs/sprint-status.yaml` 또는 `docs/archive/*/sprint-status.yaml` 중 하나 이상 존재
 - 분석 대상 Story에 메트릭 필드가 기록되어 있어야 함 (레거시 Story는 건너뜀)
 - **권장 실행 순서**: `/bf-archive-sprint` → `/bf-metrics` → `/bf-update-conventions`. 아카이빙 전에 실행해도 동작하지만, 아카이빙 후 실행하면 현재 + 아카이브 전체 데이터를 분석하여 더 정확한 결과를 제공
 
@@ -35,7 +35,7 @@ a. 현재 스프린트 데이터를 수집한다:
    - `docs/sprint-status.yaml` 읽기
 
 b. 아카이브된 스프린트 데이터를 수집한다:
-   - `docs/archive/SPRINT-*/sprint-status.yaml` 패턴으로 모든 아카이브 파일 읽기
+   - `docs/archive/*/sprint-status.yaml` 패턴으로 모든 아카이브 파일 읽기
 
 c. 분석 대상 필터링:
    - `status: done`인 Story만 분석 대상에 포함

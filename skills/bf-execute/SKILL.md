@@ -91,9 +91,9 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
   - `review: pending`인 `status: done` Story의 `review`를 `"approved"`로 설정 (사람이 Blocker를 수용)
   ```bash
   # skipped Story review 정리
-  yq -i '.<SPRINT>.<EPIC>.<SKIPPED-STORY>.review = "approved"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.<SKIPPED-STORY>.review = "approved"' docs/sprint-status.yaml
   # Blocker 수용 — done Story의 pending review를 approved로 전환
-  yq -i '.<SPRINT>.<EPIC>.<DONE-STORY>.review = "approved"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.<DONE-STORY>.review = "approved"' docs/sprint-status.yaml
   ```
 - 다음 에픽의 3a로 이동한다.
 
