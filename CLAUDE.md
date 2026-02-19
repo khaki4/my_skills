@@ -146,6 +146,9 @@ docs/
     {EPIC-ID}-modification.md    # 사람 수정 지시 (재실행 시)
   sprint-status.yaml
   conventions.md          # Convention Guard 규칙 (/bf-spec이 초기 seed 생성)
+  #   섹션: Core (항상 전달) = Architecture, Naming, Testing, Code Style
+  #         Concern-area (기술 스택별) = UI/API/Database/Security/Infrastructure Patterns
+  #   bf-lead-implement가 Story 파일 경로 기반으로 관련 섹션만 필터링하여 agent에 인라인 전달
   archive/
     {SPRINT-XX}/
       tech-specs/

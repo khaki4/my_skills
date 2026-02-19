@@ -43,6 +43,36 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   - `status: done`인 Story는 건너뛴다.
   - `status: todo` 또는 `in_progress`인 Story만 대상으로 한다.
 
+### 1b. Convention 섹션 필터링
+
+conventions.md를 읽은 후, 각 Story에 전달할 관련 섹션을 결정한다.
+
+**Core 섹션 (항상 포함):**
+Architecture, Naming, Testing, Code Style
+
+**Concern-area 섹션 (Story 파일 경로 기반 필터링):**
+
+| Story 파일 경로 패턴 | 포함 섹션 |
+|---|---|
+| `src/components/`, `src/pages/`, `src/views/`, `src/layouts/`, `src/hooks/`, `*.tsx`, `*.vue`, `*.svelte`, `app/` (Next.js) | UI Patterns |
+| `src/api/`, `src/routes/`, `src/controllers/`, `src/middleware/`, `routes/`, `controllers/`, `server/` | API Patterns |
+| `src/models/`, `src/entities/`, `src/repositories/`, `prisma/`, `migrations/`, `src/db/`, `drizzle/` | Database Patterns |
+| `src/auth/`, `src/security/`, `src/guards/`, `middleware/auth*` | Security Patterns |
+| `Dockerfile`, `.github/`, `docker-compose*`, `infra/`, `deploy/`, `.env*` | Infrastructure Patterns |
+
+**필터링 규칙:**
+1. conventions.md에 concern-area 섹션이 없으면 전체 내용을 그대로 전달한다 (하위 호환).
+2. Story의 Technical Notes에 변경 대상 파일이 없으면 전체 내용을 전달한다 (안전 fallback).
+3. 매칭되는 concern-area 섹션이 있으면, Core 섹션 + 매칭 concern-area 섹션만 추출하여 인라인으로 전달한다.
+4. 각 `##` 헤딩부터 다음 `##` 헤딩 전까지를 하나의 섹션으로 취급한다.
+
+**인라인 전달 형식:**
+```
+아래는 이 Story에 관련된 프로젝트 컨벤션이다. 전체 컨벤션은 Epic 리뷰 시 Convention Guard가 검사한다.
+
+{추출된 섹션 내용}
+```
+
 ### 2. 모델 (orchestrate가 결정)
 
 이 Lead의 모델은 `bf-lead-orchestrate`가 스폰 시 지정한다:
@@ -59,7 +89,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - `.ralph-progress/{STORY-ID}.json`이 존재하면 초기 retry_count/approaches_count를 해당 파일에서 읽어 전달한다 (이전 중단 복구 시).
 - Agent에게 전달하는 정보:
   - Story 문서 내용 (AC, Technical Notes)
-  - `docs/conventions.md` 경로
+  - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
   - 수정 재실행인 경우: modification.md의 해당 Story 수정 지시 원문
   - Ralph Loop 지침 (아래 "Story Agent용 Ralph Loop 지침" 참조)
   - 기존 retry_count/approaches_count (있으면 — 이전 중단에서 복구된 값)
@@ -75,7 +105,7 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 - Story당 1개의 Opus sub-lead를 스폰한다.
 - Sub-lead에게 전달하는 정보:
   - Story 문서 내용
-  - conventions.md 경로
+  - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
   - 수정 지시 (있으면)
   - "Sonnet implementer를 스폰하여 구현을 진행하라"
   - "쟁점 해소 프로토콜에 따라 조율하라" (아래 참조)
@@ -88,7 +118,7 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 - Story당 1개의 Opus sub-lead를 스폰한다.
 - Sub-lead에게 전달하는 정보:
   - Story 문서 내용
-  - conventions.md 경로
+  - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
   - 수정 지시 (있으면)
   - "3+ teammates를 스폰하여 구현, 통합, 리뷰 역할을 분담하라"
   - "discourse로 설계 검증 후 구현을 진행하라"
