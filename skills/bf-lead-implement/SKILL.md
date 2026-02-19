@@ -43,6 +43,70 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   - `status: done`인 Story는 건너뛴다.
   - `status: todo` 또는 `in_progress`인 Story만 대상으로 한다.
 
+### 1b. Convention 섹션 필터링
+
+conventions.md를 읽은 후, 각 Story에 전달할 관련 섹션을 결정한다.
+
+**Core 섹션 (항상 포함):**
+Architecture, Naming, Testing, Code Style
+
+**Concern-area 섹션 (Story 파일 경로 기반 필터링):**
+
+| Story 파일 경로 패턴 | 포함 섹션 |
+|---|---|
+| `src/components/`, `src/pages/`, `src/views/`, `src/layouts/`, `src/hooks/`, `*.tsx`, `*.vue`, `*.svelte`, `app/` (Next.js) | UI Patterns |
+| `src/api/`, `src/routes/`, `src/controllers/`, `src/middleware/`, `routes/`, `controllers/`, `server/` | API Patterns |
+| `src/models/`, `src/entities/`, `src/repositories/`, `prisma/`, `migrations/`, `src/db/`, `drizzle/` | Database Patterns |
+| `src/auth/`, `src/security/`, `src/guards/`, `middleware/auth*` | Security Patterns |
+| `Dockerfile`, `.github/`, `docker-compose*`, `infra/`, `deploy/`, `.env*` | Infrastructure Patterns |
+
+**필터링 규칙:**
+1. conventions.md에 concern-area 섹션이 없으면 전체 내용을 그대로 전달한다 (하위 호환).
+2. Story의 Technical Notes에 변경 대상 파일이 없으면 전체 내용을 전달한다 (안전 fallback).
+3. 매칭되는 concern-area 섹션이 있으면, Core 섹션 + 매칭 concern-area 섹션만 추출하여 인라인으로 전달한다.
+4. 각 `##` 헤딩부터 다음 `##` 헤딩 전까지를 하나의 섹션으로 취급한다.
+
+**인라인 전달 형식:**
+```
+[Project Conventions]
+아래는 이 Story에 관련된 프로젝트 컨벤션이다. 전체 컨벤션은 Epic 리뷰 시 Convention Guard가 검사한다.
+
+{추출된 섹션 내용}
+
+[Library Reference]
+아래는 이 Story 구현에 참고할 라이브러리 API 레퍼런스이다. 프로젝트 컨벤션과 충돌 시 컨벤션을 우선한다.
+
+### {라이브러리명}
+{context7에서 조회한 관련 API 문서 발췌}
+
+### {라이브러리명2}
+{context7에서 조회한 관련 API 문서 발췌}
+
+(Library Reference는 1c에서 조회. 조회 결과가 없으면 [Library Reference] 섹션 전체를 생략한다)
+```
+
+### 1c. Library Reference 조회
+
+conventions.md 필터링 후, 각 Story에 전달할 라이브러리 레퍼런스를 준비한다.
+
+**라이브러리 추출:**
+1. Story의 Technical Notes에서 "주요 라이브러리" 항목을 확인한다.
+2. 라이브러리가 명시되어 있으면, Story당 **최대 3개**까지 context7로 조회한다.
+3. 라이브러리가 명시되어 있지 않으면 이 단계를 건너뛴다.
+
+**context7 조회 절차 (라이브러리당):**
+1. `resolve-library-id`로 library ID를 확인한다.
+2. `query-docs`로 Story의 AC에 관련된 API 문서를 조회한다.
+   - query는 Story의 AC를 기반으로 구성한다 (예: "form validation with zod schema", "server actions with next.js app router")
+   - 범용적인 query보다 Story AC에 특화된 query가 효과적이다.
+3. 조회 결과에서 **해당 Story AC에 직접 관련된 API/패턴만** 추출한다 (전체 문서 전달 금지).
+
+**Fallback:**
+- `resolve-library-id` 실패 (라이브러리 미발견): 해당 라이브러리는 건너뛴다.
+- `query-docs` 실패 또는 빈 결과: 해당 라이브러리는 건너뛴다.
+- context7 MCP 서버 연결 불가: 전체 단계를 건너뛰고 conventions만 전달한다.
+- 모든 fallback은 정상 동작이다. Library Reference는 보충 자료이지 필수 전제조건이 아니다.
+
 ### 2. 모델 (orchestrate가 결정)
 
 이 Lead의 모델은 `bf-lead-orchestrate`가 스폰 시 지정한다:
@@ -59,7 +123,8 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - `.ralph-progress/{STORY-ID}.json`이 존재하면 초기 retry_count/approaches_count를 해당 파일에서 읽어 전달한다 (이전 중단 복구 시).
 - Agent에게 전달하는 정보:
   - Story 문서 내용 (AC, Technical Notes)
-  - `docs/conventions.md` 경로
+  - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
+  - library reference (1c에서 조회한 인라인 텍스트, 있으면)
   - 수정 재실행인 경우: modification.md의 해당 Story 수정 지시 원문
   - Ralph Loop 지침 (아래 "Story Agent용 Ralph Loop 지침" 참조)
   - 기존 retry_count/approaches_count (있으면 — 이전 중단에서 복구된 값)
@@ -75,7 +140,8 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 - Story당 1개의 Opus sub-lead를 스폰한다.
 - Sub-lead에게 전달하는 정보:
   - Story 문서 내용
-  - conventions.md 경로
+  - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
+  - library reference (1c에서 조회한 인라인 텍스트, 있으면)
   - 수정 지시 (있으면)
   - "Sonnet implementer를 스폰하여 구현을 진행하라"
   - "쟁점 해소 프로토콜에 따라 조율하라" (아래 참조)
@@ -88,7 +154,8 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 - Story당 1개의 Opus sub-lead를 스폰한다.
 - Sub-lead에게 전달하는 정보:
   - Story 문서 내용
-  - conventions.md 경로
+  - conventions 관련 섹션 (1b에서 필터링한 인라인 텍스트)
+  - library reference (1c에서 조회한 인라인 텍스트, 있으면)
   - 수정 지시 (있으면)
   - "3+ teammates를 스폰하여 구현, 통합, 리뷰 역할을 분담하라"
   - "discourse로 설계 검증 후 구현을 진행하라"
@@ -120,12 +187,12 @@ sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따
 - sprint-status.yaml 업데이트 (Lead가 직접, `yq -i` 명령어 사용):
   ```bash
   yq -i '
-    .<SPRINT>.<EPIC>.<STORY>.status = "done" |
-    .<SPRINT>.<EPIC>.<STORY>.tdd = "done" |
-    .<SPRINT>.<EPIC>.<STORY>.model_used = "sonnet" |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_retries = 1 |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_approaches = 0 |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_stuck = false
+    .<TICKET>.<EPIC>.<STORY>.status = "done" |
+    .<TICKET>.<EPIC>.<STORY>.tdd = "done" |
+    .<TICKET>.<EPIC>.<STORY>.model_used = "sonnet" |
+    .<TICKET>.<EPIC>.<STORY>.ralph_retries = 1 |
+    .<TICKET>.<EPIC>.<STORY>.ralph_approaches = 0 |
+    .<TICKET>.<EPIC>.<STORY>.ralph_stuck = false
   ' docs/sprint-status.yaml
   ```
   - `model_used`: 실제 사용된 모델 전략 (`"sonnet"` / `"opus-lead"` / `"opus-lead+3"`)
@@ -136,13 +203,13 @@ sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따
 - sprint-status.yaml 업데이트:
   ```bash
   yq -i '
-    .<SPRINT>.<EPIC>.<STORY>.ralph_stuck = true |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_retries = 3 |
-    .<SPRINT>.<EPIC>.<STORY>.ralph_approaches = 2
+    .<TICKET>.<EPIC>.<STORY>.ralph_stuck = true |
+    .<TICKET>.<EPIC>.<STORY>.ralph_retries = 3 |
+    .<TICKET>.<EPIC>.<STORY>.ralph_approaches = 2
   ' docs/sprint-status.yaml
   ```
 - stuck.md를 `docs/reviews/{STORY-ID}-stuck.md`에 저장한다.
-- git commit: `docs({STORY-ID}): record stuck report`
+- **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 - **다른 Story들은 계속 진행한다** (stuck Story가 있어도 나머지를 중단하지 않음).
 - **stuck Story의 `status`는 변경하지 않는다** — orchestrate가 자동 판단 시 `skipped`로 변경한다.
 
@@ -179,9 +246,8 @@ Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 �
 4. **Green 확인**: 테스트 재실행 → 통과 확인
    - 실패하면 아래 가드레일에 따라 재시도
 5. **리팩토링** (필요 시, Green 유지 확인)
-6. **git commit**: `feat({STORY-ID}): {brief description}`
-   - Bug fix인 경우: `fix({STORY-ID}): {brief description}`
-   - **sprint-status.yaml은 커밋에 포함하지 않는다**
+6. **git commit**: `[{TICKET}] {간단한 설명}`
+   - **`docs/` 하위 파일은 커밋에 포함하지 않는다** (sprint-status.yaml, story 문서 등 모두 제외)
 7. **Lead에 done 보고**: `"done"` + commit hash + `retry_count` + `approaches_count`
 
 ### Ralph Loop 가드레일

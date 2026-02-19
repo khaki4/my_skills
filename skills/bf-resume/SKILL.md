@@ -44,12 +44,12 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 - 해당 에픽 내 **모든** Story (done 포함)의 `status`를 `todo`로, `tdd`를 `pending`으로, `review`를 `pending`으로 리셋:
   ```bash
   # 에픽 내 각 Story별로 개별 yq 명령 실행 (select+할당 조합의 in-place 동작 불안정 방지)
-  yq -i '.<SPRINT>.<EPIC>.<STORY-1>.status = "todo" | .<SPRINT>.<EPIC>.<STORY-1>.tdd = "pending" | .<SPRINT>.<EPIC>.<STORY-1>.review = "pending"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.<STORY-1>.status = "todo" | .<TICKET>.<EPIC>.<STORY-1>.tdd = "pending" | .<TICKET>.<EPIC>.<STORY-1>.review = "pending"' docs/sprint-status.yaml
   # 각 Story에 대해 반복 실행
   ```
 - 에픽의 e2e 상태도 `pending`으로 리셋:
   ```bash
-  yq -i '.<SPRINT>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
   ```
 - `.ralph-progress/` 디렉토리 내 해당 에픽 Story의 진행 파일(`{STORY-ID}.json`)이 있으면 삭제 (이전 Ralph Loop 진행 파일 정리).
 - 메트릭 필드는 보존한다 (이전 시도의 기록).
@@ -70,7 +70,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   - **"변경사항 유지"** (기본): Story별 브랜치에 보관한다:
     ```bash
     git checkout -b bf-stash/{STORY-ID}
-    git add -A && git commit -m "wip({STORY-ID}): interrupted work backup"
+    git add --all -- ':!docs/' && git commit -m "[{TICKET}] 중단된 작업 백업"
     git checkout {원래-브랜치}
     ```
     사용자에게 "`bf-stash/{STORY-ID}` 브랜치에 백업했습니다. 필요 시 `git cherry-pick`으로 복원 가능합니다." 안내
@@ -98,7 +98,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 
 ```
 워크플로우 재개 지점 분석
-- 스프린트: {SPRINT-ID}
+- 티켓: {TICKET}
 - 현재 상태: {상태 요약}
 - 재개 에픽: {epic-id} (총 N개 중 M번째)
 - skipped Story: {있으면 목록 표시}
@@ -169,8 +169,8 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
   - `status: skipped`인 Story의 `review`를 `"approved"`로 설정 (사람이 skip을 수용)
   - `review: pending`인 `status: done` Story의 `review`를 `"approved"`로 설정 (사람이 Blocker를 수용)
   ```bash
-  yq -i '.<SPRINT>.<EPIC>.<SKIPPED-STORY>.review = "approved"' docs/sprint-status.yaml
-  yq -i '.<SPRINT>.<EPIC>.<DONE-STORY>.review = "approved"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.<SKIPPED-STORY>.review = "approved"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.<DONE-STORY>.review = "approved"' docs/sprint-status.yaml
   ```
 - 다음 에픽의 6a로 이동한다.
 
@@ -178,7 +178,7 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 - 사람이 수정 내용을 텍스트로 입력한다.
 - bf-resume이 수정 내용을 분석하여 대상 Story를 추론하고, 사람에게 확인한다.
 - `docs/reviews/{EPIC-ID}-modification.md`에 기록한다 (bf-execute의 modification.md 형식과 동일).
-- git commit: `docs({EPIC-ID}): record modification instructions`
+- **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 - 같은 에픽에 대해 orchestrate를 epic 모드로 다시 스폰한다 (`modification_path` 전달).
 - 6b로 돌아가 결과를 다시 제시한다.
 

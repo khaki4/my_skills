@@ -79,22 +79,22 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 **a) Orphan regression story 정리 (항상 실행, 첫 실행 시에는 대상이 없으므로 no-op):**
 에픽 내 `is_regression: true`이고 `status: todo`인 Story를 `status: skipped`로 변경한다. 이전 E2E 실행 중 중단으로 생성된 orphan regression story를 정리하여 불필요한 재실행을 방지한다.
 ```bash
-yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-status.yaml
+yq -i '.<TICKET>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-status.yaml
 ```
 
 **b) Modification 처리 (modification.md가 전달된 경우에만):**
 - modification.md를 읽어 수정 대상 Story를 파악한다.
 - 해당 Story의 status를 `in_progress`로 변경:
   ```bash
-  yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.<STORY>.status = "in_progress"' docs/sprint-status.yaml
   ```
 - tdd, review 필드를 초기화하고, e2e도 `pending`으로 리셋한다. **보존하는 메트릭 필드: `ralph_retries`, `ralph_approaches`, `ralph_stuck`, `model_used`** (이전 시도의 기록 유지). `review_blockers`/`review_recommended`는 bf-lead-review가 재리뷰 시 새 값으로 덮어쓰므로 별도 리셋 불필요. 수정 대상이 아닌 Story의 리뷰 메트릭은 보존된다:
   ```bash
   yq -i '
-    .<SPRINT>.<EPIC>.<STORY>.tdd = "pending" |
-    .<SPRINT>.<EPIC>.<STORY>.review = "pending"
+    .<TICKET>.<EPIC>.<STORY>.tdd = "pending" |
+    .<TICKET>.<EPIC>.<STORY>.review = "pending"
   ' docs/sprint-status.yaml
-  yq -i '.<SPRINT>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.e2e = "pending"' docs/sprint-status.yaml
   ```
 
 ### E1. 스토리 구현 — bf-lead-implement 스폰
@@ -118,7 +118,7 @@ yq -i '.<SPRINT>.<EPIC>.<REGRESSION-STORY>.status = "skipped"' docs/sprint-statu
 
 stuck Story를 skip 처리:
 ```bash
-yq -i '.<SPRINT>.<EPIC>.<STORY>.status = "skipped"' docs/sprint-status.yaml
+yq -i '.<TICKET>.<EPIC>.<STORY>.status = "skipped"' docs/sprint-status.yaml
 ```
 
 stuck 정보는 sprint-status.yaml(`ralph_stuck: true`) + stuck.md에 이미 기록되어 있다. bf-execute가 에픽 결과로 사람에게 제시한다.
@@ -158,7 +158,7 @@ E2E 사이클 카운트: epic 모드 진입 시 0으로 시작, `"failed"` 수�
 E2E 사이클 2회 도달로 `max-regression-cycles`를 기록할 때, 해당 사이클에서 E2E agent가 추가한 regression story가 `status: todo`인 채 남아있다. 이 Story들을 `status: skipped`로 변경하여 orphan을 방지한다:
 ```bash
 # 대상: E2E agent가 "failed" 보고와 함께 전달한 regression story 목록
-yq -i '.<SPRINT>.<EPIC>.<ORPHAN-STORY>.status = "skipped"' docs/sprint-status.yaml
+yq -i '.<TICKET>.<EPIC>.<ORPHAN-STORY>.status = "skipped"' docs/sprint-status.yaml
 ```
 
 ### E3. 에픽 통합 리뷰 — bf-lead-review 스폰
@@ -246,10 +246,10 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 **전체 통과:**
 - sprint-status.yaml 업데이트:
   ```bash
-  yq -i '.<SPRINT>.<EPIC>.e2e = "passed"' docs/sprint-status.yaml
+  yq -i '.<TICKET>.<EPIC>.e2e = "passed"' docs/sprint-status.yaml
   ```
 - `"passed"` + tests/e2e/ 경로를 Lead에 보고
-- git commit: `test({epic-name}): create and pass e2e tests`
+- git commit: `[{TICKET}] E2E 테스트 작성 및 통과` — **`tests/e2e/` 파일만 커밋, `docs/` 하위 파일은 제외**
 
 **실패:**
 - **Regression 가드레일** 확인:
@@ -266,7 +266,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
     - 번호: stories/ 전체에서 가장 큰 번호 + 1
   - sprint-status.yaml에 새 Story 추가:
     ```bash
-    yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {
+    yq -i '.<TICKET>.<EPIC>.<NEW-STORY> = {
       "status":"todo","difficulty":"S","tdd":"pending","review":"pending",
       "model_used":null,"ralph_retries":0,"ralph_approaches":0,
       "review_blockers":0,"review_recommended":0,
@@ -279,7 +279,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
     - `parent_story`: 원인 Story ID
     - 나머지 필드: 기본값
   - 난이도 태깅: `impl-bug`/`test-design`/`convention-violation` → S~M, `spec-gap`/`integration` → sprint-status.yaml에서 원본 Story 난이도를 확인하여 M~L
-  - git commit: `test({epic-name}): add regression story for {failure-tag}`
+  - **git commit하지 않는다** — regression story 문서(`docs/stories/`)와 sprint-status.yaml은 Phase 4 Archive에서 일괄 커밋한다.
   - `"failed"` + regression story 목록을 Lead에 보고
 
 ### 6. sprint-status.yaml 업데이트 프로토콜

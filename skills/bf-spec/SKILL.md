@@ -59,9 +59,20 @@ BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기�
 
   ## Code Style
   - {발견된 주요 코드 스타일 규칙}
+
+  {아래 concern-area 섹션은 코드베이스에서 해당 기술 스택이 감지된 경우에만 포함}
+
+  ## UI Patterns
+  - {React/Vue/Angular 등 감지 시: 컴포넌트 구조, 상태 관리 패턴}
+
+  ## API Patterns
+  - {Express/Fastify/NestJS/Django 등 감지 시: 엔드포인트 설계, 에러 핸들링 패턴}
+
+  ## Database Patterns
+  - {Prisma/TypeORM/Drizzle 등 감지 시: 스키마 규칙, 마이그레이션 패턴}
   ```
+- concern-area 섹션(UI Patterns, API Patterns, Database Patterns, Security Patterns, Infrastructure Patterns)은 코드베이스에서 해당 기술 스택이 감지된 경우에만 포함한다. 감지되지 않은 기술 스택의 섹션은 생성하지 않는다. 초기 seed이므로 핵심 패턴만 간결하게 기재하고, 이후 `/bf-update-conventions`가 축적한다.
 - 이미 존재하면 건너뛴다.
-- git commit: `docs: initialize conventions.md`
 
 ### 3. Tech Spec 작성
 
@@ -113,7 +124,7 @@ BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기�
 
 - `docs/tech-specs/{TICKET}-tech-spec.md`에 저장한다.
 - `docs/tech-specs/` 디렉토리가 없으면 생성한다.
-- git commit: `docs({TICKET}): create tech spec`
+- **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 
 ### 5. bf-lead-review 자동 스폰 (Tech-Spec 모드)
 
