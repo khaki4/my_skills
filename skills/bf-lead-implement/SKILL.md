@@ -209,7 +209,7 @@ sprint-status.yaml 갱신은 CLAUDE.md의 **Read-yq-Verify** 프로토콜을 따
   ' docs/sprint-status.yaml
   ```
 - stuck.md를 `docs/reviews/{STORY-ID}-stuck.md`에 저장한다.
-- git commit: `docs({STORY-ID}): record stuck report`
+- git commit: `docs({STORY-ID}): stuck 보고서 기록`
 - **다른 Story들은 계속 진행한다** (stuck Story가 있어도 나머지를 중단하지 않음).
 - **stuck Story의 `status`는 변경하지 않는다** — orchestrate가 자동 판단 시 `skipped`로 변경한다.
 
@@ -246,8 +246,8 @@ Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 �
 4. **Green 확인**: 테스트 재실행 → 통과 확인
    - 실패하면 아래 가드레일에 따라 재시도
 5. **리팩토링** (필요 시, Green 유지 확인)
-6. **git commit**: `feat({STORY-ID}): {brief description}`
-   - Bug fix인 경우: `fix({STORY-ID}): {brief description}`
+6. **git commit**: `feat({STORY-ID}): {간단한 설명}`
+   - Bug fix인 경우: `fix({STORY-ID}): {간단한 설명}`
    - **sprint-status.yaml은 커밋에 포함하지 않는다**
 7. **Lead에 done 보고**: `"done"` + commit hash + `retry_count` + `approaches_count`
 

@@ -51,7 +51,7 @@ description: 스프린트 중 코드 리뷰에서 발견된 반복 패턴을 con
    - **CLAUDE.md**: Changelog 섹션에 컨벤션 업데이트 이력을 기록한다. 본문(설계 원칙, 핵심 개념 등)은 수정하지 않는다
 
 4. git commit을 수행한다:
-   - 메시지: `docs({SPRINT-XX}): update conventions`
+   - 메시지: `docs({SPRINT-XX}): 컨벤션 업데이트`
 
 ## Output Format
 

@@ -130,7 +130,7 @@ SPRINT-XX:
 
 - Story 파일: `docs/stories/{TICKET}-story-{N}.md`
 - sprint-status.yaml: `docs/sprint-status.yaml`
-- git commit: `docs({TICKET}): create epics and stories`
+- git commit: `docs({TICKET}): 에픽/스토리 구조 생성`
 
 ### 9. Done 신호
 

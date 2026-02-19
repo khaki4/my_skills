@@ -53,7 +53,7 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - 기존 Changelog 항목 아래에 새 스프린트를 append한다 (기존 항목 수정 금지)
 
 4. git commit을 수행한다:
-   - 메시지: `chore({SPRINT-XX}): archive sprint`
+   - 메시지: `chore({SPRINT-XX}): 스프린트 아카이빙`
    - 아카이브된 파일 + changelog 변경 포함
 
 5. 완료 후 다음 순서로 후속 스킬 실행을 안내한다:

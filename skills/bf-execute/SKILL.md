@@ -114,7 +114,7 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
   - {확인된 수정 대상 Story ID 목록}
   ```
 
-- git commit: `docs({EPIC-ID}): record modification instructions`
+- git commit: `docs({EPIC-ID}): 수정 지시 기록`
 - 같은 에픽에 대해 orchestrate를 epic 모드로 다시 스폰한다 (`modification_path` 전달).
 - 3b로 돌아가 결과를 다시 제시한다.
 

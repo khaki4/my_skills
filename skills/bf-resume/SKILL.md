@@ -70,7 +70,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   - **"변경사항 유지"** (기본): Story별 브랜치에 보관한다:
     ```bash
     git checkout -b bf-stash/{STORY-ID}
-    git add -A && git commit -m "wip({STORY-ID}): interrupted work backup"
+    git add -A && git commit -m "wip({STORY-ID}): 중단된 작업 백업"
     git checkout {원래-브랜치}
     ```
     사용자에게 "`bf-stash/{STORY-ID}` 브랜치에 백업했습니다. 필요 시 `git cherry-pick`으로 복원 가능합니다." 안내
@@ -178,7 +178,7 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 - 사람이 수정 내용을 텍스트로 입력한다.
 - bf-resume이 수정 내용을 분석하여 대상 Story를 추론하고, 사람에게 확인한다.
 - `docs/reviews/{EPIC-ID}-modification.md`에 기록한다 (bf-execute의 modification.md 형식과 동일).
-- git commit: `docs({EPIC-ID}): record modification instructions`
+- git commit: `docs({EPIC-ID}): 수정 지시 기록`
 - 같은 에픽에 대해 orchestrate를 epic 모드로 다시 스폰한다 (`modification_path` 전달).
 - 6b로 돌아가 결과를 다시 제시한다.
 
