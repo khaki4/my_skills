@@ -142,24 +142,24 @@ sprint-status.yaml의 모든 메트릭 필드(model_used, ralph_retries, ralph_a
 ### Story 문서 템플릿
 
 ```markdown
-# {TICKET}-story-{N}: {Story Title}
+# {TICKET}-story-{N}: {Story 제목}
 
-## Epic
+## 에픽
 {소속 에픽 ID 및 이름}
 
-## Difficulty
+## 난이도
 {S | M | L | XL} — {난이도 판정 근거}
 
-## Acceptance Criteria
+## 인수 조건
 - [ ] AC 1: {구체적이고 테스트 가능한 기준}
 - [ ] AC 2: ...
 
-## Technical Notes
+## 기술 노트
 - 변경 대상 파일/모듈
 - 주요 라이브러리 (구현에 핵심적인 외부 라이브러리 — 예: zod, react-hook-form, @tanstack/react-query)
 - 의존성 (다른 Story와의 관계)
 - 주의사항
 
-## Dependencies
+## 의존성
 - {의존하는 Story ID} (있는 경우)
 ```
