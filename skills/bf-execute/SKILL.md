@@ -62,8 +62,8 @@ orchestrate 완료 후 sprint-status.yaml과 review.md를 읽어 사람에게 �
 ## Epic {EPIC-ID} 완료
 
 ### Story 결과
-| Story | Status | Difficulty | Retries | Stuck |
-|-------|--------|------------|---------|-------|
+| 스토리 | 상태 | 난이도 | 재시도 횟수 | Stuck |
+|--------|------|--------|------------|-------|
 | story-1 | done | S | 0 | - |
 | story-2 | done | M | 2 | - |
 | story-3 | skipped (stuck) | L | 5 | stuck.md 참조 |

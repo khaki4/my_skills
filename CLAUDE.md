@@ -146,8 +146,8 @@ docs/
     {EPIC-ID}-modification.md    # 사람 수정 지시 (재실행 시)
   sprint-status.yaml
   conventions.md          # Convention Guard 규칙 (/bf-spec이 초기 seed 생성)
-  #   섹션: Core (항상 전달) = Architecture, Naming, Testing, Code Style
-  #         Concern-area (기술 스택별) = UI/API/Database/Security/Infrastructure Patterns
+  #   섹션: Core (항상 전달) = 아키텍처, 네이밍, 테스트, 코드 스타일
+  #         Concern-area (기술 스택별) = UI 패턴/API 패턴/DB 패턴/보안 패턴/인프라 패턴
   #   bf-lead-implement가 Story 파일 경로 기반으로 관련 섹션만 필터링하여 agent에 인라인 전달
   #   bf-lead-implement가 Story의 "주요 라이브러리"를 context7로 조회하여 library reference도 함께 인라인 전달 (optional)
   archive/

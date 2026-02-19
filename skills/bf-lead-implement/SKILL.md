@@ -48,17 +48,17 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
 conventions.md를 읽은 후, 각 Story에 전달할 관련 섹션을 결정한다.
 
 **Core 섹션 (항상 포함):**
-Architecture, Naming, Testing, Code Style
+아키텍처, 네이밍, 테스트, 코드 스타일
 
 **Concern-area 섹션 (Story 파일 경로 기반 필터링):**
 
 | Story 파일 경로 패턴 | 포함 섹션 |
 |---|---|
-| `src/components/`, `src/pages/`, `src/views/`, `src/layouts/`, `src/hooks/`, `*.tsx`, `*.vue`, `*.svelte`, `app/` (Next.js) | UI Patterns |
-| `src/api/`, `src/routes/`, `src/controllers/`, `src/middleware/`, `routes/`, `controllers/`, `server/` | API Patterns |
-| `src/models/`, `src/entities/`, `src/repositories/`, `prisma/`, `migrations/`, `src/db/`, `drizzle/` | Database Patterns |
-| `src/auth/`, `src/security/`, `src/guards/`, `middleware/auth*` | Security Patterns |
-| `Dockerfile`, `.github/`, `docker-compose*`, `infra/`, `deploy/`, `.env*` | Infrastructure Patterns |
+| `src/components/`, `src/pages/`, `src/views/`, `src/layouts/`, `src/hooks/`, `*.tsx`, `*.vue`, `*.svelte`, `app/` (Next.js) | UI 패턴 |
+| `src/api/`, `src/routes/`, `src/controllers/`, `src/middleware/`, `routes/`, `controllers/`, `server/` | API 패턴 |
+| `src/models/`, `src/entities/`, `src/repositories/`, `prisma/`, `migrations/`, `src/db/`, `drizzle/` | DB 패턴 |
+| `src/auth/`, `src/security/`, `src/guards/`, `middleware/auth*` | 보안 패턴 |
+| `Dockerfile`, `.github/`, `docker-compose*`, `infra/`, `deploy/`, `.env*` | 인프라 패턴 |
 
 **필터링 규칙:**
 1. conventions.md에 concern-area 섹션이 없으면 전체 내용을 그대로 전달한다 (하위 호환).
@@ -283,7 +283,7 @@ Story agent에게 전달할 TDD 지침이다. Agent는 이 지침을 그대로 �
 - **stuck.md를 작성한다:**
 
 ```markdown
-# Stuck Report: {STORY-ID}
+# Stuck 보고서: {STORY-ID}
 
 ## 재시도 횟수: {retry_count}/5
 ## 접근 전환 횟수: {approaches_count}

@@ -163,7 +163,7 @@ Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. con
 ### review.md 구조
 
 ```markdown
-# {TICKET 또는 EPIC-ID} Review
+# {TICKET 또는 EPIC-ID} 리뷰
 
 ## 리뷰 개요
 - 모드: {tech-spec | epic-review}

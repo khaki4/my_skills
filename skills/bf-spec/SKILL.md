@@ -43,32 +43,32 @@ BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기�
 **conventions.md 초기 생성** (`docs/conventions.md`가 없는 경우):
 - 코드베이스 분석 결과를 기반으로 초기 conventions.md를 생성한다:
   ```markdown
-  # Project Conventions
+  # 프로젝트 컨벤션
 
-  ## Architecture
+  ## 아키텍처
   - {프레임워크}: {발견된 아키텍처 패턴 — 예: Layered, Hexagonal}
   - 모듈 구조: {발견된 디렉토리/모듈 규칙}
 
-  ## Naming
+  ## 네이밍
   - 파일명: {발견된 패턴 — 예: kebab-case, PascalCase}
   - 함수/변수: {발견된 패턴}
 
-  ## Testing
+  ## 테스트
   - 테스트 프레임워크: {발견된 도구}
   - 테스트 파일 위치: {규칙}
 
-  ## Code Style
+  ## 코드 스타일
   - {발견된 주요 코드 스타일 규칙}
 
   {아래 concern-area 섹션은 코드베이스에서 해당 기술 스택이 감지된 경우에만 포함}
 
-  ## UI Patterns
+  ## UI 패턴
   - {React/Vue/Angular 등 감지 시: 컴포넌트 구조, 상태 관리 패턴}
 
-  ## API Patterns
+  ## API 패턴
   - {Express/Fastify/NestJS/Django 등 감지 시: 엔드포인트 설계, 에러 핸들링 패턴}
 
-  ## Database Patterns
+  ## DB 패턴
   - {Prisma/TypeORM/Drizzle 등 감지 시: 스키마 규칙, 마이그레이션 패턴}
   ```
 - concern-area 섹션(UI Patterns, API Patterns, Database Patterns, Security Patterns, Infrastructure Patterns)은 코드베이스에서 해당 기술 스택이 감지된 경우에만 포함한다. 감지되지 않은 기술 스택의 섹션은 생성하지 않는다. 초기 seed이므로 핵심 패턴만 간결하게 기재하고, 이후 `/bf-update-conventions`가 축적한다.
@@ -81,40 +81,40 @@ BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기�
 ```markdown
 # {TICKET} Tech Spec
 
-## Background
+## 배경
 {변경 목적, 비즈니스 배경, 사용자 문제}
 
-## As-Is (현재 상태)
+## 현재 상태 (As-Is)
 {현재 아키텍처, 관련 모듈 구조, 데이터 흐름}
 {코드베이스 분석 결과 반영}
 
-## To-Be (목표 상태)
+## 목표 상태 (To-Be)
 {변경 후 아키텍처, 모듈 구조, 데이터 흐름}
 {주요 설계 결정 및 근거}
 
-## Impact Analysis (영향 분석)
+## 영향 분석
 - 변경 대상 파일/모듈: {목록}
 - 의존성 영향: {상위/하위 모듈 영향}
 - 사이드이펙트: {예상되는 부작용}
 - 하위 호환성: {호환성 유지 여부 및 전략}
 
-## Acceptance Criteria
+## 인수 조건
 {기획자 AC 그대로 포함}
 - [ ] AC 1: {구체적이고 테스트 가능한 기준}
 - [ ] AC 2: ...
 
-## Technical Constraints (기술 제약)
+## 기술 제약
 - {성능 요구사항}
 - {보안 고려사항}
 - {기존 기술 스택 제약}
 - {인프라/배포 제약}
 
-## Test Strategy (테스트 전략)
+## 테스트 전략
 - 단위 테스트: {범위 및 접근}
 - E2E 테스트: {시나리오 개요}
 - 엣지 케이스: {예상 엣지 케이스 목록}
 
-## Risks (리스크)
+## 리스크
 | 리스크 | 영향도 | 완화 전략 |
 |--------|--------|----------|
 | {리스크 1} | 높음/중간/낮음 | {전략} |
@@ -153,4 +153,4 @@ Tech Spec 작성 후 반드시 bf-lead-review를 스폰하여 다관점 리뷰�
 - `docs/tech-specs/{TICKET}-tech-spec.md` — Tech Spec 문서
 - `docs/reviews/{TICKET}-tech-spec-review.md` — 리뷰 결과 (bf-lead-review가 생성)
 
-마크다운 형식. 섹션: Background, As-Is, To-Be, Impact Analysis, Acceptance Criteria, Technical Constraints, Test Strategy.
+마크다운 형식. 섹션: 배경, 현재 상태, 목표 상태, 영향 분석, 인수 조건, 기술 제약, 테스트 전략.
