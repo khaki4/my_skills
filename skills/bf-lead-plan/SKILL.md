@@ -130,7 +130,7 @@ SPRINT-XX:
 
 - Story 파일: `docs/stories/{TICKET}-story-{N}.md`
 - sprint-status.yaml: `docs/sprint-status.yaml`
-- git commit: `docs({TICKET}): 에픽/스토리 구조 생성`
+- **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 
 ### 9. Done 신호
 

@@ -333,3 +333,4 @@ yq -i '.<SPRINT>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 - **Append-only changelog**: 대상 프로젝트의 CLAUDE.md changelog는 스프린트 이력 추적을 위해 추가 전용
 - **Convention 축적**: `docs/conventions.md`는 스프린트를 거듭하며 패턴이 발견·체계화되면서 성장
 - **E2E용 Agent-browser**: 브라우저 UI 기반 E2E 테스트는 CSS 셀렉터가 아닌 accessibility tree의 @ref 기반 요소 선택 사용 (API-only/CLI 프로젝트에는 해당 없음)
+- **문서는 아카이브 전까지 git 미관리**: `docs/` 하위 산출물(tech-specs, stories, reviews, sprint-status.yaml, conventions.md)은 Phase 1-3 동안 git에 커밋하지 않는다. Phase 4 Archive(`/bf-archive-sprint`) 시점에 비로소 git 관리 대상이 된다. Story agent의 커밋은 코드 변경만 포함해야 한다

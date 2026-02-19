@@ -54,7 +54,8 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 
 4. git commit을 수행한다:
    - 메시지: `chore({SPRINT-XX}): 스프린트 아카이빙`
-   - 아카이브된 파일 + changelog 변경 포함
+   - 포함 대상: `docs/archive/{SPRINT-XX}/` + `docs/conventions.md` + CLAUDE.md changelog 변경
+   - **이 커밋이 docs/ 산출물의 최초 git 커밋이다** — Phase 1-3에서는 docs/ 파일을 git에 커밋하지 않으며, 아카이브 시점에 일괄 커밋한다.
 
 5. 완료 후 다음 순서로 후속 스킬 실행을 안내한다:
    - **먼저** `/bf-metrics` (선택 사항): 스프린트 메트릭 분석 → 모델 배당/난이도 태깅 최적화 제안

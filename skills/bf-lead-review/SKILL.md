@@ -129,7 +129,7 @@ Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. con
 1. `docs/reviews/{TICKET}-tech-spec-review.md`에 저장한다.
    - `docs/reviews/` 디렉토리가 없으면 생성
    - 재리뷰 시에는 `## Re-review ({날짜})` 섹션을 append
-2. git commit: `docs({TICKET}): 기술 명세 리뷰`
+2. **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 3. 스폰한 상위 에이전트에 전달:
    - `"done"` + review.md 경로
 4. 종료 (컨텍스트 소멸).
@@ -147,7 +147,7 @@ Convention Guard 리뷰어는 epic-review에서 절대 생략할 수 없다. con
      .<SPRINT>.<EPIC>.<STORY>.review_recommended = 5
    ' docs/sprint-status.yaml
    ```
-3. git commit: `docs({EPIC-ID}): 에픽 리뷰`
+3. **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 4. Blocker 판정 및 종료:
    - **Blocker 0건**: 에픽 내 모든 `status: done` Story의 `review: approved`로 업데이트 (`status: skipped` Story는 bf-execute/bf-resume이 사람 "진행" 선택 시 처리):
      ```bash

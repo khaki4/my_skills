@@ -249,7 +249,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
   yq -i '.<SPRINT>.<EPIC>.e2e = "passed"' docs/sprint-status.yaml
   ```
 - `"passed"` + tests/e2e/ 경로를 Lead에 보고
-- git commit: `test({epic-name}): E2E 테스트 작성 및 통과`
+- git commit: `test({epic-name}): E2E 테스트 작성 및 통과` — **`tests/e2e/` 파일만 커밋, `docs/` 하위 파일은 제외**
 
 **실패:**
 - **Regression 가드레일** 확인:
@@ -279,7 +279,7 @@ command -v yq >/dev/null 2>&1 || { echo "❌ yq not installed. Install: brew ins
     - `parent_story`: 원인 Story ID
     - 나머지 필드: 기본값
   - 난이도 태깅: `impl-bug`/`test-design`/`convention-violation` → S~M, `spec-gap`/`integration` → sprint-status.yaml에서 원본 Story 난이도를 확인하여 M~L
-  - git commit: `test({epic-name}): {failure-tag} 회귀 스토리 추가`
+  - **git commit하지 않는다** — regression story 문서(`docs/stories/`)와 sprint-status.yaml은 Phase 4 Archive에서 일괄 커밋한다.
   - `"failed"` + regression story 목록을 Lead에 보고
 
 ### 6. sprint-status.yaml 업데이트 프로토콜
