@@ -166,12 +166,12 @@ Story agent는 sprint-status.yaml을 절대 읽거나 수정하지 않는다. �
 
 ### 4. 병렬 실행 규칙
 
-- Story 문서의 Technical Notes에서 변경 대상 파일을 확인한다.
-- **파일 겹침 없음 + 의존성 없음**: 병렬 실행
-- **파일 겹침 또는 Dependencies 명시**: 순차 실행 (의존 순서대로)
+**디폴트는 병렬이다.** Story 문서의 Technical Notes에서 변경 대상 파일을 확인하고, 아래 순차 조건에 해당하지 않으면 하나의 응답에서 여러 Task tool call을 동시에 보내 병렬 스폰한다.
 
-**공유 파일 충돌 방지:**
-- 다음 파일은 "겹침"으로 간주한다 (병렬 실행 시 반드시 순차 처리):
+**순차 실행 조건** (이 조건에 해당할 때만 순차):
+- 파일 겹침: 두 Story의 Target files에 동일 파일이 존재
+- Dependencies 명시: Story 문서에 다른 Story에 대한 의존성이 명시됨
+- 공유 파일 충돌: 아래 파일을 변경하는 Story는 "겹침"으로 간주
   - Lock 파일: `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Gemfile.lock`, `poetry.lock`, `go.sum`
   - 공유 설정: `tsconfig.json`, `webpack.config.*`, `vite.config.*`, `.env.*`
   - 자동 생성 파일: `schema.prisma` → `@prisma/client`, DB migration 파일
