@@ -1,13 +1,13 @@
 ---
 name: bf-archive-sprint
-description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서를 아카이빙한다. 문서 이동, changelog 업데이트, git commit을 자동으로 수행한다.
+description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서를 아카이빙한다. 문서 이동, git commit을 자동으로 수행한다.
 ---
 
 # Archive Sprint
 
 ## Overview
 
-스프린트가 완료되면 관련 문서를 아카이빙하고, changelog를 업데이트하고, git commit을 수행한다.
+스프린트가 완료되면 관련 문서를 아카이빙하고, git commit을 수행한다.
 
 ## When to Use
 
@@ -18,7 +18,6 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 
 - sprint-status.yaml 존재 및 모든 에픽의 e2e가 terminal state (`passed` | `escalated` | `max-regression-cycles` | `skipped`), 모든 Story `review: approved` (skipped Story 포함 — bf-execute/bf-resume가 사람 "진행" 선택 시 자동 설정)
 - `docs/stories/`, `docs/tech-specs/` 디렉토리 존재
-- CLAUDE.md 파일 존재 (changelog 기록용)
 
 ## Error Handling
 
@@ -40,24 +39,12 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
    - `docs/sprint-status.yaml` → `docs/archive/{TICKET}/sprint-status.yaml`
    - `docs/conventions.md` → `docs/archive/{TICKET}/conventions.md` (복사, 이동 아님 — 시점 스냅샷 보존용)
 
-3. CLAUDE.md의 `## Changelog` 섹션에 append-only로 기록한다 (섹션이 없으면 파일 끝에 생성):
-   - 아래 포맷을 따른다:
-     ```markdown
-     ## Changelog
-
-     ### {TICKET} ({YYYY-MM-DD})
-     - **Epic 1** ({epic-name}): Story N개 완료 ({난이도 분포 요약})
-     - **Epic 2** ({epic-name}): Story N개 완료
-     - Archive: `docs/archive/{TICKET}/`
-     ```
-   - 기존 Changelog 항목 아래에 새 스프린트를 append한다 (기존 항목 수정 금지)
-
-4. git commit을 수행한다:
+3. git commit을 수행한다:
    - 메시지: `[{TICKET}] 스프린트 아카이빙`
-   - 포함 대상: `docs/archive/{TICKET}/` + `docs/conventions.md` + CLAUDE.md changelog 변경
+   - 포함 대상: `docs/archive/{TICKET}/` + `docs/conventions.md`
    - **이 커밋이 docs/ 산출물의 최초 git 커밋이다** — Phase 1-3에서는 docs/ 파일을 git에 커밋하지 않으며, 아카이브 시점에 일괄 커밋한다.
 
-5. 완료 후 다음 순서로 후속 스킬 실행을 안내한다:
+4. 완료 후 다음 순서로 후속 스킬 실행을 안내한다:
    - **먼저** `/bf-metrics` (선택 사항): 스프린트 메트릭 분석 → 모델 배당/난이도 태깅 최적화 제안
    - **그 후** `/bf-update-conventions`: 리뷰 패턴 분석 → conventions.md 업데이트
    - 순서가 중요함: bf-metrics 분석 결과가 bf-update-conventions의 개선 방향에 참고될 수 있음
@@ -65,5 +52,4 @@ description: 스프린트 내 모든 에픽이 완료된 후 스프린트 문서
 ## Output Format
 
 - `docs/archive/{TICKET}/` — 아카이브 디렉토리
-- CLAUDE.md changelog 업데이트
 - git commit

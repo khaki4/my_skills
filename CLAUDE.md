@@ -330,7 +330,6 @@ yq -i '.<TICKET>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 - **파일이 모든 맥락을 운반**: 수정 지시는 modification.md, 리뷰 결과는 review.md, stuck 보고는 stuck.md — 대화를 통한 전달 없음
 - **Lead는 코드를 만지지 않음**: bf-lead-implement는 모든 난이도의 Story를 agent에게 위임
 - **bf-execute가 유일한 사람 경계**: 내부 agent(orchestrate, review, implement)는 사람과 직접 소통 없음
-- **Append-only changelog**: 대상 프로젝트의 CLAUDE.md changelog는 스프린트 이력 추적을 위해 추가 전용
 - **Convention 축적**: `docs/conventions.md`는 스프린트를 거듭하며 패턴이 발견·체계화되면서 성장
 - **E2E용 Agent-browser**: 브라우저 UI 기반 E2E 테스트는 CSS 셀렉터가 아닌 accessibility tree의 @ref 기반 요소 선택 사용 (API-only/CLI 프로젝트에는 해당 없음)
 - **커밋 메시지 형식**: `[{TICKET}] 메시지` — 예: `[HACKLE-13554] 로그인 폼 유효성 검사 추가`. 모든 커밋(Story 구현, E2E 테스트, 아카이브, 컨벤션 업데이트 등)에 동일 형식 적용
