@@ -17,7 +17,7 @@ BF 워크플로우의 실행 진입점이자 **사람-시스템 경계 허브**�
 ## Prerequisites
 
 - 승인된 Tech Spec: `docs/tech-specs/{TICKET}-tech-spec.md`
-- Tech Spec 리뷰 통과 (사람 개입 ① 완료)
+- Tech Spec 리뷰 통과 (사람 개입 ①-b 최종 승인 완료)
 
 ## Error Handling
 

@@ -1,13 +1,13 @@
 ---
 name: bf-spec
-description: AC 문서를 입력받아 Tech Spec을 작성하고, 자동으로 bf-lead-review를 통해 다관점 리뷰를 수행한다. BF 워크플로우 진입점.
+description: AC 문서를 입력받아 Tech Spec을 작성하고, 사람 초안 검토 후 bf-lead-review AI 다관점 리뷰를 수행한다. BF 워크플로우 진입점.
 ---
 
 # BF Spec (Entry Point)
 
 ## Overview
 
-BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기반으로 Tech Spec을 작성하고, 자동으로 `bf-lead-review`를 스폰하여 다관점 리뷰를 수행한다. 리뷰 결과를 사람에게 제시하여 승인 여부를 판단하게 한다 (사람 개입 ①).
+BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기반으로 Tech Spec을 작성하고, 사람이 초안을 먼저 검토한다 (사람 개입 ①-a). 방향성이 확인되면 `bf-lead-review`를 스폰하여 AI 다관점 리뷰를 수행하고, 리뷰 결과를 사람에게 제시하여 최종 승인 여부를 판단하게 한다 (사람 개입 ①-b).
 
 ## When to Use
 
@@ -126,10 +126,19 @@ BF 워크플로우의 진입점이다. 기획자가 제공한 AC 문서를 기�
 - `docs/tech-specs/` 디렉토리가 없으면 생성한다.
 - **git commit하지 않는다** — docs/ 산출물은 Phase 4 Archive에서 일괄 커밋한다.
 
-### 5. bf-lead-review 자동 스폰 (Tech-Spec 모드)
+### 5. Tech Spec 초안 제시 및 사람 검토 (사람 개입 ①-a)
+
+Tech Spec 초안을 사람에게 제시하고 방향성을 빠르게 검증한다. 명백한 방향 오류를 AI 리뷰 전에 잡는 단계이다.
+
+- `docs/tech-specs/{TICKET}-tech-spec.md`를 읽어서 사람에게 제시한다.
+- 사람의 결정:
+  - **승인 (AI 리뷰 진행)** → 6단계(bf-lead-review 스폰)로 이동
+  - **수정 요청** → Tech Spec 수정 후 이 단계를 재실행 (git commit하지 않음)
+
+### 6. bf-lead-review 자동 스폰 (Tech-Spec 모드)
 
 <HARD-GATE>
-Tech Spec 작성 후 반드시 bf-lead-review를 스폰하여 다관점 리뷰를 수행한다. 리뷰 없이 사람에게 직접 Tech Spec을 제시하지 않는다. "간단한 변경이라 리뷰가 필요 없다"는 이 게이트를 우회하는 전형적인 합리화이다.
+사람의 초안 승인 후 즉시 bf-lead-review를 스폰한다. "사람이 이미 검토했으니 AI 리뷰가 불필요하다"는 이 게이트를 우회하는 전형적인 합리화이다. 사람 초안 검토(방향성)와 AI 다관점 리뷰(세부 결함 발굴)는 서로 다른 목적이다.
 </HARD-GATE>
 
 - `bf-lead-review`를 스폰한다:
@@ -137,16 +146,16 @@ Tech Spec 작성 후 반드시 bf-lead-review를 스폰하여 다관점 리뷰�
   - 파라미터: `mode: "tech-spec"`, tech-spec 경로 전달
 - 메인 세션은 `"done"` + review.md 경로만 수신한다 (컨텍스트 격리).
 
-### 6. 리뷰 결과 제시 및 사람 개입 ①
+### 7. AI 리뷰 결과 제시 및 사람 최종 승인 (사람 개입 ①-b)
 
 <HARD-GATE>
-리뷰 결과를 사람에게 반드시 제시하고 승인/수정 판단을 받아야 한다. Blocker가 0이어도 자동 승인하지 않는다. 이것이 사람 판단 ①이며, BF 워크플로우에서 사람이 개입하는 정확히 2개 지점 중 하나이다.
+AI 리뷰 결과를 사람에게 반드시 제시하고 최종 승인/수정 판단을 받아야 한다. Blocker가 0이어도 자동 승인하지 않는다.
 </HARD-GATE>
 
 - review.md를 읽어서 사람에게 제시한다.
 - 사람의 결정:
   - **승인** → "`Tech Spec이 승인되었습니다. /bf-execute로 구현을 시작하세요.`" 안내
-  - **수정 요청** → Tech Spec 수정 후 5단계(bf-lead-review 스폰)를 재실행
+  - **수정 요청** → Tech Spec 수정 후 6단계(bf-lead-review 스폰)를 재실행
 
 ## Output Format
 

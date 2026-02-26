@@ -17,7 +17,7 @@ description: Tech Spec을 분석하여 Epic/Story 구조를 생성하고, Story 
 ## Prerequisites
 
 - 승인된 Tech Spec: `docs/tech-specs/{TICKET}-tech-spec.md`
-- Tech Spec 리뷰 통과 (사람 개입 ① 완료)
+- Tech Spec 리뷰 통과 (사람 개입 ①-b 최종 승인 완료)
 
 ## Error Handling
 

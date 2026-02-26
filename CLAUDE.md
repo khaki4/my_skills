@@ -23,7 +23,7 @@
 4. **쟁점 해소**: 팀메이트 직접 대화 → Lead 중재 → 미합의 시 버림(기록)
 5. **파일이 모든 맥락을 운반한다** — 수정 지시, 리뷰 결과, stuck 보고 등 모든 전달은 파일 기반
 6. **단계별 단일 쓰기 지점** — sprint-status.yaml 동시 쓰기 방지, Lead가 통합 업데이트
-7. **사람 = 외부 경계의 느린 에이전트** — 사람은 bf-execute(메인 세션)를 통해서만 시스템과 소통. 판단 지점은 2개: Spec 승인 + Epic 결과 확인
+7. **사람 = 외부 경계의 느린 에이전트** — 사람은 bf-execute(메인 세션)를 통해서만 시스템과 소통. 판단 지점은 3회: Spec 초안 검토 + Spec 최종 승인 + Epic 결과 확인
 
 ## 스킬 아키텍처
 
@@ -46,6 +46,8 @@ BF workflow는 4개 Lead 스킬을 사용하며, 각각 고유한 조율 패턴�
 - **bf-lead-orchestrate**: plan 모드는 bf-lead-plan 스폰 후 결과를 전달하는 단순 라우터 역할이므로 Sonnet. epic 모드는 자동 판단 정책(stuck/E2E/review)을 실행하므로 Opus
 - **bf-lead-implement/bf-lead-review**: 에픽에 L/XL Story가 포함되면 Opus, S/M만이면 Sonnet
 
+> **모델 정책**: `sonnet` = `claude-sonnet-4-6` (최솟값), `opus` = `claude-opus-4-6`. `haiku`는 전 스킬에서 사용 금지.
+
 ### 워크플로우 시퀀스
 
 > Phase Overview, Sub-Phase 계약, ASCII 다이어그램, 프로토콜 상세: **[BF-WORKFLOW-GRAPH.md](./BF-WORKFLOW-GRAPH.md)**
@@ -54,8 +56,9 @@ BF workflow는 다음 순서로 실행된다:
 
 **Phase 1. Spec**
 1. **`/bf-spec`** → 사람이 AC 문서 제공 → Tech Spec 작성
-2. **`bf-lead-review`** (자동, tech-spec 모드) → Agent Teams 다관점 리뷰
-3. **사람 판단 ①: Spec 승인** → 승인 또는 수정 요청
+2. **사람 판단 ①-a: Spec 초안 검토** → 승인(AI 리뷰 진행) 또는 수정 요청
+3. **`bf-lead-review`** (자동, tech-spec 모드) → Agent Teams 다관점 리뷰
+4. **사람 판단 ①-b: Spec 최종 승인** → 승인 또는 수정 요청
 
 **Phase 2. Plan**
 4. **`/bf-execute`** → **`bf-lead-orchestrate`** (plan 모드) → Epic/Story 구조 생성
@@ -325,7 +328,7 @@ yq -i '.<TICKET>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 
 ## 주요 참고사항
 
-- **사람 판단 지점은 정확히 2개**: ① Spec 승인 (메인 세션, /bf-spec 이후)과 Epic 결과 확인 (bf-execute, 각 에픽 완료 후). 시스템 내부에 다른 사람 상호작용 없음
+- **사람 판단 지점은 총 3회**: ①-a Spec 초안 검토 (/bf-spec, AI 리뷰 전 방향성 확인), ①-b Spec 최종 승인 (/bf-spec, AI 리뷰 결과 확인), ② Epic 결과 확인 (bf-execute, 각 에픽 완료 후). 시스템 내부에 다른 사람 상호작용 없음
 - **컨텍스트 격리**: 메인 세션 → orchestrate → Leads → agents. 각 층은 "done" + 파일로 종료, 컨텍스트 소멸
 - **파일이 모든 맥락을 운반**: 수정 지시는 modification.md, 리뷰 결과는 review.md, stuck 보고는 stuck.md — 대화를 통한 전달 없음
 - **Lead는 코드를 만지지 않음**: bf-lead-implement는 모든 난이도의 Story를 agent에게 위임
@@ -335,3 +338,7 @@ yq -i '.<TICKET>.<EPIC>.<NEW-STORY> = {"status":"todo","difficulty":"S","tdd":"p
 - **커밋 메시지 형식**: `[{TICKET}] 메시지` — 예: `[HACKLE-13554] 로그인 폼 유효성 검사 추가`. 모든 커밋(Story 구현, E2E 테스트, 아카이브, 컨벤션 업데이트 등)에 동일 형식 적용
 - **스프린트 식별자 = Jira 티켓 번호**: `SPRINT-01` 같은 순번 대신 Jira 티켓 번호를 그대로 사용한다 (예: `HACKLE-13554`). sprint-status.yaml 최상위 키, archive 디렉토리명 모두 티켓 번호
 - **문서는 아카이브 전까지 git 미관리**: `docs/` 하위 산출물(tech-specs, stories, reviews, sprint-status.yaml, conventions.md)은 Phase 1-3 동안 git에 커밋하지 않는다. Phase 4 Archive(`/bf-archive-sprint`) 시점에 비로소 git 관리 대상이 된다. Story agent의 커밋은 코드 변경만 포함해야 한다
+
+## Changelog
+
+<!-- /bf-update-conventions가 스프린트 완료 후 자동으로 기록합니다 -->
