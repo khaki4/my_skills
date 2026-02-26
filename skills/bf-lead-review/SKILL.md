@@ -9,7 +9,7 @@ description: Discourse 패턴으로 다관점 리뷰를 수행한다. Tech Spec 
 
 Discourse 조율 패턴으로 다관점 리뷰를 수행하는 Lead 스킬이다. 두 가지 모드를 지원한다:
 
-- **tech-spec 모드**: Tech Spec 문서를 리뷰하고 사람 개입 ①을 위한 결과를 생성한다.
+- **tech-spec 모드**: Tech Spec 문서를 리뷰하고 사람 개입 ①-b (최종 승인)를 위한 결과를 생성한다.
 - **epic-review 모드**: 에픽 전체 구현을 통합 리뷰하고, 자기 완결적 review.md를 생성한 뒤 종료한다. 사람과 직접 소통하지 않는다.
 
 ## When to Use
