@@ -1,6 +1,7 @@
 ---
 name: d
 description: Use when the user types /d followed by an English word or phrase to get a Korean translation with developer context
+disable-model-invocation: true
 ---
 
 # English-Korean Developer Dictionary
